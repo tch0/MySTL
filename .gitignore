@@ -15,9 +15,11 @@
 !.editorconfig
 
 # track *.c *.h *.cpp source files
+# track *.hpp library headers
 !*.c
 !*.cpp
 !*.h
+!*.hpp
 
 # track makefiles
 !Makefile

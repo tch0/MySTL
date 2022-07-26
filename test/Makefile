@@ -6,12 +6,13 @@
 # make debug=yes to compile with -g
 # make system=windows for windows system
 
-.PHONY : all
+.PHONY : all run_all_tests run_all_tests_in_detail run_all_eff_tests run_all_eff_tests_in_detail
 .PHONY .IGNORE : clean
 
 # add you own include path/library path/link library to CXXFLAGS
 CXX = g++
-CXXFLAGS += 
+CXXFLAGS += -I../include
+CXXFLAGS += -std=c++20 # use C++20 standard
 RM = rm
 
 # debug
@@ -19,16 +20,41 @@ ifeq ($(debug), yes)
 CXXFLAGS += -g
 endif
 
-# filenames and targets
-all_source_files := $(wildcard *.cpp)
-all_targets := $(basename $(all_source_files))
+#========================================================================================================
+#================================== Customize here ======================================================
+#========================================================================================================
+# add all test targets here
+all_test_targets += TestAllocator
 
+# add all efficiency test targets here
+all_efficiency_tests_targets += 
+#========================================================================================================
 # all targets
+all_targets += $(all_test_targets)
+all_targets += $(all_efficiency_tests_targets)
+
+# all
 all : $(all_targets)
 
-# compile
+# compile every single targets
 % : %.cpp
 	-$(CXX) $^ -o $@ $(CXXFLAGS)
+
+# run every single test
+$(addprefix run_single_target_, %) : %
+	-./$^
+$(addprefix run_single_target_in_detail_, %) : %
+	-./$^ -d
+run_all_test_targets := $(addprefix run_single_target_, $(all_test_targets))
+run_all_test_targets_in_detail := $(addprefix run_single_target_in_detail_, $(all_test_targets))
+run_all_efficiency_test_targets := $(addprefix run_single_target_, $(all_efficiency_tests_targets))
+run_all_efficiency_test_targets_in_detail := $(addprefix run_single_target_in_detail_, $(all_efficiency_tests_targets))
+
+# targets of running
+run_all_tests : $(run_all_test_targets)
+run_all_tests_in_detail : $(run_all_test_targets_in_detail)
+run_all_eff_tests : $(run_all_efficiency_test_targets)
+run_all_eff_tests_in_detail : $(run_all_efficiency_test_targets_in_detail)
 
 # system: affect how to clean and executable file name
 # value: windows/unix
