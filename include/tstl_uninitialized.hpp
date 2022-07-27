@@ -1,0 +1,4 @@
+#ifndef TSTL_UNINTIALIZED_HPP
+#define TSTL_UNINTIALIZED_HPP
+
+#endif

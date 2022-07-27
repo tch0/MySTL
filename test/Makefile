@@ -24,14 +24,14 @@ endif
 #================================== Customize here ======================================================
 #========================================================================================================
 # add all test targets here
-all_test_targets += TestAllocator
+all_test_targets += TestMemory
 
 # add all efficiency test targets here
-all_efficiency_tests_targets += 
+all_efficiency_test_targets += 
 #========================================================================================================
 # all targets
 all_targets += $(all_test_targets)
-all_targets += $(all_efficiency_tests_targets)
+all_targets += $(all_efficiency_test_targets)
 
 # all
 all : $(all_targets)
@@ -47,8 +47,8 @@ $(addprefix run_single_target_in_detail_, %) : %
 	-./$^ -d
 run_all_test_targets := $(addprefix run_single_target_, $(all_test_targets))
 run_all_test_targets_in_detail := $(addprefix run_single_target_in_detail_, $(all_test_targets))
-run_all_efficiency_test_targets := $(addprefix run_single_target_, $(all_efficiency_tests_targets))
-run_all_efficiency_test_targets_in_detail := $(addprefix run_single_target_in_detail_, $(all_efficiency_tests_targets))
+run_all_efficiency_test_targets := $(addprefix run_single_target_, $(all_efficiency_test_targets))
+run_all_efficiency_test_targets_in_detail := $(addprefix run_single_target_in_detail_, $(all_efficiency_test_targets))
 
 # targets of running
 run_all_tests : $(run_all_test_targets)

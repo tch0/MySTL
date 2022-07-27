@@ -1,6 +1,8 @@
+#ifndef TSTL_ALLOCATOR_HPP
+#define TSTL_ALLOCATOR_HPP
+
 #include <memory>  // for placement new
 #include <cstddef> // for ptrdiff_t size_t
-#include <cstdlib> // for exit
 #include <limits>  // for numeric_limits
 
 namespace tstd
@@ -125,3 +127,5 @@ bool operator!=( const allocator<T1>& lhs, const allocator<T2>& rhs ) noexcept
 }
 
 } // namespace tstd
+
+#endif

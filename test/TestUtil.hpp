@@ -1,5 +1,5 @@
-#ifndef TEST_UTIL
-#define TEST_UTIL
+#ifndef TESTUTIL_HPP
+#define TESTUTIL_HPP
 
 #include <iostream>
 #include <iomanip>
@@ -47,11 +47,11 @@ private:
 class TestUtil
 {
 public:
-    TestUtil(bool _show) : passedCount(0), totalCount(0), showDetails(_show) {}
+    TestUtil(bool _show, const std::string& _target) : passedCount(0), totalCount(0), showDetails(_show), target(_target) {}
 
     void showFinalResult(const std::source_location& loc = std::source_location::current())
     {
-        std::cout << "Final result of " << loc.file_name() << ": "
+        std::cout << "Test result of " << target << ": "
             << passedCount << "/" << totalCount << " passed"
             << (passedCount == totalCount ? "" : " --------------------------> failed") << std::endl;
     }
@@ -109,6 +109,7 @@ private:
     int passedCount;
     int totalCount;
     bool showDetails;
+    std::string target;
 };
 
 #endif
