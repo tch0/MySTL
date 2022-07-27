@@ -6,6 +6,7 @@
 #include <string>
 #include <source_location> // since C++20
 #include <algorithm>
+#include <iterator>
 
 // parsing first argument: -d to show details
 bool parseDetailFlag(int argc, char const *argv[])
@@ -13,35 +14,45 @@ bool parseDetailFlag(int argc, char const *argv[])
     return argc >= 2 && std::string(argv[1]) == "-d";
 }
 
-// manipulator for printing first N elements of container
-template<typename Container>
-class PrintNElements
+// manipulator for printing first N elements of a sequence
+template<typename Iterator>
+class PrintSequenceElements
 {
-    friend std::ostream& operator<<(std::ostream& os, const PrintNElements& pn)
+    friend std::ostream& operator<<(std::ostream& os, const PrintSequenceElements& p)
     {
-        int i = 0;
-        for (auto iter = pn.c.begin(); i < pn.num; ++i, ++iter)
+        int count = 0;
+        auto iter = p.begin;
+        for (; iter != p.end && count < p.num; ++count, ++iter)
         {
             os << *iter << " ";
         }
-        if (pn.num < pn.c.size())
+        if (iter != p.end)
         {
             os << "...";
         }
         return os;
     }
 public:
-    PrintNElements(const Container& _c, std::size_t _num) : c(_c), num(_num)
+    PrintSequenceElements(const Iterator& _begin, const Iterator& _end, std::size_t _num) : begin(_begin), end(_end), num(_num)
     {
-        if (c.size() < num)
-        {
-            num = c.size();
-        }
     }
 private:
     std::size_t num;
-    const Container& c;
+    const Iterator begin;
+    const Iterator end;
 };
+
+template<typename Container>
+PrintSequenceElements<typename Container::const_iterator> printContainerElememts(const Container& c, std::size_t num)
+{
+    return PrintSequenceElements<typename Container::const_iterator>(c.begin(), c.end(), num);
+}
+
+template<typename T>
+PrintSequenceElements<T*> printArrayElements(const T* arr, std::size_t size, std::size_t num)
+{
+    return PrintSequenceElements<T*>(arr, arr+size, num);
+}
 
 // test utilities
 class TestUtil
@@ -100,8 +111,41 @@ public:
         {
             std::cout << loc.file_name() << ":" << loc.line() << ": "
                 << "assertSequenceEqual: "
-                << "\n\tleft value: " << PrintNElements(c1, 20) // class template argument deducing
-                << "\n\tright value: " << PrintNElements(c2, 20) << "\n\t"
+                << "\n\tleft value: " << printContainerElememts(c1, 20) // class template argument deducing
+                << "\n\tright value: " << printContainerElememts(c2, 20) << "\n\t"
+                << (res ? "passed" : "==================== failed") << std::endl;
+        }
+    }
+
+    template<typename T1, typename T2>
+    void assertArrayEqual(const T1* arr1, const T2* arr2, std::size_t size, const std::source_location& loc = std::source_location::current())
+    {
+        bool res = std::equal(arr1, arr1 + size, arr2);
+        passedCount += (res ? 1 : 0);
+        totalCount++;
+        if (showDetails)
+        {
+            std::cout << loc.file_name() << ":" << loc.line() << ": "
+                << "assertArrayEqual: "
+                << "\n\tleft value: " << printArrayElements(arr1, size, 20)
+                << "\n\tright value: " << printArrayElements(arr2, size, 20) << "\n\t"
+                << (res ? "passed" : "==================== failed") << std::endl;
+        }
+    }
+
+    // more generized version of assert sequence/array equal
+    template<typename ForwardIterator1, typename ForwardIterator2>
+    void assertRangeEqual(ForwardIterator1 b1, ForwardIterator1 e1, ForwardIterator2 b2, const std::source_location& loc = std::source_location::current())
+    {
+        bool res = std::equal(b1, e1, b2);
+        passedCount += (res ? 1 : 0);
+        totalCount++;
+        if (showDetails)
+        {
+            std::cout << loc.file_name() << ":" << loc.line() << ": "
+                << "assertRangeEqual: "
+                << "\n\tleft value: " << PrintSequenceElements(b1, e1, 20)
+                << "\n\tright value: " << PrintSequenceElements(b2, b2 + std::distance(b1, e1), 20) << "\n\t"
                 << (res ? "passed" : "==================== failed") << std::endl;
         }
     }

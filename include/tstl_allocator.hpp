@@ -1,7 +1,7 @@
 #ifndef TSTL_ALLOCATOR_HPP
 #define TSTL_ALLOCATOR_HPP
 
-#include <memory>  // for placement new
+#include <new>     // for placement new
 #include <cstddef> // for ptrdiff_t size_t
 #include <limits>  // for numeric_limits
 

@@ -29,7 +29,7 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "${fileDirname}/${fileBasenameNoExtension}",
-        "args": [],
+        "args": ["-d"], // to show details
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
         "environment": [],

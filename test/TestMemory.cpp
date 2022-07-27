@@ -19,6 +19,7 @@ public:
 
 int Foo::count = 0;
 
+// allocator
 void testAllocator(bool showDetails)
 {
     if (showDetails)
@@ -56,9 +57,42 @@ void testAllocator(bool showDetails)
     cout << endl;
 }
 
+// uninitilized memory operations
+void testUnintialized(bool showDetails)
+{
+    if (showDetails)
+    {
+        cout << "Test of unintialized memory operations: " << endl;
+    }
+    TestUtil util(showDetails, "unintialized");
+    
+    void* p = ::operator new(3 * sizeof(int));
+    int* pi = (int*)p;
+    vector<int> vec{1, 2, 3};
+    tstd::uninitialized_copy(vec.begin(), vec.end(), pi);
+    util.assertRangeEqual(vec.begin(), vec.end(), pi);
+
+    vec = {99, 100, 101};
+    tstd::uninitialized_copy_n(vec.begin(), 3, pi);
+    util.assertRangeEqual(vec.begin(), vec.end(), pi);
+
+    tstd::uninitialized_fill(pi, pi+3, 10);
+    vec = {10, 10, 10};
+    util.assertRangeEqual(vec.begin(), vec.end(), pi);
+
+    tstd::uninitialized_fill_n(pi, 3, 100);
+    vec = {100, 100, 100};
+    util.assertRangeEqual(vec.begin(), vec.end(), pi);
+
+    // final result
+    util.showFinalResult();
+    cout << endl;
+}
+
 int main(int argc, char const *argv[])
 {
     bool showDetails = parseDetailFlag(argc, argv);
     testAllocator(showDetails);
+    testUnintialized(showDetails);
     return 0;
 }
