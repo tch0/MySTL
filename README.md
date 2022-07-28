@@ -12,6 +12,7 @@
 - 很生僻的东西可能不会选择实现（可能压根实现不了），比如[std::pointer_safety](https://zh.cppreference.com/w/cpp/memory/gc/pointer_safety)之类。
 - 头文件全部命名为`txxx.hpp`，其中`xxx`对应标准库中的头文件名，以示区分。如`<vector>`对应于`<tvector.hpp>`。
 - 内部实现文件以`tstl_`为前缀，不需要关注。
+- 为了与STL良好配合、专注于重点、避免繁琐冗余的实现，迭代器种类和所有的类型特性(type traits)都使用现有STL内容。
 
 ### 运行正确性测试
 
@@ -34,8 +35,7 @@ make run_all_eff_tests_in_detail
 
 C++ 标准模板库的完整内容见[Cpp_STL_ReferenceManual.pdf](https://www.cppreference.com/Cpp_STL_ReferenceManual.pdf)。
 
-详表：
 |头文件|实现的内容|
 |:-:|:-
 |[`<tmemory.hpp>`](https://github.com/tch0/MySTL/blob/master/include/tmemory.hpp)<br/>对应于<br/>[`<memory>`](https://zh.cppreference.com/w/cpp/header/memory)|分配器：allocator <br/>智能指针：unique_ptr, shared_ptr, weak_ptr <br/>辅助类：owner_less, enable_shared_from_this, bad_weak_ptr, default_delete, std::hash\<std::unique_ptr\>, std::hash\<std::shared_ptr\> <br/>未初始化存储：uninitialized_copy, uninitialized_copy_n, uninitialized_fill, uninitialized_fill_n <br/>智能指针非成员操作：make_unique, operator ==/!=/</<=/>/>=(std::unique_ptr, std::shared_ptr), make_shared, operator<<(std::shared), get_deleter, std::swap(std::unique_ptr), std::swap(std::weak_ptr), std::swap(std::shared_ptr)
-|||
+|[`<titerator.hpp>`](https://github.com/tch0/MySTL/blob/master/include/titerator.hpp)<br/>对应于<br/>[`<iterator>`](https://zh.cppreference.com/w/cpp/header/iterator)|原语：iterator <br/>适配器：<br/>迭代器操作：advance, distance, next, prev<br/>其他东西直接使用标准库版本

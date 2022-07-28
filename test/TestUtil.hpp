@@ -133,7 +133,7 @@ public:
         }
     }
 
-    // more generized version of assert sequence/array equal
+    // more generic version of assert sequence/array equal
     template<typename ForwardIterator1, typename ForwardIterator2>
     void assertRangeEqual(ForwardIterator1 b1, ForwardIterator1 e1, ForwardIterator2 b2, const std::source_location& loc = std::source_location::current())
     {
