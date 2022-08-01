@@ -11,6 +11,7 @@
 namespace tstd
 {
 
+// array is an aggregate class
 template<typename T, std::size_t N>
 class array
 {
@@ -27,9 +28,6 @@ public:
     using reverse_iterator = tstd::reverse_iterator<iterator>;
     using const_reverse_iterator = tstd::reverse_iterator<const_iterator>;
 public:
-    constexpr array() = default;
-    constexpr ~array() = default;
-    constexpr array& operator=(const array& other) = default;
     // elements access
     constexpr reference at(size_type pos)
     {
@@ -151,7 +149,7 @@ public:
             other.elements[i] = tmp;
         }
     }
-private:
+public:
     T elements[N];
 };
 
@@ -228,7 +226,7 @@ constexpr const T&& get(const tstd::array<T, N>&& a) noexcept
 
 // tstd::swap
 template<class T, std::size_t N,
-    typename std::enable_if<N == 0 || std::is_swappable_v<T>>>
+    typename = std::enable_if<N == 0 || std::is_swappable_v<T>>>
 constexpr void swap(tstd::array<T, N>& lhs, tstd::array<T, N>& rhs) noexcept(noexcept(lhs.swap(rhs)))
 {
     lhs.swap(rhs);
@@ -236,7 +234,7 @@ constexpr void swap(tstd::array<T, N>& lhs, tstd::array<T, N>& rhs) noexcept(noe
 
 // built-in array to tstd::array
 template<typename T, std::size_t N, 
-    typename std::enable_if<std::is_constructible_v<T, T&> && !std::is_array_v<T>>>
+    typename = std::enable_if<std::is_constructible_v<T, T&> && !std::is_array_v<T>>>
 constexpr tstd::array<std::remove_cv_t<T>, N> to_array(T (&a)[N])
 {
     tstd::array<std::remove_cv_t<T>, N> ret;

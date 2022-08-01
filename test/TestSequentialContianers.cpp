@@ -1,8 +1,10 @@
 #include <iostream>
 #include <vector>
+#include <array>
 #include <iterator>
-#include <tvector.hpp>
 #include <tmemory.hpp>
+#include <tvector.hpp>
+#include <tarray.hpp>
 #include <algorithm>
 #include "TestUtil.hpp"
 
@@ -219,9 +221,101 @@ void testVector(bool showDetails)
     std::cout << std::endl;
 }
 
+void testArray(bool showDetails)
+{
+    TestUtil util(showDetails, "array");
+    {
+        // implicit constructors
+        tstd::array<int, 10> arr1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        std::array<int, 10> arr2 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        util.assertSequenceEqual(arr1, arr2);
+        arr1 = {-1, -2, -3};
+        arr2 = {-1, -2, -3};
+        util.assertSequenceEqual(arr1, arr2);
+        tstd::array<int, 10> arr1c = {1, 2, 3};
+        std::array<int, 10> arr2c = {1, 2, 3};
+        arr1 = arr1c;
+        arr2 = arr2c;
+        util.assertSequenceEqual(arr1, arr2);
+        {
+            tstd::array<int, 10> arr1(arr1c);
+            std::array<int, 10> arr2(arr2c);
+            util.assertSequenceEqual(arr1, arr2);
+        }
+    }
+    {
+        // elements access
+        tstd::array<int, 10> arr1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        std::array<int, 10> arr2 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        arr1.at(0) = 10;
+        arr2.at(0) = 10;
+        arr1[9] = 99;
+        arr2[9] = 99;
+        util.assertSequenceEqual(arr1, arr2);
+        arr1.front() = -1;
+        arr2.front() = -1;
+        arr1.back() = -10;
+        arr2.back() = -10;
+        util.assertSequenceEqual(arr1, arr2);
+        // iterators
+        util.assertRangeEqual(arr1.begin(), arr1.end(), arr2.begin());
+        util.assertRangeEqual(arr1.cbegin(), arr1.cend(), arr2.cbegin());
+        util.assertRangeEqual(arr1.rbegin(), arr1.rend(), arr2.rbegin());
+        util.assertRangeEqual(arr1.crbegin(), arr1.crend(), arr2.crbegin());
+        *arr1.begin() = 1000;
+        *arr2.begin() = 1000;
+        util.assertSequenceEqual(arr1, arr2);
+        util.assertEqual(arr1.empty(), arr2.empty());
+        util.assertEqual(arr1.empty(), false);
+        util.assertEqual(arr1.size(), arr2.size());
+        util.assertEqual(arr1.size(), 10);
+        util.assertEqual(arr1.max_size(), arr2.max_size());
+        util.assertEqual(arr1.max_size(), 10);
+        // operations
+        arr1.fill(0);
+        arr2.fill(0);
+        util.assertSequenceEqual(arr1, arr2);
+        {
+            tstd::array<int, 10> arr3{1, 2, 3};
+            std::array<int, 10> arr4{1, 2, 3};
+            arr1.swap(arr3);
+            arr2.swap(arr4);
+            util.assertSequenceEqual(arr1, arr2);
+            util.assertSequenceEqual(arr3, arr4);
+        }
+    }
+    {
+        // non-member operations
+        tstd::array<int, 3> arr1{1, 2, 3};
+        tstd::array<int, 3> arr2{1, 2, 4};
+        util.assertEqual(arr1 == arr2, false);
+        util.assertEqual(arr1 != arr2, true);
+        util.assertEqual(arr1 < arr2, true);
+        util.assertEqual(arr1 <= arr2, true);
+        util.assertEqual(arr1 > arr2, false);
+        util.assertEqual(arr1 >= arr2, false);
+        util.assertEqual(arr1[0], tstd::get<0>(arr1));
+        auto arr3(arr1);
+        auto arr4(arr2);
+        swap(arr1, arr2);
+        util.assertSequenceEqual(arr1, arr4);
+        util.assertSequenceEqual(arr2, arr3);
+        {
+            // to_array
+            int A[3] = {1, 2, 3};
+            auto arr1 = tstd::to_array(A);
+            auto arr2 = std::to_array(A);
+            util.assertSequenceEqual(arr1, arr2);
+        }
+    }
+    util.showFinalResult();
+    std::cout << std::endl;
+}
+
 int main(int argc, char const *argv[])
 {
     bool showDetails = parseDetailFlag(argc, argv);
     testVector(showDetails);
+    testArray(showDetails);
     return 0;
 }
