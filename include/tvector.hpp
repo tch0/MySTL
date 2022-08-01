@@ -136,7 +136,7 @@ public:
             if (other.size() > 0)
             {
                 start = alloc.allocate(other.size() * sizeof(T));
-                tstd::uninitialized_move(other.begin(), other.end(), start); // todo: test correct or not.
+                tstd::uninitialized_move(other.begin(), other.end(), start);
             }
         }
     }
@@ -610,7 +610,7 @@ private:
     {
         while (size() + count > capacity())
         {
-            adjust_capacity(std::max(2*size(), size() + count));
+            adjust_capacity(std::max(2*size(), size() + count)); // todo: replaced with tstd::max
         }
         if (idx + count >= size())
         {

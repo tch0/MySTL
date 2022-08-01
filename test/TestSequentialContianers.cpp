@@ -216,12 +216,12 @@ void testVector(bool showDetails)
         util.assertEqual(vec1 <= vec2, false);
     }
     util.showFinalResult();
+    std::cout << std::endl;
 }
 
 int main(int argc, char const *argv[])
 {
     bool showDetails = parseDetailFlag(argc, argv);
     testVector(showDetails);
-    // TestUtil util(showDetails, "vector");
     return 0;
 }
