@@ -157,7 +157,7 @@ public:
     constexpr ~vector()
     {
         clear();
-        alloc.deallocate(start, capacity() * sizeof(T));
+        free_all_spaces();
     }
     // operator =
     constexpr vector& operator=(const vector& rhs) // 1
@@ -175,6 +175,7 @@ public:
             tstd::uninitialized_copy(rhs.begin(), rhs.end(), start);
             finish = end_of_storage = start + rhs.size();
         }
+        return *this;
     }
     constexpr vector& operator=(vector&& rhs) noexcept // 2
     {
@@ -184,10 +185,12 @@ public:
         finish = rhs.finish;
         end_of_storage = rhs.end_of_storage;
         rhs.start = rhs.finish = rhs.end_of_storage = nullptr;
+        return *this;
     }
     constexpr vector& operator=(std::initializer_list<T> il) // 3
     {
         assign(il);
+        return *this;
     }
     // assign
     constexpr void assign(size_type count, const T& value) // 1
@@ -206,12 +209,13 @@ public:
             finish = end_of_storage = start + count;
         }
     }
-    template<typename InputIterator>
+    template<typename InputIterator, 
+        typename = std::enable_if_t<std::is_base_of_v<typename std::input_iterator_tag, typename std::iterator_traits<InputIterator>::iterator_category>>>
     constexpr void assign(InputIterator first, InputIterator last) // 2
     {
         clear();
         free_all_spaces();
-        for (; first != end; ++first)
+        for (; first != last; ++first)
         {
             push_back(*first);
         }
@@ -283,7 +287,7 @@ public:
     {
         return start;
     }
-    constexpr T* data() const noexcept
+    constexpr const T* data() const noexcept
     {
         return start;
     }
@@ -402,7 +406,8 @@ public:
         fill_range(start + idx, start + idx + count, value);
         return start + idx;
     }
-    template<typename InputIterator>
+    template<typename InputIterator, 
+        typename = std::enable_if_t<std::is_base_of_v<typename std::input_iterator_tag, typename std::iterator_traits<InputIterator>::iterator_category>>>
     constexpr iterator insert(const_iterator pos, InputIterator first, InputIterator last) // 4
     {
         size_type idx = (size_type)(pos - start);
@@ -425,18 +430,18 @@ public:
     {
         size_type idx = (size_type)(pos - start);
         move_backward(idx, 1);
-        *(start + idx) = alloc.construct(args...);
+        alloc.construct(start + idx, std::forward<Args>(args)...);
         return start + idx;
     }
     constexpr iterator erase(const_iterator pos) // 1
     {
-        move_forward(pos, 1);
-        return pos;
+        move_forward(pos + 1, 1);
+        return (iterator)pos;
     }
     constexpr iterator erase(const_iterator first, const_iterator last) // 2
     {
         move_forward(last, last - first);
-        return first;
+        return (iterator)first;
     }
     constexpr void push_back(const T& value) // 1
     {
@@ -465,6 +470,7 @@ public:
         }
         alloc.construct(finish, std::forward<Args>(args)...);
         ++finish;
+        return *finish;
     }
     constexpr void pop_back()
     {
@@ -526,18 +532,31 @@ public:
     }
 private:
     // auxiliary functions
-    void copy_range(iterator first, iterator last, iterator dest)
+    template<typename InputIterator>
+    void copy_range(InputIterator first, InputIterator last, iterator dest)
     {
         for (; first != last; ++first, ++dest)
         {
             *dest = *first;
         }
     }
-    void move_range(iterator first, iterator last, iterator dest)
+    // move from front to back
+    void move_range(const_iterator first, const_iterator last, iterator dest)
     {
         for (; first != last; ++first, ++dest)
         {
             *dest = std::move(*first);
+        }
+    }
+    // move from back to front
+    void move_range_from_back_to_front(const_iterator first, const_iterator last, iterator dest)
+    {
+        auto count = last - first;
+        auto rfirst = make_reverse_iterator(first);
+        auto iter = make_reverse_iterator(last);
+        for (auto rdest = make_reverse_iterator(dest + count); iter != rfirst; ++iter, ++rdest)
+        {
+            *rdest = std::move(*iter);
         }
     }
     void fill_range(iterator first, iterator last, const T& value)
@@ -547,7 +566,7 @@ private:
             *dest = value;
         }
     }
-    // destroy a range of elements in reverse order, first and last can not be the same.
+    // destroy a range of elements in reverse order.
     void erase_range(iterator first, iterator last)
     {
         auto rfirst = make_reverse_iterator(first);
@@ -555,12 +574,6 @@ private:
         {
             alloc.destroy(&*iter);
         }
-        // todo: delete the comment
-        // auto iter = last - 1;
-        // do
-        // {
-        //     alloc.destroy(&*iter);
-        // } while (iter-- != first);
     }
     // free all spaces for another allocation
     void free_all_spaces()
@@ -569,6 +582,7 @@ private:
         {
             alloc.deallocate(start, sizeof(T) * capacity());
         }
+        start = finish = end_of_storage = nullptr;
     }
     // adjust capacity: less or more, reserve, shrink_to_fit, etc
     // new_cap must greater than or equal to size(), default adjust to double of current size()
@@ -582,7 +596,7 @@ private:
         T* new_start = alloc.allocate(new_cap * sizeof(T));
         T* new_finish = new_start + size();
         T* new_end_of_storage = new_start + new_cap;
-        move_range(start, finish, new_start);
+        uninitialized_move(start, finish, new_start);
         clear();
         free_all_spaces();
         start = new_start;
@@ -590,12 +604,13 @@ private:
         end_of_storage = new_end_of_storage;
     }
     // move elements after(include) idx backward specific location.
-    // do the copy, and ajust capacity if necessary
+    // do the copy(move if possible), and ajust capacity if necessary
+    // for insert
     void move_backward(size_type idx, size_type count)
     {
         while (size() + count > capacity())
         {
-            adjust_capacity();
+            adjust_capacity(std::max(2*size(), size() + count));
         }
         if (idx + count >= size())
         {
@@ -604,15 +619,16 @@ private:
         else // idx + count < size()
         {
             uninitialized_copy(finish - count, finish, finish);
-            move_range(start + idx, finish - count, start + idx + count);
+            // move elements from back to front
+            move_range_from_back_to_front(start + idx, finish - count, start + idx + count);
         }
         finish += count;
     }
     // move elements forward
     // called after erasing
-    void move_forward(iterator first, size_type count)
+    void move_forward(const_iterator first, size_type count)
     {
-        move_range(first, finish, first - count);
+        move_range(first, finish, (iterator)(first - count));
         erase_range(finish - count, finish);
         finish -= count;
     }

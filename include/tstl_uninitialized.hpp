@@ -57,6 +57,7 @@ ForwardIterator uninitialized_move(InputIterator first, InputIterator last, Forw
     {
         _construct(&*dest, std::move(*first));
     }
+    return dest;
 }
 
 // since C++17
@@ -67,6 +68,7 @@ ForwardIterator uninitialized_move_n(InputIterator first, Size count, ForwardIte
     {
         _construct(&*dest, std::move(*first));
     }
+    return dest;
 }
 
 // since C++20
