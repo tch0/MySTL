@@ -700,9 +700,9 @@ constexpr bool operator>=(const tstd::vector<T, Allocator>& lhs, const tstd::vec
 
 // global swap for tstd::vector
 template<typename T, typename Allocator>
-constexpr void swap(tstd::vector<T, Allocator>& lhs, tstd::vector<T, Allocator>& rhs) noexcept //() // todo: contents in noexcept()
+constexpr void swap(tstd::vector<T, Allocator>& lhs, tstd::vector<T, Allocator>& rhs) noexcept(noexcept(lhs.swap(rhs)))
 {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
 }
 
 } // namespace tstd
