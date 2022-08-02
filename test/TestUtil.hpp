@@ -58,7 +58,13 @@ PrintSequenceElements<T*> printArrayElements(T* arr, std::size_t size, std::size
 class TestUtil
 {
 public:
-    TestUtil(bool _show, const std::string& _target) : passedCount(0), totalCount(0), showDetails(_show), target(_target) {}
+    TestUtil(bool _show, const std::string& _target) : passedCount(0), totalCount(0), showDetails(_show), target(_target)
+    {
+        if (showDetails)
+        {
+            std::cout << "Test of " << target << ": " << std::endl;
+        }
+    }
 
     void showFinalResult(const std::source_location& loc = std::source_location::current())
     {
@@ -66,6 +72,10 @@ public:
         std::cout << "Test result of " << target << ": "
             << passedCount << "/" << totalCount << " passed"
             << (passedCount == totalCount ? "" : " --------------------------> failed") << std::endl;
+        if (showDetails)
+        {
+            std::cout << std::endl;
+        }
     }
 
     template<typename T1, typename T2>

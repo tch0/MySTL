@@ -30,12 +30,12 @@ void testRangeAccess(bool showDetails)
         util.assertEqual(tstd::empty(A) == false, true);
     }
     util.showFinalResult();
-    std::cout << std::endl;
 }
 
 int main(int argc, char const *argv[])
 {
     bool showDetails = parseDetailFlag(argc, argv);
     testRangeAccess(showDetails);
+    std::cout << std::endl;
     return 0;
 }

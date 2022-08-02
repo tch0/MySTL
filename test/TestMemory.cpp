@@ -22,10 +22,6 @@ int Foo::count = 0;
 // allocator
 void testAllocator(bool showDetails)
 {
-    if (showDetails)
-    {
-        cout << "Test of allocator: " << endl;
-    }
     TestUtil util(showDetails, "allocator");
 
     // allocation
@@ -54,16 +50,11 @@ void testAllocator(bool showDetails)
 
     // final result
     util.showFinalResult();
-    cout << endl;
 }
 
 // uninitilized memory operations
 void testUnintialized(bool showDetails)
 {
-    if (showDetails)
-    {
-        cout << "Test of unintialized memory operations: " << endl;
-    }
     TestUtil util(showDetails, "unintialized");
     
     void* p = ::operator new(3 * sizeof(int));
@@ -86,7 +77,6 @@ void testUnintialized(bool showDetails)
 
     // final result
     util.showFinalResult();
-    cout << endl;
 }
 
 int main(int argc, char const *argv[])
@@ -94,5 +84,6 @@ int main(int argc, char const *argv[])
     bool showDetails = parseDetailFlag(argc, argv);
     testAllocator(showDetails);
     testUnintialized(showDetails);
+    std::cout << std::endl;
     return 0;
 }
