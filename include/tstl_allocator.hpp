@@ -4,6 +4,7 @@
 #include <new>     // for placement new
 #include <cstddef> // for ptrdiff_t size_t
 #include <limits>  // for numeric_limits
+#include <type_traits>
 
 namespace tstd
 {
@@ -36,7 +37,10 @@ inline void _construct(T1* p, Args&&... args)
 template<typename T>
 inline void _destroy(T* ptr)
 {
-    ptr->~T();
+    if constexpr (!std::is_trivially_destructible_v<T>)
+    {
+        ptr->~T();
+    }
 }
 
 // allocator
@@ -53,7 +57,7 @@ public:
     using const_pointer = const T*;
     using reference = T&;
     using const_reference = const T&;
-    template< class U > struct rebind {
+    template<typename U> struct rebind {
         using other = allocator<U>;
     };
     // deprecated in C++17, removed in C++23

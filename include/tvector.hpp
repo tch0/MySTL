@@ -4,6 +4,7 @@
 #include <tstl_allocator.hpp>
 #include <tstl_uninitialized.hpp>
 #include <titerator.hpp>
+#include <tutility.hpp>
 #include <initializer_list>
 #include <cstddef>
 #include <type_traits>
@@ -523,12 +524,12 @@ public:
             finish = start + count;
         }
     }
-    constexpr void swap(vector& other) noexcept // () // todo: contents in noexcept()
+    constexpr void swap(vector& other) noexcept(std::allocator_traits<Allocator>::propagate_on_container_swap::value || std::allocator_traits<Allocator>::is_always_equal::value)
     {
-        std::swap(alloc, other.alloc);
-        std::swap(start, other.start);
-        std::swap(finish, other.finish);
-        std::swap(end_of_storage, other.end_of_storage);
+        tstd::swap(alloc, other.alloc);
+        tstd::swap(start, other.start);
+        tstd::swap(finish, other.finish);
+        tstd::swap(end_of_storage, other.end_of_storage);
     }
 private:
     // auxiliary functions

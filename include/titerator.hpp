@@ -198,7 +198,7 @@ public:
     }
     constexpr reference operator*() const
     {
-        return staic_cast<reference>(*current);
+        return static_cast<reference>(*current);
     }
     constexpr pointer operator->() const
     {
@@ -360,7 +360,7 @@ typename std::iterator_traits<InputIterator>::difference_type distance(InputIter
 template<typename InputIterator>
 constexpr InputIterator next(InputIterator it, typename std::iterator_traits<InputIterator>::difference_type n = 1)
 {
-    std::advance(it, n);
+    tstd::advance(it, n);
     return it;
 }
 
@@ -368,7 +368,7 @@ template<typename BidirectionalIterator>
 constexpr BidirectionalIterator prev(BidirectionalIterator it, typename std::iterator_traits<BidirectionalIterator>::difference_type n = 1)
 {
     static_assert(std::is_base_of_v<std::bidirectional_iterator_tag, typename std::iterator_traits<BidirectionalIterator>::iterator_category>);
-    std::advance(it, -n);
+    tstd::advance(it, -n);
     return it;
 }
 
@@ -390,7 +390,7 @@ constexpr T* begin(T (&arr)[N]) noexcept
     return arr;
 }
 template<typename C>
-constexpr auto cbegin(const C& c) noexcept(noexcept(std::begin(c))) -> decltype(tstd::begin(c))
+constexpr auto cbegin(const C& c) noexcept(noexcept(tstd::begin(c))) -> decltype(tstd::begin(c))
 {
     return tstd::begin(c);
 }
@@ -411,7 +411,7 @@ constexpr T* end(T (&arr)[N]) noexcept
     return arr + N;
 }
 template<typename C>
-constexpr auto cend(const C& c) noexcept(noexcept(std::end(c))) -> decltype(tstd::end(c))
+constexpr auto cend(const C& c) noexcept(noexcept(tstd::end(c))) -> decltype(tstd::end(c))
 {
     return tstd::end(c);
 }
@@ -437,7 +437,7 @@ constexpr tstd::reverse_iterator<const T*> rbegin(std::initializer_list<T> il)
     return tstd::reverse_iterator<const T*>(il.end());
 }
 template<typename C>
-constexpr auto crbegin(const C& c) noexcept(noexcept(std::rbegin(c))) -> decltype(tstd::rbegin(c))
+constexpr auto crbegin(const C& c) noexcept(noexcept(tstd::rbegin(c))) -> decltype(tstd::rbegin(c))
 {
     return tstd::rbegin(c);
 }
@@ -463,7 +463,7 @@ constexpr tstd::reverse_iterator<const T*> rend(std::initializer_list<T> il)
     return tstd::reverse_iterator<const T*>(il.begin());
 }
 template<typename C>
-constexpr auto crend(const C& c) noexcept(noexcept(std::rend(c))) -> decltype(tstd::rend(c))
+constexpr auto crend(const C& c) noexcept(noexcept(tstd::rend(c))) -> decltype(tstd::rend(c))
 {
     return tstd::rend(c);
 }

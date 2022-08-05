@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include <tmemory.hpp>
 #include "TestUtil.hpp"
-using namespace std;
 
 class Foo
 {
@@ -12,7 +11,7 @@ public:
     Foo() { ++count; }
     Foo(int, int, int) { ++count; }
     Foo(double) { ++count; }
-    Foo(const string&) { ++count; }
+    Foo(const std::string&) { ++count; }
     Foo(const Foo&) { ++count; }
     ~Foo() { --count; }
 };
@@ -25,13 +24,13 @@ void testAllocator(bool showDetails)
     TestUtil util(showDetails, "allocator");
 
     // allocation
-    vector<int, tstd::allocator<int>> vec{1, 2, 3, 4, 5};
-    vector<int> vec2{1, 2, 3, 4, 5};
+    std::vector<int, tstd::allocator<int>> vec{1, 2, 3, 4, 5};
+    std::vector<int> vec2{1, 2, 3, 4, 5};
     util.assertSequenceEqual(vec, vec2);
 
     // construction and destruction
     {
-        vector<Foo, tstd::allocator<Foo>> vec;
+        std::vector<Foo, tstd::allocator<Foo>> vec;
         vec.emplace_back();
         vec.emplace_back(1, 2, 3);
         vec.emplace_back(2.0);
@@ -59,7 +58,7 @@ void testUnintialized(bool showDetails)
     
     void* p = ::operator new(3 * sizeof(int));
     int* pi = (int*)p;
-    vector<int> vec{1, 2, 3};
+    std::vector<int> vec{1, 2, 3};
     tstd::uninitialized_copy(vec.begin(), vec.end(), pi);
     util.assertRangeEqual(vec.begin(), vec.end(), pi);
 
