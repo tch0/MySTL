@@ -58,7 +58,12 @@ PrintSequenceElements<T*> printArrayElements(T* arr, std::size_t size, std::size
 class TestUtil
 {
 public:
-    TestUtil(bool _show, const std::string& _target) : passedCount(0), totalCount(0), showDetails(_show), target(_target)
+    TestUtil(bool _show, const std::string& _target, int _lineNumberWidth = 4) 
+        : passedCount(0)
+        , totalCount(0)
+        , showDetails(_show)
+        , target(_target)
+        , lineNumberWidth(_lineNumberWidth)
     {
         if (showDetails)
         {
@@ -87,7 +92,7 @@ public:
         if (showDetails)
         {
             std::cout << std::boolalpha << std::dec;
-            std::cout << loc.file_name() << ":" << loc.line() << ": "
+            std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertEqual: " << "left value( " << t1 << " ), right value( " << t2 << " ) : "
                 << (res ? "passed" : "==================== failed") << std::endl;
         }
@@ -102,7 +107,7 @@ public:
         if (showDetails)
         {
             std::cout << std::boolalpha << std::dec;
-            std::cout << loc.file_name() << ":" << loc.line() << ": "
+            std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertNotEqual: " << "left value( " << t1 << " ), right value( " << t2 << " ) : "
                 << (res ? "passed" : "==================== failed") << std::endl;
         }
@@ -121,7 +126,7 @@ public:
         if (showDetails)
         {
             std::cout << std::boolalpha << std::dec;
-            std::cout << loc.file_name() << ":" << loc.line() << ": "
+            std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertSequenceEqual: " << (res ? "passed" : "==================== failed")
                 << "\n\tleft value: " << printContainerElememts(c1, 20) // class template argument deducing
                 << "\n\tright value: " << printContainerElememts(c2, 20) << std::endl;
@@ -137,7 +142,7 @@ public:
         if (showDetails)
         {
             std::cout << std::boolalpha << std::dec;
-            std::cout << loc.file_name() << ":" << loc.line() << ": "
+            std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertArrayEqual: " << (res ? "passed" : "==================== failed")
                 << "\n\tleft value: " << printArrayElements(arr1, size, 20)
                 << "\n\tright value: " << printArrayElements(arr2, size, 20) << std::endl;
@@ -154,7 +159,7 @@ public:
         if (showDetails)
         {
             std::cout << std::boolalpha << std::dec;
-            std::cout << loc.file_name() << ":" << loc.line() << ": "
+            std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertRangeEqual: " << (res ? "passed" : "==================== failed")
                 << "\n\tleft value: " << PrintSequenceElements(b1, e1, 20)
                 << "\n\tright value: " << PrintSequenceElements(b2, b2 + std::distance(b1, e1), 20)  << std::endl;
@@ -163,6 +168,7 @@ public:
 private:
     int passedCount;
     int totalCount;
+    int lineNumberWidth;
     bool showDetails;
     std::string target;
 };

@@ -305,7 +305,72 @@ constexpr auto operator-( const move_iterator<Iterator1>& lhs, const move_iterat
 // back_insert_iterator
 // front_insert_iterator
 // insert_iterator
-// advance, distance, next, prev
+
+template<typename InputIterator, typename Distance>
+constexpr void advance(InputIterator& it, Distance n)
+{
+    using category = typename std::iterator_traits<InputIterator>::iterator_category;
+    static_assert(std::is_base_of_v<std::input_iterator_tag, category>);
+
+    auto dist = typename std::iterator_traits<InputIterator>::difference_type(n);
+    if constexpr (std::is_base_of_v<std::random_access_iterator_tag, category>)
+    {
+        it += n;
+    }
+    else
+    {
+        while (dist > 0)
+        {
+            --dist;
+            ++it;
+        }
+        if constexpr (std::is_base_of_v<std::bidirectional_iterator_tag, category>)
+        {
+            while (dist < 0)
+            {
+                ++dist;
+                --it;
+            }
+        }
+    }
+}
+
+template<typename InputIterator>
+typename std::iterator_traits<InputIterator>::difference_type distance(InputIterator first, InputIterator last)
+{
+    using category = typename std::iterator_traits<InputIterator>::iterator_category;
+    static_assert(std::is_base_of_v<std::input_iterator_tag, category>);
+
+    if constexpr (std::is_base_of_v<std::random_access_iterator_tag, category>)
+    {
+        return last - first;
+    }
+    else
+    {
+        typename std::iterator_traits<InputIterator>::difference_type result = 0;
+        while (first != last)
+        {
+            ++first;
+            ++result;
+        }
+        return result;
+    }
+}
+
+template<typename InputIterator>
+constexpr InputIterator next(InputIterator it, typename std::iterator_traits<InputIterator>::difference_type n = 1)
+{
+    std::advance(it, n);
+    return it;
+}
+
+template<typename BidirectionalIterator>
+constexpr BidirectionalIterator prev(BidirectionalIterator it, typename std::iterator_traits<BidirectionalIterator>::difference_type n = 1)
+{
+    static_assert(std::is_base_of_v<std::bidirectional_iterator_tag, typename std::iterator_traits<BidirectionalIterator>::iterator_category>);
+    std::advance(it, -n);
+    return it;
+}
 
 // range access
 // begin, cbegin
