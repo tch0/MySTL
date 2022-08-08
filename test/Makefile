@@ -27,6 +27,7 @@ endif
 all_test_targets += TestMemory
 all_test_targets += TestIterator
 all_test_targets += TestSequentialContianers
+all_test_targets += TestContainerAdaptors
 
 # add all efficiency test targets here
 all_efficiency_test_targets += 
