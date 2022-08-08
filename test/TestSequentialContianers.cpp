@@ -2,13 +2,16 @@
 #include <vector>
 #include <array>
 #include <list>
+#include <deque>
 #include <iterator>
 #include <algorithm>
 #include <functional>
+#include <string>
 #include <tmemory.hpp>
 #include <tvector.hpp>
 #include <tarray.hpp>
 #include <tlist.hpp>
+#include <tdeque.hpp>
 #include "TestUtil.hpp"
 
 void testVector(bool showDetails)
@@ -752,12 +755,293 @@ void testList(bool showDetails)
     util.showFinalResult();
 }
 
+void testDeque(bool showDetails)
+{
+    TestUtil util(showDetails, "deque");
+    // a range for test
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 1);
+    std::random_shuffle(vec.begin(), vec.end());
+    {
+        // constructors
+        // 1
+        {
+            tstd::deque<int> dq1;
+            std::deque<int> dq2;
+            util.assertSequenceEqual(dq1, dq2);
+            util.assertEqual(dq1.empty(), true);
+            util.assertEqual(dq1.size(), 0);
+        }
+        // 2
+        {
+            tstd::deque<int> dq1((tstd::allocator<int>()));
+            std::deque<int> dq2((std::allocator<int>()));
+            util.assertSequenceEqual(dq1, dq2);
+            util.assertEqual(dq1.empty(), true);
+            util.assertEqual(dq1.size(), 0);
+        }
+        // 3
+        {
+            tstd::deque<int> dq1(10, 99);
+            std::deque<int> dq2(10, 99);
+            util.assertSequenceEqual(dq1, dq2);
+            util.assertEqual(dq1.empty(), false);
+            util.assertEqual(dq1.size(), 10);
+        }
+        // 4
+        {
+            tstd::deque<int> dq1(10);
+            std::deque<int> dq2(10);
+            util.assertSequenceEqual(dq1, dq2);
+        }
+        // 5
+        {
+            tstd::deque<int> dq1(vec.begin(), vec.end());
+            std::deque<int> dq2(vec.begin(), vec.end());
+            util.assertSequenceEqual(dq1, dq2);
+        }
+        // 6, 7, 8, 9
+        {
+            tstd::deque<int> tmp1(vec.begin(), vec.end());
+            std::deque<int> tmp2(vec.begin(), vec.end());
+            {
+                tstd::deque<int> dq1(tmp1);
+                std::deque<int> dq2(tmp2);
+                util.assertSequenceEqual(dq1, dq2);
+            }
+            {
+                tstd::deque<int> dq1(tmp1, tstd::allocator<int>());
+                std::deque<int> dq2(tmp2, std::allocator<int>());
+                util.assertSequenceEqual(dq1, dq2);
+            }
+            {
+                tstd::deque<int> dq1(std::move(tmp1));
+                std::deque<int> dq2(std::move(tmp2));
+                util.assertSequenceEqual(dq1, dq2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                tstd::deque<int> dqm1(std::move(dq1), tstd::allocator<int>());
+                std::deque<int> dqm2(std::move(dq2), std::allocator<int>());
+                util.assertSequenceEqual(dqm1, dqm2);
+                util.assertSequenceEqual(dq1, dq2);
+            }
+        }
+        // 10
+        {
+            tstd::deque<int> dq1{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+            std::deque<int> dq2{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+            util.assertSequenceEqual(dq1, dq2);
+        }
+    }
+    {
+        // assignment
+        tstd::deque<int> tmp1(vec.begin(), vec.end());
+        std::deque<int> tmp2(vec.begin(), vec.end());
+        tstd::deque<int> dq1;
+        std::deque<int> dq2;
+        dq1 = tmp1;
+        dq2 = tmp2;
+        util.assertSequenceEqual(dq1, tmp1);
+        util.assertSequenceEqual(dq1, dq2);
+        dq1 = std::move(tmp1);
+        dq2 = std::move(tmp2);
+        util.assertSequenceEqual(dq1, dq2);
+        util.assertSequenceEqual(tmp1, tmp2);
+        dq1 = {1, 2, 3, 4, 5};
+        dq2 = {1, 2, 3, 4, 5};
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.assign(10, 99);
+        dq2.assign(10, 99);
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.assign(vec.begin(), vec.end());
+        dq2.assign(vec.begin(), vec.end());
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.assign({1, 2, 3, 4, 5});
+        dq2.assign({1, 2, 3, 4, 5});
+        util.assertSequenceEqual(dq1, dq2);
+    }
+    {
+        // allocator
+        tstd::deque<int> dq1;
+        util.assertEqual(dq1.get_allocator() == tstd::allocator<int>(), true);
+    }
+    {
+        // element access
+        tstd::deque<int> dq1(vec.begin(), vec.end());
+        std::deque<int> dq2(vec.begin(), vec.end());
+        std::vector<int> vec1, vec2;
+        for (std::size_t i = 0; i < dq1.size(); ++i)
+        {
+            vec1.push_back(dq1.at(i));
+            vec1.push_back(dq1[i]);
+            vec2.push_back(dq2.at(i));
+            vec2.push_back(dq2[i]);
+        }
+        util.assertSequenceEqual(vec1, vec2);
+        util.assertEqual(dq1.front(), dq2.front());
+        util.assertEqual(dq1.back(), dq2.back());
+        dq1.front() = dq1.back() = 9999;
+        dq2.front() = dq2.back() = 9999;
+        util.assertSequenceEqual(dq1, dq2);
+    }
+    {
+        // iterators
+        tstd::deque<int> dq1(vec.begin(), vec.end());
+        std::deque<int> dq2(vec.begin(), vec.end());
+        util.assertEqual(*dq2.begin(), *dq1.begin());
+        util.assertEqual(*dq2.cbegin(), *dq1.cbegin());
+        util.assertEqual(*tstd::prev(dq1.end()), *std::prev(dq2.end()));
+        util.assertEqual(*tstd::prev(dq1.cend()), *std::prev(dq2.cend()));
+        util.assertEqual(*dq2.rbegin(), *dq1.rbegin());
+        util.assertEqual(*dq2.crbegin(), *dq1.crbegin());
+        util.assertEqual(*tstd::prev(dq1.rend()), *std::prev(dq2.rend()));
+        util.assertEqual(*tstd::prev(dq1.crend()), *std::prev(dq2.crend()));
+        // random access iterator test
+        auto iter = dq1.begin();
+        util.assertEqual(++iter == dq1.begin() + 1, true);
+        util.assertEqual(--iter == dq1.begin(), true);
+        util.assertEqual(iter++ == dq1.begin(), true);
+        util.assertEqual(iter == dq1.begin() + 1, true);
+        util.assertEqual(iter-- == dq1.begin() + 1, true);
+        util.assertEqual(iter == dq1.begin(), true);
+        util.assertEqual(dq1.end() - dq1.begin(), dq1.size());
+        util.assertEqual((iter += 3) == dq1.begin() + 3, true);
+        util.assertEqual((iter -= 3) != dq1.begin(), false);
+        util.assertEqual(dq1.begin() < dq1.end(), true);
+        util.assertEqual(dq1.begin() > dq1.end(), false);
+        util.assertEqual(dq1.begin() <= dq1.end(), true);
+        util.assertEqual(dq1.begin() >= dq1.end(), false);
+    }
+    {
+        // size and capacity
+        tstd::deque<int> dq1(vec.begin(), vec.end());
+        std::deque<int> dq2(vec.begin(), vec.end());
+        util.assertEqual(dq1.size(), dq2.size());
+        util.assertEqual(dq1.empty(), dq2.empty());
+        // modififers: clear
+        dq1.clear();
+        dq2.clear();
+        util.assertSequenceEqual(dq1, dq2);
+    }
+    {
+        // modifiers
+        // insert
+        tstd::deque<int> dq1(vec.begin(), vec.end());
+        std::deque<int> dq2(vec.begin(), vec.end());
+        // 1
+        int a = 100;
+        dq1.insert(dq1.begin(), a);
+        dq2.insert(dq2.begin(), a);
+        dq1.insert(dq1.begin(), 10);
+        dq2.insert(dq2.begin(), 10);
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.insert(dq1.begin() + 20, 10, 1024);
+        dq2.insert(dq2.begin() + 20, 10, 1024);
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.insert(dq1.begin() + 50, vec.begin(), vec.end());
+        dq2.insert(dq2.begin() + 50, vec.begin(), vec.end());
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.insert(dq1.end() - 10, {1, 2, 3, 4, 5});
+        dq2.insert(dq2.end() - 10, {1, 2, 3, 4, 5});
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.emplace(dq1.end() - 20, 10);
+        dq2.emplace(dq2.end() - 20, 10);
+        util.assertSequenceEqual(dq1, dq2);
+        // erase
+        dq1.erase(dq1.begin());
+        dq2.erase(dq2.begin());
+        dq1.erase(dq1.begin() + 50);
+        dq2.erase(dq2.begin() + 50);
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.erase(dq1.begin() + 10, dq1.end() - 30);
+        dq2.erase(dq2.begin() + 10, dq2.end() - 30);
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.erase(dq1.begin(), dq1.end());
+        dq2.erase(dq2.begin(), dq2.end());
+        util.assertSequenceEqual(dq1, dq2);
+        // push_back, emplace_back
+        for (int i = 0; i < 10000; ++i)
+        {
+            dq1.push_back(i);
+            dq1.push_back(std::move(i));
+            dq1.emplace_back(i);
+            dq2.push_back(i);
+            dq2.push_back(std::move(i));
+            dq2.emplace_back(i);
+        }
+        util.assertSequenceEqual(dq1, dq2);
+        // push_front, emplace_front
+        for (int i = 0; i < 10000; ++i)
+        {
+            dq1.push_front(i);
+            dq2.push_front(i);
+            dq1.push_front(std::move(i));
+            dq2.push_front(std::move(i));
+            dq1.emplace_front(i);
+            dq2.emplace_front(i);
+        }
+        util.assertSequenceEqual(dq1, dq2);
+        // pop_front, pop_back
+        for (int i = 0; i < 10000; ++i)
+        {
+            dq1.pop_front();
+            dq2.pop_front();
+            dq1.pop_back();
+            dq2.pop_back();
+        }
+        util.assertSequenceEqual(dq1, dq2);
+        // resize
+        dq1.resize(100000);
+        dq2.resize(100000);
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.resize(100);
+        dq2.resize(100);
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.resize(1000, 9999);
+        dq2.resize(1000, 9999);
+        util.assertSequenceEqual(dq1, dq2);
+        dq1.resize(100, 200);
+        dq2.resize(100, 200);
+        util.assertSequenceEqual(dq1, dq2);
+        // swap
+        {
+            tstd::deque<int> tmp1(vec.begin(), vec.end());
+            std::deque<int> tmp2(vec.begin(), vec.end());
+            tmp1.swap(dq1);
+            tmp2.swap(dq2);
+            util.assertSequenceEqual(dq1, dq2);
+            util.assertSequenceEqual(tmp1, tmp2);
+            swap(dq1, tmp1);
+            swap(dq2, tmp2);
+            util.assertSequenceEqual(dq1, dq2);
+            util.assertSequenceEqual(tmp1, tmp2);
+            tstd::swap(dq1, tmp1);
+            tstd::swap(dq2, tmp2);
+            util.assertSequenceEqual(dq1, dq2);
+            util.assertSequenceEqual(tmp1, tmp2);
+        }
+    }
+    {
+        // comparisons
+        tstd::deque<int> dq1(vec.begin(), vec.end());
+        tstd::deque<int> dq2(vec.begin(), vec.end());
+        util.assertEqual(dq1 == dq2, true);
+        util.assertEqual(dq1 != dq2, false);
+        dq1[0] = -1;
+        util.assertEqual(dq1 < dq2, true);
+        util.assertEqual(dq1 <= dq2, true);
+        util.assertEqual(dq1 > dq2, false);
+        util.assertEqual(dq1 >= dq2, false);
+    }
+    util.showFinalResult();
+}
+
 int main(int argc, char const *argv[])
 {
     bool showDetails = parseDetailFlag(argc, argv);
     testVector(showDetails);
     testArray(showDetails);
     testList(showDetails);
+    testDeque(showDetails);
     std::cout << std::endl;
     return 0;
 }

@@ -74,7 +74,7 @@ public:
     // deprecated in C++17, removed in C++20
     T* allocate(size_type n, const void* hint)
     {
-        _allocate(static_cast<difference_type>(n), hint);
+        return _allocate(static_cast<difference_type>(n), hint);
     }
 
     [[nodiscard]] constexpr T* allocate(size_type n)

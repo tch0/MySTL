@@ -40,7 +40,7 @@ all : $(all_targets)
 
 # compile every single targets
 % : %.cpp
-	-$(CXX) $^ -o $@ $(CXXFLAGS)
+	$(CXX) $^ -o $@ $(CXXFLAGS)
 
 # run every single test
 $(addprefix run_single_target_, %) : %

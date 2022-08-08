@@ -534,7 +534,7 @@ public:
 private:
     // auxiliary functions
     template<typename InputIterator>
-    void copy_range(InputIterator first, InputIterator last, iterator dest)
+    void copy_range(InputIterator first, InputIterator last, iterator dest) // todo: replace with tstd::copy
     {
         for (; first != last; ++first, ++dest)
         {
@@ -542,7 +542,7 @@ private:
         }
     }
     // move from front to back
-    void move_range(const_iterator first, const_iterator last, iterator dest)
+    void move_range(const_iterator first, const_iterator last, iterator dest) // todo: replace with tstd::move
     {
         for (; first != last; ++first, ++dest)
         {
@@ -550,7 +550,7 @@ private:
         }
     }
     // move from back to front
-    void move_range_from_back_to_front(const_iterator first, const_iterator last, iterator dest)
+    void move_range_from_back_to_front(const_iterator first, const_iterator last, iterator dest) // todo: replace with tstd::move_backward
     {
         auto count = last - first;
         auto rfirst = make_reverse_iterator(first);
@@ -570,10 +570,9 @@ private:
     // destroy a range of elements in reverse order.
     void erase_range(iterator first, iterator last)
     {
-        auto rfirst = make_reverse_iterator(first);
-        for (auto iter = make_reverse_iterator(last); iter != rfirst; ++iter)
+        for (auto iter = last; iter != first;)
         {
-            alloc.destroy(&*iter);
+            alloc.destroy(&*(--iter));
         }
     }
     // free all spaces for another allocation
