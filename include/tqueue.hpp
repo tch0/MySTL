@@ -3,6 +3,10 @@
 
 #include <tdeque.hpp>
 #include <initializer_list>
+#include <tstl_heap.hpp>
+#include <tvector.hpp>
+#include <functional> // todo: replace with <tfuntional.hpp>
+#include <type_traits>
 
 namespace tstd
 {
@@ -204,6 +208,233 @@ constexpr bool operator>=(const tstd::queue<T, Container>& lhs, const tstd::queu
 // global swap for tstd::queue
 template<typename T, typename Container>
 constexpr void swap(tstd::queue<T, Container>& lhs, tstd::queue<T, Container>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+{
+    lhs.swap(rhs);
+}
+
+
+// priority_queue
+
+template<typename T, typename Container = tstd::vector<T>, typename Compare = std::less<typename Container::value_type>>
+class priority_queue
+{
+public:
+    using container_type = Container;
+    using value_compare = Compare;
+    using value_type = typename Container::value_type;
+    using size_type = typename Container::size_type;
+    using reference = typename Container::reference;
+    using const_reference = typename Container::const_reference;
+public:
+    
+    priority_queue() // 1
+        : priority_queue(Compare(), Container())
+    {
+    }
+    explicit priority_queue(const Compare& compare) // 2
+        : priority_queue(compare, Container())
+    {
+    }
+    priority_queue(const Compare& compare, const Container& cont) // 3
+        : c(cont)
+        , comp(compare)
+    {
+        tstd::make_heap(c.begin(), c.end(), comp);
+    }
+    priority_queue(const Compare& compare, Container&& cont) // 4
+        : c(std::move(cont))
+        , comp(compare)
+    {
+        tstd::make_heap(c.begin(), c.end(), comp);
+    }
+    priority_queue(const priority_queue& other) // 5
+        : c(other.c)
+        , comp(other.comp)
+    {
+    }
+    priority_queue(priority_queue&& other) // 6
+        : c(std::move(other.c))
+        , comp(other.comp)
+    {
+    }
+    template<typename InputIterator,
+        typename = std::enable_if_t<std::is_base_of_v<typename std::input_iterator_tag, typename std::iterator_traits<InputIterator>::iterator_category>>>
+    priority_queue(InputIterator first, InputIterator last, const Compare& compare = Compare()) // 7
+        : c(first, last)
+        , comp(compare)
+    {
+        tstd::make_heap(c.begin(), c.end(), comp);
+    }
+    template<typename InputIterator,
+        typename = std::enable_if_t<std::is_base_of_v<typename std::input_iterator_tag, typename std::iterator_traits<InputIterator>::iterator_category>>>
+    priority_queue(InputIterator first, InputIterator last, const Compare& compare, const Container& cont) // 8
+        : c(cont)
+        , comp(compare)
+    {
+        c.insert(c.end(), first, last);
+        tstd::make_heap(c.begin(), c.end(), comp);
+    }
+    template<typename InputIterator,
+        typename = std::enable_if_t<std::is_base_of_v<typename std::input_iterator_tag, typename std::iterator_traits<InputIterator>::iterator_category>>>
+    priority_queue(InputIterator first, InputIterator last, const Compare& compare, Container&& cont) // 9
+        : c(std::move(cont))
+        , comp(compare)
+    {
+        c.insert(c.end(), first, last);
+        tstd::make_heap(c.begin(), c.end(), comp);
+    }
+    template<typename Allocator,
+        typename = std::enable_if_t<std::uses_allocator_v<Container, Allocator>>>
+    explicit priority_queue(const Allocator& alloc) // 10
+        : c(alloc)
+        , comp()
+    {
+    }
+    template<typename Allocator,
+        typename = std::enable_if_t<std::uses_allocator_v<Container, Allocator>>>
+    priority_queue(const Compare& compare, const Allocator& alloc) // 11
+        : c(alloc)
+        , comp(compare)
+    {
+    }
+    template<typename Allocator,
+        typename = std::enable_if_t<std::uses_allocator_v<Container, Allocator>>>
+    priority_queue(const Compare& compare, const Container& cont, const Allocator& alloc) // 12
+        : c(cont, alloc)
+        , comp(compare)
+    {
+        tstd::make_heap(c.begin(), c.end(), comp);
+    }
+    template<typename Allocator,
+        typename = std::enable_if_t<std::uses_allocator_v<Container, Allocator>>>
+    priority_queue(const Compare& compare, Container&& cont, const Allocator& alloc) // 13
+        : c(std::move(cont), alloc)
+        , comp(compare)
+    {
+        tstd::make_heap(c.begin(), c.end(), comp);
+    }
+    template<typename Allocator,
+        typename = std::enable_if_t<std::uses_allocator_v<Container, Allocator>>>
+    priority_queue(const priority_queue& other, const Allocator& alloc) // 14
+        : c(other.c, alloc)
+        , comp(other.comp)
+    {
+    }
+    template<typename Allocator,
+        typename = std::enable_if_t<std::uses_allocator_v<Container, Allocator>>>
+    priority_queue(priority_queue&& other, const Allocator& alloc) // 15
+        : c(std::move(other.c), alloc)
+        , comp(other.comp)
+    {
+    }
+    template<typename InputIterator, typename Allocator,
+        typename = std::enable_if_t<std::is_base_of_v<typename std::input_iterator_tag, typename std::iterator_traits<InputIterator>::iterator_category>>,
+        typename = std::enable_if_t<std::uses_allocator_v<Container, Allocator>>>
+    priority_queue(InputIterator first, InputIterator last, const Allocator& alloc) // 16
+        : c(first, last, alloc)
+        , comp()
+    {
+        tstd::make_heap(c.begin(), c.end(), comp);
+    }
+    template<typename InputIterator, typename Allocator,
+        typename = std::enable_if_t<std::is_base_of_v<typename std::input_iterator_tag, typename std::iterator_traits<InputIterator>::iterator_category>>,
+        typename = std::enable_if_t<std::uses_allocator_v<Container, Allocator>>>
+    priority_queue(InputIterator first, InputIterator last, const Compare& compare, const Allocator& alloc) // 17
+        : c(first, last, alloc)
+        , comp(compare)
+    {
+        tstd::make_heap(c.begin(), c.end(), comp);
+    }
+    template<typename InputIterator, typename Allocator,
+        typename = std::enable_if_t<std::is_base_of_v<typename std::input_iterator_tag, typename std::iterator_traits<InputIterator>::iterator_category>>,
+        typename = std::enable_if_t<std::uses_allocator_v<Container, Allocator>>>
+    priority_queue(InputIterator first, InputIterator last, const Compare& compare, const Container& cont, const Allocator& alloc) // 18
+        : c(cont, alloc)
+        , comp(compare)
+    {
+        c.insert(c.end(), first, last);
+        tstd::make_heap(c.begin(), c.end(), comp);
+    }
+    template<typename InputIterator, typename Allocator,
+        typename = std::enable_if_t<std::is_base_of_v<typename std::input_iterator_tag, typename std::iterator_traits<InputIterator>::iterator_category>>,
+        typename = std::enable_if_t<std::uses_allocator_v<Container, Allocator>>>
+    priority_queue(InputIterator first, InputIterator last, const Compare& compare, Container&& cont, const Allocator& alloc) // 18
+        : c(std::move(cont))
+        , comp(compare)
+    {
+        c.insert(c.end(), first, last);
+        tstd::make_heap(c.begin(), c.end(), comp);
+    }
+    ~priority_queue()
+    {
+    }
+    // assignment
+    priority_queue& operator=(const priority_queue& other)
+    {
+        c = other.c;
+        comp = other.comp;
+        return *this;
+    }
+    priority_queue& operator=(priority_queue&& other)
+    {
+        c = std::move(other.c);
+        comp = std::move(other.comp);
+        return *this;
+    }
+    // element access
+    reference top()
+    {
+        return c.front();
+    }
+    const_reference top() const
+    {
+        return c.front();
+    }
+    // size and capacity
+    [[nodiscard]] bool empty() const
+    {
+        return c.empty();
+    }
+    size_type size() const
+    {
+        return c.size();
+    }
+    // modifiers
+    void push(const value_type& value)
+    {
+        c.push_back(value);
+        tstd::push_heap(c.begin(), c.end(), comp);
+    }
+    void push(value_type&& value)
+    {
+        c.push_back(std::move(value));
+        tstd::push_heap(c.begin(), c.end(), comp);
+    }
+    template<typename... Args>
+    void emplace(Args&&... args)
+    {
+        c.emplace_back(std::forward<Args>(args)...);
+        tstd::push_heap(c.begin(), c.end(), comp);
+    }
+    void pop()
+    {
+        tstd::pop_heap(c.begin(), c.end(), comp);
+        c.pop_back();
+    }
+    void swap(priority_queue& other) noexcept(std::is_nothrow_swappable_v<Container> && std::is_nothrow_swappable_v<Compare>)
+    {
+        using tstd::swap;
+        swap(c, other.c);
+        swap(comp, other.comp);
+    }
+protected:
+    Container c;
+    Compare comp;
+};
+
+// global swap for tstd::priority_queue
+template<typename T, typename Container, typename Compare>
+constexpr void swap(tstd::priority_queue<T, Container, Compare>& lhs, tstd::priority_queue<T, Container, Compare>& rhs) noexcept(noexcept(lhs.swap(rhs)))
 {
     lhs.swap(rhs);
 }
