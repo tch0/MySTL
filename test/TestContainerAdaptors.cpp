@@ -5,6 +5,7 @@
 #include <stack>
 #include <queue>
 #include <string>
+#include <functional>
 #include <tstack.hpp>
 #include <tdeque.hpp>
 #include <tqueue.hpp>
@@ -31,6 +32,18 @@ std::vector<typename Queue::value_type> queueToVector(Queue q)
     while (!q.empty())
     {
         vec.push_back(q.front());
+        q.pop();
+    }
+    return vec;
+}
+
+template<typename PriorityQueue>
+std::vector<typename PriorityQueue::value_type> priorityQueueToVector(PriorityQueue q)
+{
+    std::vector<typename PriorityQueue::value_type> vec;
+    while (!q.empty())
+    {
+        vec.push_back(q.top());
         q.pop();
     }
     return vec;
@@ -379,11 +392,277 @@ void testQueue(bool showDetails)
     testQueueImpl<tstd::list<int>, std::list<int>>(showDetails, "tstd::list<int> vs std::list<int>");
 }
 
+// test compare class: less or greater
+template<typename T>
+class Compare
+{
+public:
+    Compare(bool _less = true) : less(_less) {}
+    bool operator()(const T& a, const T& b)
+    {
+        return less ? a < b : a > b;
+    }
+private:
+    bool less;
+};
+
+template<typename T, typename Container1, typename Container2>
+void testPriorityQueueImpl(bool showDetails, const std::string& underlyingContainer)
+{
+    using tstd_priority_queue = tstd::priority_queue<int, Container1, Compare<int>>;
+    using std_priority_queue = std::priority_queue<int, Container2, Compare<int>>;
+    TestUtil util(showDetails, "priority_queue(underlying containers: " + underlyingContainer + ")");
+
+    // auxiliary objects
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 1);
+    std::random_shuffle(vec.begin(), vec.end());
+    auto less = Compare<int>(true);
+    auto greater = Compare<int>(false);
+    tstd::allocator<int> talloc;
+    std::allocator<int> alloc;
+    {
+        // constructors
+        // 1
+        {
+            tstd_priority_queue q1;
+            std_priority_queue q2;
+            util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            util.assertEqual(q1.size(), q2.size());
+            util.assertEqual(q1.empty(), q2.empty());
+        }
+        // 2
+        {
+            tstd_priority_queue q1(greater);
+            std_priority_queue q2(greater);
+            for (auto elem : vec)
+            {
+                q1.push(elem);
+                q2.push(elem);
+            }
+            while (!q1.empty())
+            {
+                q1.pop();
+                q2.pop();
+            }
+            util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            util.assertEqual(q1.size(), q2.size());
+            util.assertEqual(q1.empty(), q2.empty());
+        }
+        // 3, 4
+        {
+            Container1 c1(vec.begin(), vec.end());
+            Container2 c2(vec.begin(), vec.end());
+            {
+                tstd_priority_queue q1(greater, c1);
+                std_priority_queue q2(greater, c2);
+                util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            }
+            {
+                tstd_priority_queue q1(greater, std::move(c1));
+                std_priority_queue q2(greater, std::move(c2));
+                util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+                util.assertSequenceEqual(c1, c2);
+            }
+        }
+        // 5, 6
+        {
+            Container1 c1(vec.begin(), vec.end());
+            Container2 c2(vec.begin(), vec.end());
+            tstd_priority_queue q1(greater, c1);
+            std_priority_queue q2(greater, c2);
+            {
+                
+                tstd_priority_queue qc1(q1);
+                std_priority_queue qc2(q2);
+                util.assertSequenceEqual(priorityQueueToVector(qc1), priorityQueueToVector(qc2));
+            }
+            {
+                tstd_priority_queue qc1(std::move(q1));
+                std_priority_queue qc2(std::move(q2));
+                util.assertSequenceEqual(priorityQueueToVector(qc1), priorityQueueToVector(qc2));
+                util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            }
+        }
+        // 7
+        {
+            tstd_priority_queue q1(vec.begin(), vec.end(), greater);
+            std_priority_queue q2(vec.begin(), vec.end(), greater);
+            util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+        }
+        // 8, 9
+        {
+            Container1 c1(vec.begin(), vec.end());
+            Container2 c2(vec.begin(), vec.end());
+            {
+                tstd_priority_queue q1(vec.begin(), vec.end(), greater, c1);
+                std_priority_queue q2(vec.begin(), vec.end(), greater, c2);
+                util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            }
+            {
+                tstd_priority_queue q1(vec.begin(), vec.end(), greater, std::move(c1));
+                std_priority_queue q2(vec.begin(), vec.end(), greater, std::move(c2));
+                util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+                util.assertSequenceEqual(c1, c2);
+            }
+        }
+        // 10
+        {
+            tstd_priority_queue q1(talloc);
+            std_priority_queue q2(alloc);
+            util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            util.assertEqual(q1.size(), q2.size());
+            util.assertEqual(q1.empty(), q2.empty());
+        }
+        // 11
+        {
+            tstd_priority_queue q1(greater, talloc);
+            std_priority_queue q2(greater, alloc);
+            for (auto elem : vec)
+            {
+                q1.push(elem);
+                q2.push(elem);
+            }
+            util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            util.assertEqual(q1.size(), q2.size());
+            util.assertEqual(q1.empty(), q2.empty());
+        }
+        // 12, 13
+        {
+            Container1 c1(vec.begin(), vec.end());
+            Container2 c2(vec.begin(), vec.end());
+            {
+                tstd_priority_queue q1(greater, c1, talloc);
+                std_priority_queue q2(greater, c2, alloc);
+                util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            }
+            {
+                tstd_priority_queue q1(greater, std::move(c1), talloc);
+                std_priority_queue q2(greater, std::move(c2), alloc);
+                util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+                util.assertSequenceEqual(c1, c2);
+            }
+        }
+        // 14, 15
+        {
+            Container1 c1(vec.begin(), vec.end());
+            Container2 c2(vec.begin(), vec.end());
+            tstd_priority_queue q1(greater, c1, talloc);
+            std_priority_queue q2(greater, c2, alloc);
+            {
+                
+                tstd_priority_queue qc1(q1, talloc);
+                std_priority_queue qc2(q2, alloc);
+                util.assertSequenceEqual(priorityQueueToVector(qc1), priorityQueueToVector(qc2));
+            }
+            {
+                tstd_priority_queue qc1(std::move(q1), talloc);
+                std_priority_queue qc2(std::move(q2), alloc);
+                util.assertSequenceEqual(priorityQueueToVector(qc1), priorityQueueToVector(qc2));
+                util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            }
+        }
+        // 16
+        {
+            tstd_priority_queue q1(vec.begin(), vec.end(), talloc);
+            std_priority_queue q2(vec.begin(), vec.end(), alloc);
+            util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+        }
+        // 17
+        {
+            tstd_priority_queue q1(vec.begin(), vec.end(), greater, talloc);
+            std_priority_queue q2(vec.begin(), vec.end(), greater, alloc);
+            util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+        }
+        // 18, 19
+        {
+            Container1 c1(vec.begin(), vec.end());
+            Container2 c2(vec.begin(), vec.end());
+            {
+                tstd_priority_queue q1(vec.begin(), vec.end(), greater, c1, talloc);
+                std_priority_queue q2(vec.begin(), vec.end(), greater, c2, alloc);
+                util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            }
+            {
+                tstd_priority_queue q1(vec.begin(), vec.end(), greater, std::move(c1), talloc);
+                std_priority_queue q2(vec.begin(), vec.end(), greater, std::move(c2), alloc);
+                util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+                util.assertSequenceEqual(c1, c2);
+            }
+        }
+    }
+    {
+        // assignment
+        tstd_priority_queue q1(vec.begin(), vec.end(), greater);
+        std_priority_queue q2(vec.begin(), vec.end(), greater);
+        tstd_priority_queue qc1(q1);
+        std_priority_queue qc2(q2);
+        util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+    }
+    {
+        // element access
+        tstd_priority_queue q1(vec.begin(), vec.end(), greater);
+        std_priority_queue q2(vec.begin(), vec.end(), greater);
+        util.assertEqual(q1.top(), q2.top());
+        // size and capacity
+        util.assertEqual(q1.size(), q2.size());
+        util.assertEqual(q1.empty(), q2.empty());
+    }
+    {
+        tstd_priority_queue q1(vec.begin(), vec.end(), greater);
+        std_priority_queue q2(vec.begin(), vec.end(), greater);
+        // modifiers
+        // push, emplace
+        for (auto elem : vec)
+        {
+            q1.push(elem);
+            q2.push(elem);
+            q1.push(std::move(elem));
+            q2.push(std::move(elem));
+            q1.emplace(elem);
+            q2.emplace(elem);
+        }
+        util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+        // pop
+        for (int i = 0; i < q1.size() / 2; ++i)
+        {
+            q1.pop();
+            q2.pop();
+        }
+        util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+        // swap
+        {
+            tstd_priority_queue tmp1(vec.begin(), vec.end(), greater);
+            std_priority_queue tmp2(vec.begin(), vec.end(), greater);
+            q1.swap(tmp1);
+            q2.swap(tmp2);
+            util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            util.assertSequenceEqual(priorityQueueToVector(tmp1), priorityQueueToVector(tmp2));
+            swap(q1, tmp1);
+            swap(q2, tmp2);
+            util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            util.assertSequenceEqual(priorityQueueToVector(tmp1), priorityQueueToVector(tmp2));
+            tstd::swap(q1, tmp1);
+            std::swap(q2, tmp2);
+            util.assertSequenceEqual(priorityQueueToVector(q1), priorityQueueToVector(q2));
+            util.assertSequenceEqual(priorityQueueToVector(tmp1), priorityQueueToVector(tmp2));
+        }
+    }
+    util.showFinalResult();
+}
+
+void testPriorityQueue(bool showDetails)
+{
+    testPriorityQueueImpl<int, tstd::vector<int>, std::vector<int>>(showDetails, "tstd::vector<int> vs std::vector<int>");
+    testPriorityQueueImpl<int, tstd::deque<int>, std::deque<int>>(showDetails, "tstd::deque<int> vs std::deque<int>");
+}
+
 int main(int argc, char const *argv[])
 {
     bool showDetail = parseDetailFlag(argc, argv);
     testStack(showDetail);
     testQueue(showDetail);
+    testPriorityQueue(showDetail);
     std::cout << std::endl;
     return 0;
 }

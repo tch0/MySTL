@@ -5,7 +5,7 @@
 #include <initializer_list>
 #include <tstl_heap.hpp>
 #include <tvector.hpp>
-#include <functional> // todo: replace with <tfuntional.hpp>
+#include <functional> // todo: replace with <tfunctional.hpp>
 #include <type_traits>
 
 namespace tstd
