@@ -35,7 +35,7 @@ constexpr RandomIterator is_heap_until(RandomIterator first, RandomIterator last
     }
     auto current = 2;
     auto parent = current / 2;
-    while (first + current - 1 < last && cmp(*(first + parent - 1), *(first + current - 1)))
+    while (first + current - 1 < last && !cmp(*(first + parent - 1), *(first + current - 1)))
     {
         ++current;
         parent = current / 2;

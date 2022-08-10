@@ -54,7 +54,7 @@ void testAllocator(bool showDetails)
 // uninitilized memory operations
 void testUnintialized(bool showDetails)
 {
-    TestUtil util(showDetails, "unintialized");
+    TestUtil util(showDetails, "unintialized algorithms");
     
     void* p = ::operator new(3 * sizeof(int));
     int* pi = (int*)p;
