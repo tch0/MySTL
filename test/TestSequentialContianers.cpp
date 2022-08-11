@@ -2,6 +2,7 @@
 #include <vector>
 #include <array>
 #include <list>
+#include <forward_list>
 #include <deque>
 #include <iterator>
 #include <algorithm>
@@ -11,6 +12,7 @@
 #include <tvector.hpp>
 #include <tarray.hpp>
 #include <tlist.hpp>
+#include <tforward_list.hpp>
 #include <tdeque.hpp>
 #include "TestUtil.hpp"
 
@@ -407,6 +409,9 @@ void testList(bool showDetails)
         list2 = std::move(tmp2);
         util.assertSequenceEqual(list1, list2);
         util.assertSequenceEqual(tmp1, tmp2);
+        list1 = {1, 2, 3, 4, 5};
+        list2 = {1, 2, 3, 4, 5};
+        util.assertSequenceEqual(list1, list2);
         list1.assign(100, 9999);
         list2.assign(100, 9999);
         util.assertSequenceEqual(list1, list2);
@@ -755,6 +760,467 @@ void testList(bool showDetails)
     util.showFinalResult();
 }
 
+void testForwardList(bool showDetails)
+{
+    TestUtil util(showDetails, "forward_list");
+
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 1);
+    std::random_shuffle(vec.begin(), vec.end());
+    {
+        // constructors
+        {
+            // 1
+            tstd::forward_list<int> li;
+            util.assertEqual(li.empty(), true);
+            util.assertEqual(li.begin() == li.end(), true);
+        }
+        {
+            // 2
+            tstd::forward_list<int> li((tstd::allocator<int>()));
+            util.assertEqual(li.empty(), true);
+            util.assertEqual(li.begin() == li.end(), true);
+        }
+        {
+            // 3
+            {
+                tstd::forward_list<int> list1(2, 99); // can not use std::allocator for tstd::forward_list<int> in C++20 because of compatibility reasons
+                std::forward_list<int> list2(2, 99);
+                util.assertSequenceEqual(list1, list2);
+            }
+            {
+                tstd::forward_list<int> list1(10, 99, tstd::allocator<int>());
+                std::forward_list<int> list2(10, 99, std::allocator<int>());
+                util.assertSequenceEqual(list1, list2);
+            }
+        }
+        {
+            // 4
+            tstd::forward_list<int> list1(100);
+            std::forward_list<int> list2(100);
+            util.assertSequenceEqual(list1, list2);
+        }
+        {
+            // 5
+            tstd::forward_list<int> list1(vec.begin(), vec.end());
+            std::forward_list<int> list2(vec.begin(), vec.end());
+            util.assertSequenceEqual(list1, list2);
+        }
+        {
+            // 6, 7, 8, 9
+            tstd::forward_list<int> tmp1(vec.begin(), vec.end());
+            std::forward_list<int> tmp2(vec.begin(), vec.end());
+            {
+                tstd::forward_list<int> list1(tmp1);
+                std::forward_list<int> list2(tmp2);
+                util.assertSequenceEqual(list1, list2);
+            }
+            {
+                tstd::forward_list<int> list1(tmp1, tstd::allocator<int>());
+                std::forward_list<int> list2(tmp2, std::allocator<int>());
+                util.assertSequenceEqual(list1, list2);
+            }
+            {
+                // move constructors
+                tstd::forward_list<int> list1(std::move(tmp1));
+                std::forward_list<int> list2(std::move(tmp2));
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                tstd::forward_list<int> list3(std::move(list1), tstd::allocator<int>());
+                std::forward_list<int> list4(std::move(list2), std::allocator<int>());
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(list3, list4);
+            }
+            // 10
+            {
+                tstd::forward_list<int> list1{1, 2, 3, 4, 5};
+                std::forward_list<int> list2{1, 2, 3, 4, 5};
+                util.assertSequenceEqual(list1, list2);
+            }
+        }
+    }
+    {
+        // assignment: operator=/assign
+        tstd::forward_list<int> list1;
+        std::forward_list<int> list2;
+        tstd::forward_list<int> tmp1(vec.begin(), vec.end());
+        std::forward_list<int> tmp2(vec.begin(), vec.end());
+        // operator=
+        // 1
+        list1 = tmp1;
+        list2 = tmp2;
+        util.assertSequenceEqual(list1, list2);
+        // 2
+        list1 = std::move(tmp1);
+        list2 = std::move(tmp2);
+        util.assertSequenceEqual(list1, list2);
+        util.assertSequenceEqual(tmp1, tmp2);
+        // 3
+        list1 = {1, 2, 3, 4, 5};
+        list2 = {1, 2, 3, 4, 5};
+        util.assertSequenceEqual(list1, list2);
+        // assign
+        // 1
+        list1.assign(100, 9999);
+        list2.assign(100, 9999);
+        util.assertSequenceEqual(list1, list2);
+        // 2
+        list1.assign(vec.begin(), vec.end());
+        list2.assign(vec.begin(), vec.end());
+        util.assertSequenceEqual(list1, list2);
+        // 3
+        list1.assign({1, 2, 3, 4, 5, 100});
+        list2.assign({1, 2, 3, 4, 5, 100});
+        util.assertSequenceEqual(list1, list2);
+    }
+    {
+        // allocator
+        tstd::forward_list<int> tmp;
+        util.assertEqual(tstd::allocator<int>() == tmp.get_allocator(), true);
+    }
+    {
+        // element access
+        tstd::forward_list<int> list1{1, 2, 3, 4, 5};
+        std::forward_list<int> list2{1, 2, 3, 4, 5};
+        util.assertEqual(list1.front(), list2.front());
+        util.assertEqual(list1.front(), 1);
+        list1.front() = 10;
+        list2.front() = 10;
+        util.assertEqual(list1.front(), list2.front());
+        util.assertEqual(list1.front(), 10);
+    }
+    {
+        // iterators
+        tstd::forward_list<int> list1{1, 2, 3, 4, 5};
+        std::forward_list<int> list2{1, 2, 3, 4, 5};
+        util.assertEqual(*tstd::next(list1.before_begin()), *std::next(list2.before_begin()));
+        util.assertEqual(*tstd::next(list1.cbefore_begin()), *std::next(list2.cbefore_begin()));
+        util.assertEqual(*list1.begin(), *list2.begin());
+        util.assertEqual(*list1.cbegin(), *list2.cbegin());
+        util.assertEqual(tstd::distance(list1.before_begin(), list1.end()), std::distance(list2.before_begin(), list2.end()));
+        util.assertEqual(tstd::distance(list1.cbefore_begin(), list1.cend()), std::distance(list2.cbefore_begin(), list2.cend()));
+    }
+    {
+        // size and capacity
+        tstd::forward_list<int> list1{1, 2, 3, 4, 5};
+        std::forward_list<int> list2{1, 2, 3, 4, 5};
+        util.assertEqual(list1.empty(), list2.empty());
+
+        // modifiers
+        list1.clear();
+        list2.clear();
+        util.assertEqual(list1.empty(), true);
+        util.assertEqual(list1.empty(), list2.empty());
+    }
+    {
+        // modifiers
+        tstd::forward_list<int> list1{1, 2, 3, 4, 5};
+        std::forward_list<int> list2{1, 2, 3, 4, 5};
+        // insert_after
+        // 1
+        int a = 100;
+        list1.insert_after(list1.before_begin(), a);
+        list2.insert_after(list2.before_begin(), a);
+        // 2
+        list1.insert_after(std::next(list1.begin(), 2), 99);
+        list2.insert_after(std::next(list2.begin(), 2), 99);
+        util.assertSequenceEqual(list1, list2);
+        // 3
+        list1.insert_after(tstd::next(list1.begin(), 5), 10, 1024);
+        list2.insert_after(tstd::next(list2.begin(), 5), 10, 1024);
+        util.assertSequenceEqual(list1, list2);
+        // 4
+        list1.insert_after(tstd::next(list1.begin(), 5), vec.begin(), vec.end());
+        list2.insert_after(tstd::next(list2.begin(), 5), vec.begin(), vec.end());
+        util.assertSequenceEqual(list1, list2);
+        // 5
+        list1.insert_after(tstd::next(list1.begin(), 5), {1, 2, 3, 4, 5});
+        list2.insert_after(tstd::next(list2.begin(), 5), {1, 2, 3, 4, 5});
+        // emplace_after
+        list1.emplace_after(tstd::next(list1.begin(), 5), 2048);
+        list2.emplace_after(tstd::next(list2.begin(), 5), 2048);
+        util.assertSequenceEqual(list1, list2);
+        // erase_after
+        // 1
+        list1.erase_after(list1.begin());
+        list2.erase_after(list2.begin());
+        util.assertSequenceEqual(list1, list2);
+
+        // 2
+        list1.erase_after(tstd::next(list1.begin(), 10), tstd::next(list1.begin(), 100));
+        list2.erase_after(tstd::next(list2.begin(), 10), tstd::next(list2.begin(), 100));
+        util.assertSequenceEqual(list1, list2);
+        // push_front
+        for (int i = 0; i < 100; ++i)
+        {
+            // 1, 2
+            int a = 1;
+            list1.push_front(a);
+            list2.push_front(a);
+            list1.push_front(1000001);
+            list2.push_front(1000001);
+        }
+        util.assertSequenceEqual(list1, list2);
+        // emplace_front
+        for (int i = 0; i < 3; ++i)
+        {
+            auto res1 = list1.emplace_front(a);
+            auto res2 = list2.emplace_front(a);
+            res1 = 10;
+            res2 = 10;
+            list1.emplace_front(0);
+            list2.emplace_front(0);
+        }
+        util.assertSequenceEqual(list1, list2);
+        // pop_front
+        for (int i = 0; i < 100; ++i)
+        {
+            list1.pop_front();
+            list2.pop_front();
+        }
+        util.assertSequenceEqual(list1, list2);
+        // resize
+        // 1
+        list1.resize(100);
+        list2.resize(100);
+        util.assertSequenceEqual(list1, list2);
+        // 2
+        list1.resize(1000, 1024);
+        list2.resize(1000, 1024);
+        util.assertSequenceEqual(list1, list2);
+        // swap
+        {
+            tstd::forward_list<int> tmp1{1, 2, 3, 4, 5};
+            std::forward_list<int> tmp2{1, 2, 3, 4, 5};
+            list1.swap(tmp1);
+            list2.swap(tmp2);
+            util.assertSequenceEqual(list1, list2);
+            util.assertSequenceEqual(tmp1, tmp2);
+            tstd::swap(list1, tmp1);
+            std::swap(list2, tmp2);
+            util.assertSequenceEqual(list1, list2);
+            util.assertSequenceEqual(tmp1, tmp2);
+            // case of empty forward_list
+            tmp1.clear();
+            tmp2.clear();
+            list1.swap(tmp1);
+            list2.swap(tmp2);
+            util.assertSequenceEqual(list1, list2);
+            util.assertSequenceEqual(tmp1, tmp2);
+            swap(tmp1, list1);
+            swap(tmp2, list2);
+            util.assertSequenceEqual(list1, list2);
+            util.assertSequenceEqual(tmp1, tmp2);
+        }
+    }
+    {
+        // oeprations/algorithms
+        // merge
+        {
+            tstd::forward_list<int> list1{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+            std::forward_list<int> list2{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+            {
+                // 1
+                tstd::forward_list<int> tmp1{1, 2, 3, 4, 5};
+                std::forward_list<int> tmp2{1, 2, 3, 4, 5};
+                list1.merge(tmp1);
+                list2.merge(tmp2);
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+            }
+            {
+                // 2
+                tstd::forward_list<int> tmp1{1, 2, 3, 4, 5};
+                std::forward_list<int> tmp2{1, 2, 3, 4, 5};
+                list1.merge(std::move(tmp1));
+                list2.merge(std::move(tmp2));
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+            }
+            {
+                // one of the lists is empty
+                tstd::forward_list<int> tmp1;
+                std::forward_list<int> tmp2;
+                list1.merge(tmp1);
+                list2.merge(tmp2);
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                tmp1.merge(list1);
+                tmp2.merge(list2);
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+            }
+            {
+                // 3
+                tstd::forward_list<int> list1{10, 9, 5, 4, 2, 1};
+                std::forward_list<int> list2{10, 9, 5, 4, 2, 1};
+                tstd::forward_list<int> tmp1{5, 4, 3, 2, 1};
+                std::forward_list<int> tmp2{5, 4, 3, 2, 1};
+                list1.merge(tmp1, std::greater<int>());
+                list2.merge(tmp2, std::greater<int>());
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+            }
+            {
+                // 4
+                tstd::forward_list<int> list1{10, 9, 5, 4, 2, 1};
+                std::forward_list<int> list2{10, 9, 5, 4, 2, 1};
+                tstd::forward_list<int> tmp1{5, 4, 3, 2, 1};
+                std::forward_list<int> tmp2{5, 4, 3, 2, 1};
+                list1.merge(std::move(tmp1), std::greater<int>());
+                list2.merge(std::move(tmp2), std::greater<int>());
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+            }
+        }
+        // splice_after
+        {
+            {
+                // 1
+                tstd::forward_list<int> list1(vec.begin(), vec.end());
+                std::forward_list<int> list2(vec.begin(), vec.end());
+                tstd::forward_list<int> tmp1{1, 2, 3, 4, 5};
+                std::forward_list<int> tmp2{1, 2, 3, 4, 5};
+                list1.splice_after(std::next(list1.begin(), 20), tmp1);
+                list2.splice_after(std::next(list2.begin(), 20), tmp2);
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                list1.splice_after(std::next(list1.begin(), 20), tmp1);
+                list2.splice_after(std::next(list2.begin(), 20), tmp2);
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                tmp1.splice_after(tmp1.before_begin(), list1);
+                tmp2.splice_after(tmp2.before_begin(), list2);
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                tmp1.clear();
+                tmp2.clear();
+                list1.splice_after(list1.before_begin(), tmp1);
+                list2.splice_after(list2.before_begin(), tmp2);
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+            }
+            {
+                // 2
+                tstd::forward_list<int> list1(vec.begin(), vec.end());
+                std::forward_list<int> list2(vec.begin(), vec.end());
+                tstd::forward_list<int> tmp1{1, 2, 3, 4, 5};
+                std::forward_list<int> tmp2{1, 2, 3, 4, 5};
+                list1.splice_after(std::next(list1.begin(), 20), std::move(tmp1));
+                list2.splice_after(std::next(list2.begin(), 20), std::move(tmp2));
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                list1.splice_after(std::next(list1.begin(), 20), std::move(tmp1));
+                list2.splice_after(std::next(list2.begin(), 20), std::move(tmp2));
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                tmp1.splice_after(tmp1.before_begin(), std::move(list1));
+                tmp2.splice_after(tmp2.before_begin(), std::move(list2));
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                tmp1.clear();
+                tmp2.clear();
+                list1.splice_after(list1.before_begin(), std::move(tmp1));
+                list2.splice_after(list2.before_begin(), std::move(tmp2));
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+            }
+            {
+                tstd::forward_list<int> list1(vec.begin(), vec.end());
+                std::forward_list<int> list2(vec.begin(), vec.end());
+                tstd::forward_list<int> tmp1{1, 2, 3, 4, 5};
+                std::forward_list<int> tmp2{1, 2, 3, 4, 5};
+                // 3
+                list1.splice_after(tstd::next(list1.begin(), 20), tmp1, tstd::next(tmp1.begin(), 2));
+                list2.splice_after(tstd::next(list2.begin(), 20), tmp2, tstd::next(tmp2.begin(), 2));
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                // 4
+                list1.splice_after(tstd::next(list1.begin(), 20), std::move(tmp1), tstd::next(tmp1.begin(), 2));
+                list2.splice_after(tstd::next(list2.begin(), 20), std::move(tmp2), tstd::next(tmp2.begin(), 2));
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                // 5
+                list1.splice_after(tstd::next(list1.begin(), 20), tmp1, tmp1.begin(), tmp1.end());
+                list2.splice_after(tstd::next(list2.begin(), 20), tmp2, tmp2.begin(), tmp2.end());
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+                // 6
+                list1.splice_after(tstd::next(list1.begin(), 20), std::move(tmp1), tmp1.begin(), tmp1.end());
+                list2.splice_after(tstd::next(list2.begin(), 20), std::move(tmp2), tmp2.begin(), tmp2.end());
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+            }
+        }
+        // remove, remove_if
+        {
+            tstd::forward_list<int> list1(vec.begin(), vec.end());
+            std::forward_list<int> list2(vec.begin(), vec.end());
+            for (int i = 10; i < 20; ++i)
+            {
+                auto res1 = list1.remove(i);
+                auto res2 = list2.remove(i);
+                util.assertEqual(res1, res2);
+            }
+            util.assertSequenceEqual(list1, list2);
+            auto res1 = list1.remove_if([](int a) -> bool { return a >= 50; });
+            auto res2 = list2.remove_if([](int a) -> bool { return a >= 50; });
+            util.assertEqual(res1, res2);
+            util.assertSequenceEqual(list1, list2);
+        }
+        // reverse
+        {
+            tstd::forward_list<int> list1(vec.begin(), vec.end());
+            std::forward_list<int> list2(vec.begin(), vec.end());
+            list1.reverse();
+            list2.reverse();
+            util.assertSequenceEqual(list1, list2);
+        }
+        // unique
+        {
+            tstd::forward_list<int> list1{1, 1, 1, 2, 3, 4, 1, 3, 4, 4, 10, 10, 1};
+            std::forward_list<int> list2{1, 1, 1, 2, 3, 4, 1, 3, 4, 4, 10, 10, 1};
+            // 1
+            auto res1 = list1.unique();
+            auto res2 = list2.unique();
+            util.assertEqual(res1, res2);
+            util.assertSequenceEqual(list1, list2);
+            // 2
+            res1 = list1.unique([](int a, int b) -> bool { return a < b; });
+            res2 = list2.unique([](int a, int b) -> bool { return a < b; });
+            util.assertEqual(res1, res2);
+            util.assertSequenceEqual(list1, list2);
+        }
+        // sort
+        {
+            tstd::forward_list<int> list1(vec.begin(), vec.end());
+            std::forward_list<int> list2(vec.begin(), vec.end());
+            // 1
+            list1.sort();
+            list2.sort();
+            util.assertSequenceEqual(list1, list2);
+            // 2
+            list1.sort(std::greater<int>());
+            list2.sort(std::greater<int>());
+            util.assertSequenceEqual(list1, list2);
+        }
+    }
+    // non-member operations
+    {
+        // comparison
+        tstd::forward_list<int> list1{1, 2, 3, 4, 5, 6};
+        tstd::forward_list<int> list2{1, 2, 3, 4, 5, 6};
+        util.assertEqual(list1 == list2, true);
+        util.assertEqual(list1 != list2, false);
+        list1.front() = 2;
+        util.assertEqual(list1 > list2, true);
+        util.assertEqual(list1 >= list2, true);
+        util.assertEqual(list2 < list1, true);
+        util.assertEqual(list2 <= list1, true);
+    }
+    util.showFinalResult();
+}
+
 void testDeque(bool showDetails)
 {
     TestUtil util(showDetails, "deque");
@@ -1041,6 +1507,7 @@ int main(int argc, char const *argv[])
     testVector(showDetails);
     testArray(showDetails);
     testList(showDetails);
+    testForwardList(showDetails);
     testDeque(showDetails);
     std::cout << std::endl;
     return 0;

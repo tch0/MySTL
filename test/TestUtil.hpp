@@ -116,11 +116,7 @@ public:
     template<typename Container1, typename Container2>
     void assertSequenceEqual(const Container1& c1, const Container2& c2, const std::source_location& loc = std::source_location::current())
     {
-        bool res = (c1.size() == c2.size());
-        if (res)
-        {
-            res = std::equal(c1.begin(), c1.end(), c2.begin());
-        }
+        bool res = std::equal(c1.begin(), c1.end(), c2.begin());
         passedCount += (res ? 1 : 0);
         totalCount++;
         if (showDetails)
