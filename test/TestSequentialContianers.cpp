@@ -16,22 +16,51 @@
 #include <tdeque.hpp>
 #include "TestUtil.hpp"
 
+void testVector(bool showDetails);
+void testArray(bool showDetails);
+void testVector(bool showDetails);
+void testArray(bool showDetails);
+void testList(bool showDetails);
+void testForwardList(bool showDetails);
+void testDeque(bool showDetails);
+
+int main(int argc, char const *argv[])
+{
+    bool showDetails = parseDetailFlag(argc, argv);
+    testVector(showDetails);
+    testArray(showDetails);
+    testList(showDetails);
+    testForwardList(showDetails);
+    testDeque(showDetails);
+    std::cout << std::endl;
+    return 0;
+}
+
 void testVector(bool showDetails)
 {
     TestUtil util(showDetails, "vector");
     // constructors
     {
+        // 1
         tstd::vector<int> vec1;
         std::vector<int> vec2;
         util.assertSequenceEqual(vec1, vec2);
     }
     {
+        // 2
+        tstd::vector<int> vec1((tstd::allocator<int>()));
+        std::vector<int> vec2((std::allocator<int>()));
+        util.assertSequenceEqual(vec1, vec2);
+    }
+    {
+        // 3
         tstd::allocator<int> alloc;
         tstd::vector<int> vec1(10, 99, alloc);
         std::vector<int, tstd::allocator<int>> vec2(10, 99, alloc);
         util.assertSequenceEqual(vec1, vec2);
     }
     {
+        // 4
         tstd::allocator<int> alloc;
         tstd::vector<int> vec1(10);
         std::vector<int, tstd::allocator<int>> vec2(10);
@@ -47,65 +76,87 @@ void testVector(bool showDetails)
         std::vector<int> vec(100);
         std::iota(vec.begin(), vec.end(), 1);
         std::random_shuffle(vec.begin(), vec.end());
+        // 5
         tstd::vector<int> vec1(vec.begin(), vec.end());
         std::vector<int> vec2(vec.begin(), vec.end());
         util.assertSequenceEqual(vec1, vec2);
         // copy constuctor
+        // 6
         tstd::vector<int> cvec1(vec1);
         std::vector<int> cvec2(vec2);
         util.assertSequenceEqual(cvec1, cvec2);
+        // 7
         tstd::vector<int> cvec3(cvec1, tstd::allocator<int>());
         std::vector<int> cvec4(cvec2, std::allocator<int>());
         util.assertSequenceEqual(cvec3, cvec4);
         // move constructor
+        // 8
         tstd::vector mvec1(std::move(cvec1));
         std::vector mvec2(std::move(cvec2));
         util.assertSequenceEqual(mvec1, mvec2);
+        // 9
         tstd::vector<int> mvec3(std::move(mvec1), tstd::allocator<int>());
         std::vector<int> mvec4(std::move(mvec2), std::allocator<int>());
         util.assertSequenceEqual(mvec3, mvec4);
     }
     {
+        // 10
         tstd::vector<int> vec1{1, 2, 3, 4};
         std::vector<int> vec2{1, 2, 3, 4};
         util.assertSequenceEqual(vec1, vec2);
+        // assignment
         {
-            // operator= / assign
             tstd::vector<int> vec1c{1, 2, 3, 100, 99999};
             std::vector<int> vec2c{1, 2, 3, 100, 99999};
+            // operator =
+            // 1
             vec1 = vec1c;
             vec2 = vec2c;
             util.assertSequenceEqual(vec1, vec2);
+            // 2
             vec1 = std::move(vec1c);
             vec2 = std::move(vec2c);
             util.assertSequenceEqual(vec1, vec2);
+            // 3
             vec1 = {1, 2, 3, 4, 5, 10};
             vec2 = {1, 2, 3, 4, 5, 10};
             util.assertSequenceEqual(vec1, vec2);
+            // assign
+            // 1
             vec1.assign(10, 99);
             vec2.assign(10, 99);
             util.assertSequenceEqual(vec1, vec2);
+            // 2
             vec1.assign(vec1c.begin(), vec1c.end());
             vec2.assign(vec2c.begin(), vec2c.end());
             util.assertSequenceEqual(vec1, vec2);
+            // 3
             vec1.assign({1, 2, 3, 4, 5, 10});
             vec2.assign({1, 2, 3, 4, 5, 10});
             util.assertSequenceEqual(vec1, vec2);
         }
+        // allocator 
+        {
+            util.assertEqual(vec1.get_allocator() == tstd::allocator<int>(), true);
+        }
         // elements access
+        // at
         util.assertEqual(vec1.at(0), vec2.at(0));
         util.assertEqual(vec1.at(1), vec2.at(1));
         util.assertEqual(vec1.at(2), vec2.at(2));
         util.assertEqual(vec1.at(5), vec2.at(5));
+        // operator[]
         util.assertEqual(vec1[0], vec2[0]);
         util.assertEqual(vec1[1], vec2[1]);
         util.assertEqual(vec1[2], vec2[2]);
         util.assertEqual(vec1[5], vec2[5]);
+        // front, back
         util.assertEqual(vec1.front(), vec2.front());
         util.assertEqual(vec1.back(), vec2.back());
         vec1.back() = vec2.back() = 9999;
         vec1.front() = vec2.front() = -9999;
         util.assertSequenceEqual(vec1, vec2);
+        // data
         util.assertArrayEqual(vec1.data(), vec2.data(), vec1.size());
         // iterators
         util.assertRangeEqual(vec1.begin(), vec1.end(), vec2.begin());
@@ -126,6 +177,7 @@ void testVector(bool showDetails)
             util.assertEqual(vec1.capacity(), 100);
         }
         // modifiers
+        // clear
         vec1.clear();
         vec2.clear();
         util.assertEqual(vec1.empty(), vec2.empty());
@@ -135,13 +187,21 @@ void testVector(bool showDetails)
         // insert
         tstd::vector<int> vec1{1, 2, 3, 4};
         std::vector<int> vec2{1, 2, 3, 4};
+        // 1
+        int a = 10;
+        vec1.insert(vec1.begin() + 2, a);
+        vec2.insert(vec2.begin() + 2, a);
+        util.assertSequenceEqual(vec1, vec2);
+        // 2
         vec1.insert(vec1.begin() + 2, 10);
         vec2.insert(vec2.begin() + 2, 10);
         util.assertSequenceEqual(vec1, vec2);
+        // 3
         vec1.insert(vec1.begin(), 100, 9999);
         vec2.insert(vec2.begin(), 100, 9999);
         util.assertSequenceEqual(vec1, vec2);
         {
+            // 4
             std::vector<int> tmp(100);
             std::iota(tmp.begin(), tmp.end(), 1);
             std::random_shuffle(tmp.begin(), tmp.end());
@@ -149,30 +209,38 @@ void testVector(bool showDetails)
             vec2.insert(vec2.begin() + 33, tmp.begin(), tmp.end());
             util.assertSequenceEqual(vec1, vec2);
         }
+        // 5
+        vec1.insert(vec1.begin(), {1, 2, 3});
+        vec2.insert(vec2.begin(), {1, 2, 3});
+        util.assertSequenceEqual(vec1, vec2);
         // emplace
         vec1.emplace(vec1.begin() + 100, -1024);
         vec2.emplace(vec2.begin() + 100, -1024);
         util.assertSequenceEqual(vec1, vec2);
         // erase
+        // 1
         vec1.erase(vec1.begin());
         vec2.erase(vec2.begin());
         util.assertSequenceEqual(vec1, vec2);
+        // 2
         vec1.erase(vec1.begin() + 100, vec1.begin() + 150);
         vec2.erase(vec2.begin() + 100, vec2.begin() + 150);
         util.assertSequenceEqual(vec1, vec2);
         // push_back
-        vec1.push_back(1);
+        // 1, 2
+        int b = 1;
+        vec1.push_back(b);
         vec1.push_back(100);
         vec1.push_back(1001);
-        vec2.push_back(1);
+        vec2.push_back(b);
         vec2.push_back(100);
         vec2.push_back(1001);
         util.assertSequenceEqual(vec1, vec2);
         // emplace_back
-        vec1.emplace_back(1);
+        vec1.emplace_back(b);
         vec1.emplace_back(100);
         vec1.emplace_back(1001);
-        vec2.emplace_back(1);
+        vec2.emplace_back(b);
         vec2.emplace_back(100);
         vec2.emplace_back(1001);
         util.assertSequenceEqual(vec1, vec2);
@@ -184,9 +252,11 @@ void testVector(bool showDetails)
         }
         util.assertSequenceEqual(vec1, vec2);
         // resize
+        // 1
         vec1.resize(vec1.size() / 2);
         vec2.resize(vec2.size() / 2);
         util.assertSequenceEqual(vec1, vec2);
+        // 2
         vec1.resize(200, 9999);
         vec2.resize(200, 9999);
         util.assertSequenceEqual(vec1, vec2);
@@ -207,8 +277,9 @@ void testVector(bool showDetails)
             util.assertSequenceEqual(tmp1, tmp2);
         }
     }
+    // non-member operations
     {
-        // comparison
+        // comparisons
         tstd::vector<int> vec1{1, 2, 3, 4};
         tstd::vector<int> vec2{1, 2, 3, 4};
         util.assertSequenceEqual(vec1, vec2);
@@ -254,13 +325,17 @@ void testArray(bool showDetails)
         // elements access
         tstd::array<int, 10> arr1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         std::array<int, 10> arr2 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        // at
         arr1.at(0) = 10;
         arr2.at(0) = 10;
+        // operator []
         arr1[9] = 99;
         arr2[9] = 99;
         util.assertSequenceEqual(arr1, arr2);
+        // front
         arr1.front() = -1;
         arr2.front() = -1;
+        // back
         arr1.back() = -10;
         arr2.back() = -10;
         util.assertSequenceEqual(arr1, arr2);
@@ -272,15 +347,18 @@ void testArray(bool showDetails)
         *arr1.begin() = 1000;
         *arr2.begin() = 1000;
         util.assertSequenceEqual(arr1, arr2);
+        // size and capacity
         util.assertEqual(arr1.empty(), arr2.empty());
         util.assertEqual(arr1.empty(), false);
         util.assertEqual(arr1.size(), arr2.size());
         util.assertEqual(arr1.size(), 10);
         util.assertEqual(arr1.max_size(), arr2.max_size());
         util.assertEqual(arr1.max_size(), 10);
-        // operations
+        // modifiers
+        // fill
         arr1.fill(0);
         arr2.fill(0);
+        // swap
         util.assertSequenceEqual(arr1, arr2);
         {
             tstd::array<int, 10> arr3{1, 2, 3};
@@ -289,10 +367,19 @@ void testArray(bool showDetails)
             arr2.swap(arr4);
             util.assertSequenceEqual(arr1, arr2);
             util.assertSequenceEqual(arr3, arr4);
+            swap(arr1, arr3);
+            swap(arr2, arr4);
+            util.assertSequenceEqual(arr1, arr2);
+            util.assertSequenceEqual(arr3, arr4);
+            tstd::swap(arr1, arr3);
+            std::swap(arr2, arr4);
+            util.assertSequenceEqual(arr1, arr2);
+            util.assertSequenceEqual(arr3, arr4);
         }
     }
+    // non-member operations
     {
-        // non-member operations
+        // comparisons
         tstd::array<int, 3> arr1{1, 2, 3};
         tstd::array<int, 3> arr2{1, 2, 4};
         util.assertEqual(arr1 == arr2, false);
@@ -324,18 +411,25 @@ void testList(bool showDetails)
     {
         // constructors
         {
-            tstd::list<int> li;
-            util.assertEqual(li.empty(), true);
-            util.assertEqual(li.begin() == li.end(), true);
-            util.assertEqual(li.size(), 0);
+            // 1
+            tstd::list<int> list1;
+            std::list<int> list2;
+            util.assertEqual(list1.empty(), true);
+            util.assertEqual(list1.begin() == list1.end(), true);
+            util.assertEqual(list1.size(), 0);
+            util.assertSequenceEqual(list1, list2);
         }
         {
-            tstd::list<int> li((tstd::allocator<int>()));
-            util.assertEqual(li.empty(), true);
-            util.assertEqual(li.begin() == li.end(), true);
-            util.assertEqual(li.size(), 0);
+            // 2
+            tstd::list<int> list1((tstd::allocator<int>()));
+            std::list<int> list2((std::allocator<int>()));
+            util.assertEqual(list1.empty(), true);
+            util.assertEqual(list1.begin() == list1.end(), true);
+            util.assertEqual(list1.size(), 0);
+            util.assertSequenceEqual(list1, list2);
         }
         {
+            // 3
             tstd::list<int> list1(2, 99); // can not use std::allocator for tstd::list<int> in C++20 because of compatibility reasons
             std::list<int> list2(2, 99);
             util.assertSequenceEqual(list1, list2);
@@ -346,11 +440,13 @@ void testList(bool showDetails)
             util.assertSequenceEqual(list1, list2);
         }
         {
+            // 4
             tstd::list<int> list1(100);
             std::list<int> list2(100);
             util.assertSequenceEqual(list1, list2);
         }
         {
+            // 5
             std::vector<int> vec(100);
             std::iota(vec.begin(), vec.end(), 1);
             std::random_shuffle(vec.begin(), vec.end());
@@ -364,16 +460,19 @@ void testList(bool showDetails)
             std::random_shuffle(vec.begin(), vec.end());
             tstd::list<int> tmp1(vec.begin(), vec.end());
             std::list<int> tmp2(vec.begin(), vec.end());
+            // 6
             {
                 tstd::list<int> list1(tmp1);
                 std::list<int> list2(tmp2);
                 util.assertSequenceEqual(list1, list2);
             }
+            // 7
             {
                 tstd::list<int> list1(tmp1, tstd::allocator<int>());
                 std::list<int> list2(tmp2, std::allocator<int>());
                 util.assertSequenceEqual(list1, list2);
             }
+            // 8, 9
             {
                 // move constructors
                 tstd::list<int> list1(std::move(tmp1));
@@ -385,6 +484,7 @@ void testList(bool showDetails)
                 util.assertSequenceEqual(list1, list2);
                 util.assertSequenceEqual(list3, list4);
             }
+            // 10
             {
                 tstd::list<int> list1{1, 2, 3, 4, 5};
                 std::list<int> list2{1, 2, 3, 4, 5};
@@ -393,31 +493,39 @@ void testList(bool showDetails)
         }
     }
     {
+        // assignment
         std::vector<int> vec(1000);
         std::iota(vec.begin(), vec.end(), 1);
         std::random_shuffle(vec.begin(), vec.end());
 
-        // assignment: operator=/assign
+        // operator=
         tstd::list<int> list1;
         std::list<int> list2;
         tstd::list<int> tmp1(vec.begin(), vec.end());
         std::list<int> tmp2(vec.begin(), vec.end());
+        // 1
         list1 = tmp1;
         list2 = tmp2;
         util.assertSequenceEqual(list1, list2);
+        // 2
         list1 = std::move(tmp1);
         list2 = std::move(tmp2);
         util.assertSequenceEqual(list1, list2);
         util.assertSequenceEqual(tmp1, tmp2);
+        // 3
         list1 = {1, 2, 3, 4, 5};
         list2 = {1, 2, 3, 4, 5};
         util.assertSequenceEqual(list1, list2);
+        // assign
+        // 1
         list1.assign(100, 9999);
         list2.assign(100, 9999);
         util.assertSequenceEqual(list1, list2);
+        // 2
         list1.assign(vec.begin(), vec.end());
         list2.assign(vec.begin(), vec.end());
         util.assertSequenceEqual(list1, list2);
+        // 3
         list1.assign({1, 2, 3, 4, 5, 100});
         list2.assign({1, 2, 3, 4, 5, 100});
         util.assertSequenceEqual(list1, list2);
@@ -429,6 +537,7 @@ void testList(bool showDetails)
     }
     {
         // element access
+        // front
         tstd::list<int> list1{1, 2, 3, 4, 5};
         std::list<int> list2{1, 2, 3, 4, 5};
         util.assertEqual(list1.front(), list2.front());
@@ -437,6 +546,7 @@ void testList(bool showDetails)
         list2.front() = 10;
         util.assertEqual(list1.front(), list2.front());
         util.assertEqual(list1.front(), 10);
+        // back
         util.assertEqual(list1.back(), list2.back());
         util.assertEqual(list1.back(), 5);
         list1.back() = 99;
@@ -465,6 +575,7 @@ void testList(bool showDetails)
         util.assertEqual(list1.size(), list2.size());
 
         // modifiers
+        // clear
         list1.clear();
         list2.clear();
         util.assertEqual(list1.empty(), true);
@@ -479,35 +590,45 @@ void testList(bool showDetails)
         tstd::list<int> list1{1, 2, 3, 4, 5};
         std::list<int> list2{1, 2, 3, 4, 5};
         // insert
+        // 1
         int a = 100;
         list1.insert(list1.begin(), a);
         list2.insert(list2.begin(), a);
+        // 2
         list1.insert(std::next(list1.begin(), 2), 99);
         list2.insert(std::next(list2.begin(), 2), 99);
         list1.insert(list1.end(), 42);
         list2.insert(list2.end(), 42);
         util.assertSequenceEqual(list1, list2);
+        // 3
         list1.insert(tstd::next(list1.begin(), 5), 10, 1024);
         list2.insert(tstd::next(list2.begin(), 5), 10, 1024);
         util.assertSequenceEqual(list1, list2);
+        // 4
         list1.insert(tstd::next(list1.begin(), 5), vec.begin(), vec.end());
         list2.insert(tstd::next(list2.begin(), 5), vec.begin(), vec.end());
         util.assertSequenceEqual(list1, list2);
+        // 5
         list1.insert(tstd::next(list1.begin(), 5), {1, 2, 3, 4, 5});
         list2.insert(tstd::next(list2.begin(), 5), {1, 2, 3, 4, 5});
+        util.assertSequenceEqual(list1, list2);
         // emplace
         list1.emplace(tstd::next(list1.begin(), 5), 2048);
         list2.emplace(tstd::next(list2.begin(), 5), 2048);
         util.assertSequenceEqual(list1, list2);
         // erase
+        // 1
         list1.erase(list1.begin());
         list2.erase(list2.begin());
+        // 2
         list1.erase(tstd::next(list1.begin(), 10), tstd::next(list1.begin(), 100));
         list2.erase(tstd::next(list2.begin(), 10), tstd::next(list2.begin(), 100));
         util.assertSequenceEqual(list1, list2);
         // push_back
+        // 1
         list1.push_back(a);
         list2.push_back(a);
+        // 2
         list1.push_back(100);
         list2.push_back(100);
         util.assertSequenceEqual(list1, list2);
@@ -551,9 +672,11 @@ void testList(bool showDetails)
         }
         util.assertSequenceEqual(list1, list2);
         // resize
+        // 1
         list1.resize(100);
         list2.resize(100);
         util.assertSequenceEqual(list1, list2);
+        // 2
         list1.resize(1000, 1024);
         list2.resize(1000, 1024);
         util.assertSequenceEqual(list1, list2);
@@ -592,6 +715,7 @@ void testList(bool showDetails)
         {
             tstd::list<int> list1{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
             std::list<int> list2{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+            // 1
             {
                 tstd::list<int> tmp1{1, 2, 3, 4, 5};
                 std::list<int> tmp2{1, 2, 3, 4, 5};
@@ -600,6 +724,7 @@ void testList(bool showDetails)
                 util.assertSequenceEqual(list1, list2);
                 util.assertSequenceEqual(tmp1, tmp2);
             }
+            // 2
             {
                 tstd::list<int> tmp1{1, 2, 3, 4, 5};
                 std::list<int> tmp2{1, 2, 3, 4, 5};
@@ -621,10 +746,33 @@ void testList(bool showDetails)
                 util.assertSequenceEqual(list1, list2);
                 util.assertSequenceEqual(tmp1, tmp2);
             }
+            // 3
+            {
+                tstd::list<int> list1{10, 9, 5, 4, 2, 1};
+                std::list<int> list2{10, 9, 5, 4, 2, 1};
+                tstd::list<int> tmp1{5, 4, 3, 2, 1};
+                std::list<int> tmp2{5, 4, 3, 2, 1};
+                list1.merge(tmp1, std::greater<int>());
+                list2.merge(tmp2, std::greater<int>());
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+            }
+            // 4
+            {
+                tstd::list<int> list1{10, 9, 5, 4, 2, 1};
+                std::list<int> list2{10, 9, 5, 4, 2, 1};
+                tstd::list<int> tmp1{5, 4, 3, 2, 1};
+                std::list<int> tmp2{5, 4, 3, 2, 1};
+                list1.merge(std::move(tmp1), std::greater<int>());
+                list2.merge(std::move(tmp2), std::greater<int>());
+                util.assertSequenceEqual(list1, list2);
+                util.assertSequenceEqual(tmp1, tmp2);
+            }
         }
         // splice
         {
             {
+                // 1
                 tstd::list<int> list1(vec.begin(), vec.end());
                 std::list<int> list2(vec.begin(), vec.end());
                 tstd::list<int> tmp1{1, 2, 3, 4, 5};
@@ -649,6 +797,7 @@ void testList(bool showDetails)
                 util.assertSequenceEqual(tmp1, tmp2);
             }
             {
+                // 2
                 tstd::list<int> list1(vec.begin(), vec.end());
                 std::list<int> list2(vec.begin(), vec.end());
                 tstd::list<int> tmp1{1, 2, 3, 4, 5};
@@ -677,18 +826,22 @@ void testList(bool showDetails)
                 std::list<int> list2(vec.begin(), vec.end());
                 tstd::list<int> tmp1{1, 2, 3, 4, 5};
                 std::list<int> tmp2{1, 2, 3, 4, 5};
+                // 3
                 list1.splice(tstd::next(list1.begin(), 20), tmp1, tstd::next(tmp1.begin(), 2));
                 list2.splice(tstd::next(list2.begin(), 20), tmp2, tstd::next(tmp2.begin(), 2));
                 util.assertSequenceEqual(list1, list2);
                 util.assertSequenceEqual(tmp1, tmp2);
+                // 4
                 list1.splice(tstd::next(list1.begin(), 20), std::move(tmp1), tstd::next(tmp1.begin(), 2));
                 list2.splice(tstd::next(list2.begin(), 20), std::move(tmp2), tstd::next(tmp2.begin(), 2));
                 util.assertSequenceEqual(list1, list2);
                 util.assertSequenceEqual(tmp1, tmp2);
+                // 5
                 list1.splice(tstd::next(list1.begin(), 20), tmp1, tmp1.begin(), tmp1.end());
                 list2.splice(tstd::next(list2.begin(), 20), tmp2, tmp2.begin(), tmp2.end());
                 util.assertSequenceEqual(list1, list2);
                 util.assertSequenceEqual(tmp1, tmp2);
+                // 6
                 list1.splice(tstd::next(list1.begin(), 20), std::move(tmp1), tmp1.begin(), tmp1.end());
                 list2.splice(tstd::next(list2.begin(), 20), std::move(tmp2), tmp2.begin(), tmp2.end());
                 util.assertSequenceEqual(list1, list2);
@@ -723,10 +876,12 @@ void testList(bool showDetails)
         {
             tstd::list<int> list1{1, 1, 1, 2, 3, 4, 1, 3, 4, 4, 10, 10, 1};
             std::list<int> list2{1, 1, 1, 2, 3, 4, 1, 3, 4, 4, 10, 10, 1};
+            // 1
             auto res1 = list1.unique();
             auto res2 = list2.unique();
             util.assertEqual(res1, res2);
             util.assertSequenceEqual(list1, list2);
+            // 2
             res1 = list1.unique([](int a, int b) -> bool { return a < b; });
             res2 = list2.unique([](int a, int b) -> bool { return a < b; });
             util.assertEqual(res1, res2);
@@ -746,7 +901,7 @@ void testList(bool showDetails)
     }
     // non-member operations
     {
-        // comparison
+        // comparisons
         tstd::list<int> list1{1, 2, 3, 4, 5, 6};
         tstd::list<int> list2{1, 2, 3, 4, 5, 6};
         util.assertEqual(list1 == list2, true);
@@ -1207,7 +1362,7 @@ void testForwardList(bool showDetails)
     }
     // non-member operations
     {
-        // comparison
+        // comparisons
         tstd::forward_list<int> list1{1, 2, 3, 4, 5, 6};
         tstd::forward_list<int> list2{1, 2, 3, 4, 5, 6};
         util.assertEqual(list1 == list2, true);
@@ -1304,23 +1459,31 @@ void testDeque(bool showDetails)
         std::deque<int> tmp2(vec.begin(), vec.end());
         tstd::deque<int> dq1;
         std::deque<int> dq2;
+        // operator=
+        // 1
         dq1 = tmp1;
         dq2 = tmp2;
         util.assertSequenceEqual(dq1, tmp1);
         util.assertSequenceEqual(dq1, dq2);
+        // 2
         dq1 = std::move(tmp1);
         dq2 = std::move(tmp2);
         util.assertSequenceEqual(dq1, dq2);
         util.assertSequenceEqual(tmp1, tmp2);
+        // 3
         dq1 = {1, 2, 3, 4, 5};
         dq2 = {1, 2, 3, 4, 5};
         util.assertSequenceEqual(dq1, dq2);
+        // assign
+        // 1
         dq1.assign(10, 99);
         dq2.assign(10, 99);
         util.assertSequenceEqual(dq1, dq2);
+        // 2
         dq1.assign(vec.begin(), vec.end());
         dq2.assign(vec.begin(), vec.end());
         util.assertSequenceEqual(dq1, dq2);
+        // 3
         dq1.assign({1, 2, 3, 4, 5});
         dq2.assign({1, 2, 3, 4, 5});
         util.assertSequenceEqual(dq1, dq2);
@@ -1335,6 +1498,7 @@ void testDeque(bool showDetails)
         tstd::deque<int> dq1(vec.begin(), vec.end());
         std::deque<int> dq2(vec.begin(), vec.end());
         std::vector<int> vec1, vec2;
+        // at, operator[]
         for (std::size_t i = 0; i < dq1.size(); ++i)
         {
             vec1.push_back(dq1.at(i));
@@ -1343,6 +1507,7 @@ void testDeque(bool showDetails)
             vec2.push_back(dq2[i]);
         }
         util.assertSequenceEqual(vec1, vec2);
+        // front, back
         util.assertEqual(dq1.front(), dq2.front());
         util.assertEqual(dq1.back(), dq2.back());
         dq1.front() = dq1.back() = 9999;
@@ -1383,7 +1548,8 @@ void testDeque(bool showDetails)
         std::deque<int> dq2(vec.begin(), vec.end());
         util.assertEqual(dq1.size(), dq2.size());
         util.assertEqual(dq1.empty(), dq2.empty());
-        // modififers: clear
+        // modififers
+        // clear
         dq1.clear();
         dq2.clear();
         util.assertSequenceEqual(dq1, dq2);
@@ -1397,27 +1563,34 @@ void testDeque(bool showDetails)
         int a = 100;
         dq1.insert(dq1.begin(), a);
         dq2.insert(dq2.begin(), a);
+        // 2
         dq1.insert(dq1.begin(), 10);
         dq2.insert(dq2.begin(), 10);
         util.assertSequenceEqual(dq1, dq2);
+        // 3
         dq1.insert(dq1.begin() + 20, 10, 1024);
         dq2.insert(dq2.begin() + 20, 10, 1024);
         util.assertSequenceEqual(dq1, dq2);
+        // 4
         dq1.insert(dq1.begin() + 50, vec.begin(), vec.end());
         dq2.insert(dq2.begin() + 50, vec.begin(), vec.end());
         util.assertSequenceEqual(dq1, dq2);
+        // 5
         dq1.insert(dq1.end() - 10, {1, 2, 3, 4, 5});
         dq2.insert(dq2.end() - 10, {1, 2, 3, 4, 5});
         util.assertSequenceEqual(dq1, dq2);
+        // emplace
         dq1.emplace(dq1.end() - 20, 10);
         dq2.emplace(dq2.end() - 20, 10);
         util.assertSequenceEqual(dq1, dq2);
         // erase
+        // 1
         dq1.erase(dq1.begin());
         dq2.erase(dq2.begin());
         dq1.erase(dq1.begin() + 50);
         dq2.erase(dq2.begin() + 50);
         util.assertSequenceEqual(dq1, dq2);
+        // 2
         dq1.erase(dq1.begin() + 10, dq1.end() - 30);
         dq2.erase(dq2.begin() + 10, dq2.end() - 30);
         util.assertSequenceEqual(dq1, dq2);
@@ -1456,12 +1629,14 @@ void testDeque(bool showDetails)
         }
         util.assertSequenceEqual(dq1, dq2);
         // resize
+        // 1
         dq1.resize(100000);
         dq2.resize(100000);
         util.assertSequenceEqual(dq1, dq2);
         dq1.resize(100);
         dq2.resize(100);
         util.assertSequenceEqual(dq1, dq2);
+        // 2
         dq1.resize(1000, 9999);
         dq2.resize(1000, 9999);
         util.assertSequenceEqual(dq1, dq2);
@@ -1486,6 +1661,7 @@ void testDeque(bool showDetails)
             util.assertSequenceEqual(tmp1, tmp2);
         }
     }
+    // non-member operations
     {
         // comparisons
         tstd::deque<int> dq1(vec.begin(), vec.end());
@@ -1499,16 +1675,4 @@ void testDeque(bool showDetails)
         util.assertEqual(dq1 >= dq2, false);
     }
     util.showFinalResult();
-}
-
-int main(int argc, char const *argv[])
-{
-    bool showDetails = parseDetailFlag(argc, argv);
-    testVector(showDetails);
-    testArray(showDetails);
-    testList(showDetails);
-    testForwardList(showDetails);
-    testDeque(showDetails);
-    std::cout << std::endl;
-    return 0;
 }

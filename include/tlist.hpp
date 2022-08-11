@@ -341,7 +341,7 @@ public:
         construct_a_link(first, last, other.begin(), other.end());
         insert_before(node, first, last);
     }
-    list(const list& other, const Allocator& _alloc) // 7s
+    list(const list& other, const Allocator& _alloc) // 7
         : alloc(_alloc)
         , node_alloc(alloc)
         , node(nullptr)
@@ -352,7 +352,7 @@ public:
         insert_before(node, first, last);
     }
     list(list&& other) // 8
-        : alloc(other.alloc)
+        : alloc(std::move(other.alloc))
         , node_alloc(alloc)
         , node(nullptr)
     {
@@ -365,7 +365,7 @@ public:
         , node(nullptr)
     {
         init_empty();
-        if (alloc == Allocator()) // move the whole list
+        if (alloc == other.get_allocator()) // move the whole list
         {
             move_from(std::move(other));
         }
@@ -535,7 +535,7 @@ public:
     {
         return insert_before(pos.node, construct_node(std::move(value)));
     }
-    iterator insert(const_iterator pos, size_type count, const T& value) //3
+    iterator insert(const_iterator pos, size_type count, const T& value) // 3
     {
         link_type first = nullptr, last = nullptr;
         construct_a_link(first, last, count, value);
@@ -705,37 +705,37 @@ public:
         }
     }
     template<typename Compare>
-    void mrege(list&& other, Compare cmp) // 4
+    void merge(list&& other, Compare cmp) // 4
     {
         merge(other, cmp);
     }
     // splice
-    void splice(const_iterator pos, list& other)
+    void splice(const_iterator pos, list& other) // 1
     {
         assert(alloc == other.alloc);
         transfer(pos, other.begin(), other.end());
     }
-    void splice(const_iterator pos, list&& other)
+    void splice(const_iterator pos, list&& other) // 2
     {
         assert(alloc == other.alloc);
         transfer(pos, other.begin(), other.end());
     }
-    void splice(const_iterator pos, [[maybe_unused]] list& other, const_iterator it)
+    void splice(const_iterator pos, [[maybe_unused]] list& other, const_iterator it) // 3
     {
         assert(alloc == other.alloc);
         transfer(pos, it, tstd::next(it));
     }
-    void splice(const_iterator pos, [[maybe_unused]] list&& other, const_iterator it)
+    void splice(const_iterator pos, [[maybe_unused]] list&& other, const_iterator it) // 4
     {
         assert(alloc == other.alloc);
         transfer(pos, it, tstd::next(it));
     }
-    void splice(const_iterator pos, [[maybe_unused]] list& other, const_iterator _first, const_iterator _last)
+    void splice(const_iterator pos, [[maybe_unused]] list& other, const_iterator _first, const_iterator _last) // 5
     {
         assert(alloc == other.alloc);
         transfer(pos, _first, _last);
     }
-    void splice(const_iterator pos, [[maybe_unused]] list&& other, const_iterator _first, const_iterator _last)
+    void splice(const_iterator pos, [[maybe_unused]] list&& other, const_iterator _first, const_iterator _last) // 6
     {
         assert(alloc == other.alloc);
         transfer(pos, _first, _last);
@@ -790,7 +790,7 @@ public:
         }
     }
     // unique
-    size_type unique()
+    size_type unique() // 1
     {
         if (empty())
         {
@@ -812,7 +812,7 @@ public:
         return count;
     }
     template<typename BinaryPredicate>
-    size_type unique(BinaryPredicate p)
+    size_type unique(BinaryPredicate p) // 2
     {
         if (empty())
         {
@@ -834,7 +834,7 @@ public:
         return count;
     }
     // sort : quick sort
-    void sort()
+    void sort() // 1
     {
         // empty or only one element
         if (node->next == node || node->next->next == node)
@@ -866,7 +866,7 @@ public:
         swap(counter[fill-1]);
     }
     template<typename Compare>
-    void sort(Compare cmp)
+    void sort(Compare cmp) // 2
     {
          // empty or only one element
         if (node->next == node || node->next->next == node)

@@ -5,6 +5,16 @@
 #include <numeric>
 #include "TestUtil.hpp"
 
+void testHeapAlgorithms(bool showDetils);
+
+int main(int argc, char const *argv[])
+{
+    bool showDetils = parseDetailFlag(argc, argv);
+    testHeapAlgorithms(showDetils);
+    return 0;
+}
+
+
 void testHeapAlgorithms(bool showDetials)
 {
     TestUtil util(showDetials, "heap algorithms");
@@ -95,11 +105,4 @@ void testHeapAlgorithms(bool showDetials)
         util.assertSequenceEqual(v1, v2);
     }
     util.showFinalResult();
-}
-
-int main(int argc, char const *argv[])
-{
-    bool showDetils = parseDetailFlag(argc, argv);
-    testHeapAlgorithms(showDetils);
-    return 0;
 }

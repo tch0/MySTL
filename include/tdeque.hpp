@@ -45,13 +45,6 @@ private:
             , node(nullptr)
         {
         }
-        // __deque_iterator(const self& other)
-        //     : cur(other.cur)
-        //     , first(other.first)
-        //     , last(other.last)
-        //     , node(other.node)
-        // {
-        // }
         __deque_iterator(const iterator& other)
             : cur(other.cur)
             , first(other.first)
@@ -485,28 +478,28 @@ public:
         release_map();
     }
     // assignment
-    deque& operator=(const deque& other)
+    deque& operator=(const deque& other) // 1
     {
         clear_elements();
         release_map();
         copy_initialize(other.size(), other.begin(), other.end());
         return *this;
     }
-    deque& operator=(deque&& other) noexcept(std::allocator_traits<Allocator>::is_always_equal::value)
+    deque& operator=(deque&& other) noexcept(std::allocator_traits<Allocator>::is_always_equal::value) // 2
     {
         clear_elements();
         release_map();
         move_from(std::move(other));
         return *this;
     }
-    deque& operator=(std::initializer_list<T> il)
+    deque& operator=(std::initializer_list<T> il) // 3
     {
         clear_elements();
         release_map();
         copy_initialize(il.size(), il.begin(), il.end());
         return *this;
     }
-    void assign(size_type count, const T& value)
+    void assign(size_type count, const T& value) // 1
     {
         clear_elements();
         release_map();
@@ -514,18 +507,19 @@ public:
     }
     template<typename InputIterator,
         typename = std::enable_if_t<std::is_base_of_v<typename std::input_iterator_tag, typename std::iterator_traits<InputIterator>::iterator_category>>>
-    void assign(InputIterator first, InputIterator last)
+    void assign(InputIterator first, InputIterator last) // 2
     {
         clear_elements();
         release_map();
         copy_initialize(last - first, first, last);
     }
-    void assign(std::initializer_list<T> il)
+    void assign(std::initializer_list<T> il) // 3
     {
         clear_elements();
         release_map();
         copy_initialize(il.size(), il.begin(), il.end());
     }
+    // allocator
     allocator_type get_allocator() const noexcept
     {
         return alloc;
@@ -647,70 +641,12 @@ public:
         iterator insert_pos = get_ready_for_insert(1, pos);
         *insert_pos = value;
         return insert_pos;
-        // if (pos == start) // insert at front
-        // {
-        //     push_front(value);
-        //     return start;
-        // }
-        // else if (pos == finish) // insert at back
-        // {
-        //     push_back(value);
-        //     return finish;
-        // }
-        // else // insert in middle of deque
-        // {
-        //     difference_type index = pos - start;
-        //     iterator insert_pos = pos;
-        //     if (index < size() / 2) // more elements in back of pos, move front elements
-        //     {
-        //         push_front(front());
-        //         insert_pos = start + index;
-        //         std::move(start + 2, insert_pos + 1, start + 1); // move [start + 2, insert_pos] to [start + 1, insert_pos + 1]
-        //     }
-        //     else // more elements in front of pos, move front elements
-        //     {
-        //         push_back(back());
-        //         insert_pos = start + index;
-        //         std::move_backward(insert_pos, finish - 2, finish - 1); // move [insert_pos, finish - 3] to [insert_pos + 1, finish - 2]
-        //     }
-        //     *insert_pos = value;
-        //     return insert_pos;
-        // }
     }
     iterator insert(const_iterator pos, T&& value) // 2
     {
         iterator insert_pos = get_ready_for_insert(1, pos);
         *insert_pos = std::move(value);
         return insert_pos;
-        // if (pos == start) // insert at front
-        // {
-        //     push_front(value);
-        //     return start;
-        // }
-        // else if (pos == finish) // insert at back
-        // {
-        //     push_back(value);
-        //     return finish;
-        // }
-        // else // insert in middle of deque
-        // {
-        //     difference_type index = pos - start;
-        //     iterator insert_pos = pos;
-        //     if (index < size() / 2) // more elements in back of pos, move front elements
-        //     {
-        //         push_front(front());
-        //         insert_pos = start + index;
-        //         std::move(start + 2, insert_pos + 1, start + 1); // move [start + 2, insert_pos] to [start + 1, insert_pos + 1]
-        //     }
-        //     else // more elements in front of pos, move front elements
-        //     {
-        //         push_back(back());
-        //         insert_pos = start + index;
-        //         std::move_backward(insert_pos, finish - 2, finish - 1); // move [insert_pos, finish - 3] to [insert_pos + 1, finish - 2]
-        //     }
-        //     *insert_pos = std::move(value);
-        //     return insert_pos;
-        // }
     }
     iterator insert(const_iterator pos, size_type count, const T& value) // 3
     {

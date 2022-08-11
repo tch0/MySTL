@@ -645,25 +645,25 @@ private:
 template<typename T, typename Allocator>
 constexpr int _cmp_vector(const tstd::vector<T, Allocator>& lhs, const tstd::vector<T, Allocator>& rhs)
 {
-    if (lhs.size() == 0 || rhs.size() == 0)
+    auto iter1 = lhs.begin();
+    auto iter2 = rhs.begin();
+    for (; iter1 != lhs.end() && iter2 != rhs.end(); ++iter1, ++iter2)
     {
-        return lhs.size() < rhs.size() ? -1 : (lhs.size() == rhs.size() ? 0 : 1);
-    }
-    auto it1 = lhs.begin();
-    auto it2 = rhs.begin();
-    for (; it1 != lhs.end() && it2 != rhs.end(); ++it1, ++it2)
-    {
-        if (*it1 == *it2)
+        if (*iter1 == *iter2)
         {
             continue;
         }
-        return *it1 > *it2 ? 1 : -1;
+        return *iter1 > *iter2 ? 1 : -1;
     }
-    if (it1 == lhs.end())
+    if (iter1 != lhs.end())
     {
-        return it2 == rhs.end() ? 0 : -1;
+        return 1;
     }
-    return 1; // it1 != lhs.end() && it2 == rhs.end()
+    if (iter2 != rhs.end())
+    {
+        return -1;
+    }
+    return 0;
 }
 
 // comparasions

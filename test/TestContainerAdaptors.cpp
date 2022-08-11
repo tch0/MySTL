@@ -13,6 +13,21 @@
 #include <tvector.hpp>
 #include "TestUtil.hpp"
 
+void testStack(bool showDetail);
+void testQueue(bool showDetail);
+void testPriorityQueue(bool showDetail);
+
+int main(int argc, char const *argv[])
+{
+    bool showDetail = parseDetailFlag(argc, argv);
+    testStack(showDetail);
+    testQueue(showDetail);
+    testPriorityQueue(showDetail);
+    std::cout << std::endl;
+    return 0;
+}
+
+
 template<typename Stack>
 std::vector<typename Stack::value_type> stackToVector(Stack s)
 {
@@ -151,12 +166,13 @@ void testStackImpl(bool showDetails, const std::string& underlyingContainer)
         util.assertSequenceEqual(stackToVector(tmp1), stackToVector(tmp2));
     }
     {
-        // element access, size and capacity
+        // element access
         tstd_stack s1(Container1{1, 2, 3, 4, 5, 100});
         std_stack s2(Container2{1, 2, 3, 4, 5, 100});
         util.assertEqual(s1.top(), s2.top());
         s1.top() = s2.top() = 99;
         util.assertEqual(s1.top(), s2.top());
+        // size and capacity
         util.assertEqual(s1.empty(), s2.empty());
         util.assertEqual(s1.size(), s2.size());
     }
@@ -169,6 +185,8 @@ void testStackImpl(bool showDetails, const std::string& underlyingContainer)
         {
             s1.push(i);
             s2.push(i);
+            s1.push(100);
+            s2.push(100);
             s1.emplace(i);
             s2.emplace(i);
         }
@@ -322,7 +340,7 @@ void testQueueImpl(bool showDetails, const std::string& underlyingContainer)
         util.assertSequenceEqual(queueToVector(tmp1), queueToVector(tmp2));
     }
     {
-        // element access, size and capacity
+        // element access
         tstd_queue q1(Container1{1, 2, 3, 4, 5, 100});
         std_queue q2(Container2{1, 2, 3, 4, 5, 100});
         util.assertEqual(q1.front(), q2.front());
@@ -330,6 +348,7 @@ void testQueueImpl(bool showDetails, const std::string& underlyingContainer)
         util.assertEqual(q1.front(), q2.front());
         q1.back() = q2.back() = 999;
         util.assertEqual(q1.back(), q2.back());
+        // size and capacity
         util.assertEqual(q1.empty(), q2.empty());
         util.assertEqual(q1.size(), q2.size());
     }
@@ -342,6 +361,8 @@ void testQueueImpl(bool showDetails, const std::string& underlyingContainer)
         {
             q1.push(i);
             q2.push(i);
+            q1.push(100);
+            q2.push(100);
             q1.emplace(i);
             q2.emplace(i);
         }
@@ -655,14 +676,4 @@ void testPriorityQueue(bool showDetails)
 {
     testPriorityQueueImpl<int, tstd::vector<int>, std::vector<int>>(showDetails, "tstd::vector<int> vs std::vector<int>");
     testPriorityQueueImpl<int, tstd::deque<int>, std::deque<int>>(showDetails, "tstd::deque<int> vs std::deque<int>");
-}
-
-int main(int argc, char const *argv[])
-{
-    bool showDetail = parseDetailFlag(argc, argv);
-    testStack(showDetail);
-    testQueue(showDetail);
-    testPriorityQueue(showDetail);
-    std::cout << std::endl;
-    return 0;
 }

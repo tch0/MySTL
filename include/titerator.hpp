@@ -135,22 +135,22 @@ bool operator!=(const tstd::reverse_iterator<Iterator1>& lhs, const tstd::revers
 template<typename Iterator1, typename Iterator2>
 bool operator<(const tstd::reverse_iterator<Iterator1>& lhs, const tstd::reverse_iterator<Iterator2>& rhs)
 {
-    return lhs.base() < rhs.base();
+    return lhs.base() > rhs.base();
 }
 template<typename Iterator1, typename Iterator2>
 bool operator<=(const tstd::reverse_iterator<Iterator1>& lhs, const tstd::reverse_iterator<Iterator2>& rhs)
 {
-    return lhs.base() <= rhs.base();
+    return lhs.base() >= rhs.base();
 }
 template<typename Iterator1, typename Iterator2>
 bool operator>(const tstd::reverse_iterator<Iterator1>& lhs, const tstd::reverse_iterator<Iterator2>& rhs)
 {
-    return lhs.base() > rhs.base();
+    return lhs.base() < rhs.base();
 }
 template<typename Iterator1, typename Iterator2>
 bool operator>=(const tstd::reverse_iterator<Iterator1>& lhs, const tstd::reverse_iterator<Iterator2>& rhs)
 {
-    return lhs.base() >= rhs.base();
+    return lhs.base() <= rhs.base();
 }
 
 // non-member arithemetic operations
@@ -175,7 +175,7 @@ public:
     using value_type            = std::iterator_traits<Iter>::value_type;
     using difference_type       = std::iterator_traits<Iter>::difference_type;
     using pointer               = std::iterator_traits<Iter>::pointer;
-    using reference             = std::iter_rvalue_reference_t<Iter>; // will be a rvalue reference(if std::iterator_traits<Iter>::reference is a reference instead of value)
+    using reference             = std::iter_rvalue_reference_t<Iter>; // will be a rvalue reference (if std::iterator_traits<Iter>::reference is a reference instead of value)
 
     // constructors
     constexpr move_iterator() // 1

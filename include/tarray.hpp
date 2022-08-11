@@ -28,6 +28,7 @@ public:
     using reverse_iterator = tstd::reverse_iterator<iterator>;
     using const_reverse_iterator = tstd::reverse_iterator<const_iterator>;
 public:
+    // constructors are implicit
     // elements access
     constexpr reference at(size_type pos)
     {
@@ -131,7 +132,7 @@ public:
     {
         return N;
     }
-    // operations
+    // modifiers
     constexpr void fill(const T& value)
     {
         for (size_type i = 0; i < N; ++i)

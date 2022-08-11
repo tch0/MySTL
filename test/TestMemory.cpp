@@ -4,6 +4,18 @@
 #include <tmemory.hpp>
 #include "TestUtil.hpp"
 
+void testAllocator(bool showDetails);
+void testUnintialized(bool showDetails);
+
+int main(int argc, char const *argv[])
+{
+    bool showDetails = parseDetailFlag(argc, argv);
+    testAllocator(showDetails);
+    testUnintialized(showDetails);
+    std::cout << std::endl;
+    return 0;
+}
+
 class Foo
 {
 public:
@@ -76,13 +88,4 @@ void testUnintialized(bool showDetails)
 
     // final result
     util.showFinalResult();
-}
-
-int main(int argc, char const *argv[])
-{
-    bool showDetails = parseDetailFlag(argc, argv);
-    testAllocator(showDetails);
-    testUnintialized(showDetails);
-    std::cout << std::endl;
-    return 0;
 }
