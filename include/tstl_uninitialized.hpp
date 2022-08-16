@@ -15,7 +15,7 @@ ForwardIterator uninitialized_copy(InputIterator first, InputIterator last, Forw
 {
     for (; first != last; ++dest, ++first)
     {
-        _construct(&*dest, *first);
+        impl::_construct(&*dest, *first);
     }
     return dest;
 }
@@ -25,7 +25,7 @@ ForwardIterator uninitialized_copy_n(InputIterator first, Size count, ForwardIte
 {
     for (; count > 0; --count, ++dest, ++first)
     {
-        _construct(&*dest, *first);
+        impl::_construct(&*dest, *first);
     }
     return dest;
 }
@@ -35,7 +35,7 @@ void uninitialized_fill(ForwardIterator first, ForwardIterator last, const T& va
 {
     for (; first != last; ++first)
     {
-        _construct(&*first, value);
+        impl::_construct(&*first, value);
     }
 }
 
@@ -44,7 +44,7 @@ ForwardIterator uninitialized_fill_n(ForwardIterator first, Size count, const T&
 {
     for (; count > 0; --count, ++first)
     {
-        _construct(&*first, value);
+        impl::_construct(&*first, value);
     }
     return first;
 }
@@ -55,7 +55,7 @@ ForwardIterator uninitialized_move(InputIterator first, InputIterator last, Forw
 {
     for (; first != last; ++dest, ++first)
     {
-        _construct(&*dest, std::move(*first));
+        impl::_construct(&*dest, std::move(*first));
     }
     return dest;
 }
@@ -66,7 +66,7 @@ ForwardIterator uninitialized_move_n(InputIterator first, Size count, ForwardIte
 {
     for (; count > 0; --count, ++dest, ++first)
     {
-        _construct(&*dest, std::move(*first));
+        impl::_construct(&*dest, std::move(*first));
     }
     return dest;
 }

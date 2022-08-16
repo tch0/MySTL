@@ -926,7 +926,7 @@ constexpr int _cmp_list(const tstd::list<T, Allocator>& lhs, const tstd::list<T,
     return 0;
 }
 
-// comparasions
+// comparisons
 template<typename T, typename Allocator>
 constexpr bool operator==(const tstd::list<T, Allocator>& lhs, const tstd::list<T, Allocator>& rhs)
 {

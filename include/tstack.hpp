@@ -165,7 +165,7 @@ protected:
 };
 
 // non-member operations
-// comparasions
+// comparisons
 template<typename T, typename Container>
 constexpr bool operator==(const tstd::stack<T, Container>& lhs, const tstd::stack<T, Container>& rhs)
 {

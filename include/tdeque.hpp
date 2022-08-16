@@ -931,7 +931,7 @@ constexpr int _cmp_deque(const tstd::deque<T, Allocator>& lhs, const tstd::deque
     return 0;
 }
 
-// comparasions
+// comparisons
 template<typename T, typename Allocator>
 constexpr bool operator==(const tstd::deque<T, Allocator>& lhs, const tstd::deque<T, Allocator>& rhs)
 {

@@ -806,7 +806,7 @@ constexpr int _cmp_forward_list(const tstd::forward_list<T, Allocator>& lhs, con
     return 0;
 }
 
-// comparasions
+// comparisons
 template<typename T, typename Allocator>
 constexpr bool operator==(const tstd::forward_list<T, Allocator>& lhs, const tstd::forward_list<T, Allocator>& rhs)
 {

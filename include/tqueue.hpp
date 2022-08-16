@@ -173,7 +173,7 @@ protected:
 };
 
 // non-member operations
-// comparasions
+// comparisons
 template<typename T, typename Container>
 constexpr bool operator==(const tstd::queue<T, Container>& lhs, const tstd::queue<T, Container>& rhs)
 {

@@ -11,6 +11,7 @@ int main(int argc, char const *argv[])
 {
     bool showDetils = parseDetailFlag(argc, argv);
     testHeapAlgorithms(showDetils);
+    std::cout << std::endl;
     return 0;
 }
 

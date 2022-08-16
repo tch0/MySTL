@@ -171,7 +171,7 @@ constexpr int _cmp_array(const tstd::array<T, N>& lhs, const tstd::array<T, N>& 
     return 0;
 }
 
-// comparasions
+// comparisons
 template<typename T, std::size_t N>
 constexpr bool operator==(const tstd::array<T, N>& lhs, const tstd::array<T, N>& rhs)
 {

@@ -666,7 +666,7 @@ constexpr int _cmp_vector(const tstd::vector<T, Allocator>& lhs, const tstd::vec
     return 0;
 }
 
-// comparasions
+// comparisons
 template<typename T, typename Allocator>
 constexpr bool operator==(const tstd::vector<T, Allocator>& lhs, const tstd::vector<T, Allocator>& rhs)
 {

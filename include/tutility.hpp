@@ -28,5 +28,4 @@ constexpr void swap(T (&a)[N], T (&b)[N]) noexcept(std::is_nothrow_swappable_v<T
 
 } // namespace tstd
 
-
-#endif
+#endif // TUTILITY_HPP

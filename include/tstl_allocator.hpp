@@ -9,6 +9,9 @@
 namespace tstd
 {
 
+namespace impl
+{
+
 // auxiliary global functions for allocator
 template<typename T>
 inline T* _allocate(ptrdiff_t size, [[maybe_unused]] T*)
@@ -43,6 +46,8 @@ inline void _destroy(T* ptr)
     }
 }
 
+} // namespace impl
+
 // allocator
 template<typename T>
 class allocator
@@ -74,24 +79,24 @@ public:
     // deprecated in C++17, removed in C++20
     T* allocate(size_type n, const void* hint)
     {
-        return _allocate(static_cast<difference_type>(n), hint);
+        return impl::_allocate(static_cast<difference_type>(n), hint);
     }
 
     [[nodiscard]] constexpr T* allocate(size_type n)
     {
-        return _allocate(static_cast<difference_type>(n), (T*)nullptr);
+        return impl::_allocate(static_cast<difference_type>(n), (T*)nullptr);
     }
 
     constexpr void deallocate(T* p, [[maybe_unused]] size_type n)
     {
-        _deallocate(p);
+        impl::_deallocate(p);
     }
 
     // deprecated in C++17, removed in C++20
     template<typename U, typename... Args>
     void construct(U* p, Args&&... args)
     {
-        _construct(p, std::forward<Args>(args)...);
+        impl::_construct(p, std::forward<Args>(args)...);
     }
 
     // deprecated in C++17, removed in C++20
@@ -104,7 +109,7 @@ public:
     template<typename U>
     void destroy(U* p)
     {
-        _destroy(p);
+        impl::_destroy(p);
     }
 
     // deprecated in C++17, removed in C++20
