@@ -29,6 +29,7 @@ all_test_targets += TestIterator
 all_test_targets += TestSequentialContianers
 all_test_targets += TestContainerAdaptors
 all_test_targets += TestAlgorithms
+all_test_targets += TestTreeImpl
 
 # add all efficiency test targets here
 all_efficiency_test_targets += 

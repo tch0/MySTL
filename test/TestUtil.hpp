@@ -158,7 +158,22 @@ public:
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertRangeEqual: " << (res ? "passed" : "==================== failed")
                 << "\n\tleft value: " << PrintSequenceElements(b1, e1, 20)
-                << "\n\tright value: " << PrintSequenceElements(b2, b2 + std::distance(b1, e1), 20)  << std::endl;
+                << "\n\tright value: " << PrintSequenceElements(b2, std::next(b2, std::distance(b1, e1)), 20)  << std::endl;
+        }
+    }
+    // assert a sequence is sorted
+    template<typename InputIterator, typename Compare = std::less<typename std::iterator_traits<InputIterator>::value_type>>
+    void assertSorted(InputIterator b, InputIterator e, const Compare& cmp = Compare(), const std::source_location& loc = std::source_location::current())
+    {
+        bool res = std::is_sorted(b, e, cmp);
+        passedCount += (res ? 1 : 0);
+        totalCount++;
+        if (showDetails)
+        {
+            std::cout << std::boolalpha << std::dec;
+            std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
+                << "assertSorted: " << (res ? "passed" : "==================== failed")
+                << "\n\tsequence: " << PrintSequenceElements(b, e, 20) << std::endl;
         }
     }
 private:
