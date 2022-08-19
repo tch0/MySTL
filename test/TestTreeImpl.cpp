@@ -13,6 +13,16 @@
 // 2. rb-tree: todo yet!
 // 3. avl-tree: todo yet!
 
+template<template<typename Key, typename Value, typename KeyOfValue, bool Multi = false, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<Value>> class bst>
+void testTreeImpl(bool showDetails, const std::string& treeType);
+
+int main(int argc, char const *argv[])
+{
+    bool showDetails = parseDetailFlag(argc, argv);
+    testTreeImpl<tstd::impl::bst>(showDetails, "tstd::impl::bst");
+    return 0;
+}
+
 template<typename T>
 class identity
 {
@@ -23,7 +33,29 @@ public:
     }
 };
 
-// test with template argument: <int, int, identity<int>>
+// get first of pair
+template<typename T1, typename T2>
+class FirstOfPair
+{
+public:
+    T1& operator()(std::pair<T1, T2>& p)
+    {
+        return p.first;
+    }
+};
+
+// compare according key, descending order
+template<typename T1, typename T2>
+class CmpFirstOfPair
+{
+public:
+    bool operator()(const std::pair<T1, T2>& p1, const std::pair<T1, T2>& p2)
+    {
+        return std::greater<T1>()(p1.first, p2.first);
+    }
+};
+
+
 template<template<typename Key, typename Value, typename KeyOfValue, bool Multi = false, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<Value>> class bst>
 void testTreeImpl(bool showDetails, const std::string& treeType)
 {
@@ -143,7 +175,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
         util.assertEqual(t1.size(), 0);
         util.assertEqual(t1.empty(), true);
         // insert
-        for (int i = 1; i <= 101; ++i)
+        for (int i = 1; i <= 100; ++i)
         {
             t1.insert(i);
         }
@@ -161,6 +193,13 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
         }
         util.assertEqual(t1.size(), 300);
         util.assertSorted(t1.begin(), t1.end());
+        // return value
+        auto p = t1.insert(150);
+        util.assertEqual(*p.first, 150);
+        util.assertEqual(p.second, false); // exist
+        p = t1.insert(500);
+        util.assertEqual(*p.first, 500);
+        util.assertEqual(p.second, true); // inserted
     }
     {
         // modifiers
@@ -284,14 +323,257 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
         util.assertEqual(typeid(t1.key_comp()) == typeid(std::less<int>), true);
         util.assertEqual(typeid(t1.value_comp()) == typeid(std::less<int>), true);
     }
+    
     // other template arguments test
-    // support multi or not, customized compare/key/value
+    // support multi, customized compare/key/value
+    using bst_map = bst<const int, std::pair<const int, std::string>, FirstOfPair<const int, std::string>, true, std::greater<int>>;
+    CmpFirstOfPair<const int, std::string> cmp;
+    {
+        // constructors
+        // 1: default constructor
+        bst_map m1;
+        util.assertEqual(m1.size(), 0);
+        util.assertEqual(std::distance(m1.begin(), m1.end()), m1.size());
+        util.assertEqual(std::distance(m1.rbegin(), m1.rend()), m1.size());
+        for (auto elem : vec)
+        {
+            m1.insert(std::make_pair(elem, std::to_string(elem)));
+            m1.insert(std::make_pair(elem, std::to_string(elem) + "__2"));
+        }
+        util.assertEqual(m1.size(), 200);
+        util.assertEqual(std::distance(m1.begin(), m1.end()), m1.size());
+        util.assertEqual(std::distance(m1.rbegin(), m1.rend()), m1.size());
+        // 2: copy constructor
+        bst_map m2(m1);
+        util.assertSequenceEqual(m1, m2);
+        util.assertSorted(m2.begin(), m2.end(), cmp);
+        util.assertEqual(m2.size(), m1.size());
+        util.assertEqual(std::distance(m2.begin(), m2.end()), m2.size());
+        util.assertEqual(std::distance(m2.rbegin(), m2.rend()), m2.size());
+        // 3: move constructor
+        bst_map m3(std::move(m2));
+        util.assertSequenceEqual(m1, m3);
+        util.assertSorted(m3.begin(), m3.end(), cmp);
+        util.assertEqual(m3.size(), m1.size());
+        util.assertEqual(std::distance(m3.begin(), m3.end()), m3.size());
+        util.assertEqual(std::distance(m3.rbegin(), m3.rend()), m3.size());
+        util.assertEqual(m2.size(), 0);
+        util.assertEqual(std::distance(m2.begin(), m2.end()), m2.size());
+        util.assertEqual(std::distance(m2.rbegin(), m2.rend()), m2.size());
+    }
+    {
+        // assignment
+        bst_map m1;
+        for (auto elem : vec)
+        {
+            m1.insert(std::make_pair(elem, std::to_string(elem)));
+            m1.insert(std::make_pair(elem, std::to_string(elem) + "__2"));
+        }
+        // copy assignment
+        bst_map m2;
+        m2 = m1;
+        util.assertSequenceEqual(m1, m2);
+        // move assignment
+        bst_map m3;
+        m3 = std::move(m2);
+        util.assertSequenceEqual(m1, m3);
+        util.assertEqual(m2.size(), 0);
+        util.assertEqual(std::distance(m2.begin(), m2.end()), m2.size());
+        util.assertEqual(std::distance(m2.rbegin(), m2.rend()), m2.size());
+    }
+    {
+        // allocator
+        bst_map m1;
+        util.assertEqual(m1.get_allocator() == tstd::allocator<int>(), true);
+    }
+    {
+        // iterators
+        bst_map m1;
+        for (auto elem : vec)
+        {
+            m1.insert(std::make_pair(elem, std::to_string(elem)));
+            m1.insert(std::make_pair(elem, std::to_string(elem) + "__2"));
+        }
+        util.assertRangeEqual(m1.begin(), m1.end(), m1.cbegin());
+        util.assertRangeEqual(m1.cbegin(), m1.cend(), m1.begin());
+        util.assertRangeEqual(m1.rbegin(), m1.rend(), m1.crbegin());
+        util.assertRangeEqual(m1.crbegin(), m1.crend(), m1.rbegin());
+    }
+    {
+        // size and capacity
+        bst_map m1;
+        util.assertEqual(m1.size(), 0);
+        util.assertEqual(m1.empty(), true);
+        for (auto elem : vec)
+        {
+            m1.insert(std::make_pair(elem, std::to_string(elem)));
+            m1.insert(std::make_pair(elem, std::to_string(elem) + "__2"));
+        }
+        util.assertEqual(m1.size(), 200);
+        util.assertEqual(m1.empty(), false);
+    }
+    {
+        // modifiers
+        // clear
+        bst_map m1;
+        for (auto elem : vec)
+        {
+            m1.insert(std::make_pair(elem, std::to_string(elem)));
+            m1.insert(std::make_pair(elem, std::to_string(elem) + "__2"));
+        }
+        m1.clear();
+        util.assertEqual(std::distance(m1.begin(), m1.end()), 0);
+        util.assertEqual(m1.size(), 0);
+        util.assertEqual(m1.empty(), true);
+        // insert
+        for (int i = 1; i <= 100; ++i)
+        {
+            auto p = std::make_pair(i, std::to_string(i));
+            m1.insert(p);
+        }
+        for (int i = 101; i <= 200; ++i)
+        {
+            m1.insert(std::make_pair(i, std::to_string(i)));
+        }
+        util.assertEqual(m1.size(), 200);
+        util.assertSorted(m1.begin(), m1.end(), cmp);
+        // emplace
+        for (int i = 201; i <= 300; ++i)
+        {
+            auto p = std::make_pair(i, std::to_string(i));
+            m1.emplace(p);
+            m1.emplace(std::move(p)); // duplicate key
+        }
+        util.assertEqual(m1.size(), 400); // Multi == true, so 400
+        util.assertSorted(m1.begin(), m1.end(), cmp);
+        // return value
+        auto p = m1.insert(std::make_pair(150, std::string("150")));
+        util.assertEqual((*p.first).first, 150);
+        util.assertEqual(p.second, true); // always true
+    }
+    {
+        // modifiers
+        // erase
+        // 1
+        {
+            bst_map m1;
+            for (auto elem : vec)
+            {
+                m1.insert(std::make_pair(elem, std::to_string(elem)));
+                m1.insert(std::make_pair(elem, std::to_string(elem) + "__2"));
+            }
+            for (int i = 1; i < 100; i += 10)
+            {
+                auto iter = m1.erase(m1.find(i));
+            }
+            util.assertSorted(m1.begin(), m1.end(), cmp);
+            util.assertEqual(m1.size(), 190);
+            auto iter = m1.erase(m1.begin());
+            util.assertEqual(iter == m1.begin(), true);
+            iter = m1.erase(tstd::prev(m1.end()));
+            util.assertEqual(iter == m1.end(), true);
+            util.assertEqual(m1.size(), 188);
+            util.assertSorted(m1.begin(), m1.end(), cmp);
+        }
+        // 2
+        {
+            bst_map m1;
+            for (auto elem : vec)
+            {
+                m1.insert(std::make_pair(elem, std::to_string(elem)));
+                m1.insert(std::make_pair(elem, std::to_string(elem) + "__2"));
+            }
+            for (int i = 10; i < 30; i++)
+            {
+                auto count = m1.erase(i);
+                util.assertEqual(count, 2);
+            }
+            util.assertEqual(m1.size(), 160);
+            util.assertSorted(m1.begin(), m1.end(), cmp);
+        }
+        // swap
+        {
+            bst_map m1;
+            bst_map m2;
+            for (auto elem : vec)
+            {
+                m1.insert(std::make_pair(elem, std::to_string(elem)));
+                m1.insert(std::make_pair(elem, std::to_string(elem) + "__2"));
+                m2.insert(std::make_pair(elem, std::to_string(elem)));
+            }
+            util.assertEqual(m2.size(), 100);
+            bst_map m1c(m1);
+            bst_map m2c(m2);
+            m1.swap(m2);
+            util.assertSequenceEqual(m1, m2c);
+            util.assertSequenceEqual(m2, m1c);
+            swap(m1, m2);
+            util.assertSequenceEqual(m1, m1c);
+            util.assertSequenceEqual(m2, m2c);
+        }
+    }
+    {
+        // lookup
+        bst_map m1;
+        for (auto elem : vec)
+        {
+            m1.insert(std::make_pair(elem, std::to_string(elem)));
+            m1.insert(std::make_pair(elem, std::to_string(elem) + "__2"));
+        }
+        // find
+        auto iter = m1.find(10);
+        util.assertEqual((*iter).first, 10);
+        iter = m1.find(0);
+        util.assertEqual(iter == m1.end(), true);
+        iter = m1.find(200);
+        util.assertEqual(iter == m1.end(), true);
+        // lower_bound, upper_bound
+        // m1 in descending order
+        auto l = m1.lower_bound(20);
+        auto u = m1.upper_bound(10);
+        util.assertEqual((*l).first, 20);
+        util.assertEqual((*u).first, 9);
+        util.assertEqual(tstd::distance(l, u), 22); // double of 11(10 to 20 both included)
+
+        // const version
+        {
+            const bst_map m2(m1);
+            // find
+            auto iter = m2.find(10);
+            util.assertEqual((*iter).first, 10);
+            iter = m2.find(0);
+            util.assertEqual(iter == m2.end(), true);
+            iter = m2.find(200);
+            util.assertEqual(iter == m2.end(), true);
+            // lower_bound, upper_bound
+            // m1 in descending order
+            auto l = m1.lower_bound(20);
+            auto u = m1.upper_bound(10);
+            util.assertEqual((*l).first, 20);
+            util.assertEqual((*u).first, 9);
+            util.assertEqual(tstd::distance(l, u), 22); // double of 11(10 to 20 both included)
+        }
+    }
+    {
+        // comparisons
+        bst_map m1;
+        bst_map m2;
+        for (auto elem : vec)
+        {
+            m1.insert(std::make_pair(elem, std::to_string(elem)));
+            m2.insert(std::make_pair(elem, std::to_string(elem)));
+        }
+        util.assertEqual(m1 == m2, true);
+        util.assertEqual(m1 != m2, false);
+        m1.erase(10);
+        util.assertEqual(m1 != m2, true);
+        // descending order
+        util.assertEqual(m1 < m2, true);
+        util.assertEqual(m1 <= m2, true);
+        util.assertEqual(m1 > m2, false);
+        util.assertEqual(m1 >= m2, false);
+    }
     util.showFinalResult();
 }
 
-int main(int argc, char const *argv[])
-{
-    bool showDetails = parseDetailFlag(argc, argv);
-    testTreeImpl<tstd::impl::bst>(showDetails, "tstd::impl::bst");
-    return 0;
-}
+

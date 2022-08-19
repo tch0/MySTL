@@ -7,11 +7,20 @@
 #include <source_location> // since C++20
 #include <algorithm>
 #include <iterator>
+#include <utility>
 
 // parsing first argument: -d to show details
 bool parseDetailFlag(int argc, char const *argv[])
 {
     return argc >= 2 && std::string(argv[1]) == "-d";
+}
+
+// operator << for pair
+template<typename T1, typename T2>
+std::ostream& operator<<(std::ostream& os, const std::pair<T1, T2>& p)
+{
+    os << "(" << p.first << ", " << p.second << ")";
+    return os;
 }
 
 // manipulator for printing first N elements of a sequence
