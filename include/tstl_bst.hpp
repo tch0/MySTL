@@ -149,7 +149,6 @@ struct __bst_iterator : public __bst_iterator_base
     using self = __bst_iterator<Value, Ref, Ptr>;
     using link_type = __bst_node<Value>*; // or __bst_node<Value>::link_type
 
-    __bst_iterator() {}
     __bst_iterator(link_type x, link_type header) : __bst_iterator_base(x, header) {}
     __bst_iterator(const iterator& it) : __bst_iterator_base(it) {}
     self& operator=(const self& other)
@@ -310,7 +309,7 @@ private:
         leftmost() = header;
         rightmost() = header;
     }
-    // copy from another tree
+    // copy node and its children
     void copy_node(link_type src, link_type& dest)
     {
         if (src)
@@ -332,6 +331,7 @@ private:
             dest = nullptr;
         }
     }
+    // copy from another tree
     void copy_from(const bst& other)
     {
         copy_node(other.root(), root());
@@ -358,6 +358,44 @@ private:
         other.rightmost() = other.header;
         node_count = other.node_count;
         other.node_count = 0;
+    }
+    // move node and its children
+    void move_node(link_type src, link_type& dest)
+    {
+        if (src)
+        {
+            dest = construct_node(std::move(value(src)));
+            move_node(left(src), left(dest));
+            move_node(right(src), right(dest));
+            if (left(dest))
+            {
+                parent(left(dest)) = dest;
+            }
+            if (right(dest))
+            {
+                parent(right(dest)) = dest;
+            }
+        }
+        else
+        {
+            dest = nullptr;
+        }
+    }
+    // move every elements from other bst
+    void move_elements_from(bst&& other)
+    {
+        move_node(other.root(), root());
+        node_count = other.node_count;
+        if (root())
+        {
+            leftmost() = minimum(root());
+            rightmost() = maximum(root());
+        }
+        else
+        {
+            leftmost() = header;
+            rightmost() = header;
+        }
     }
     // insert to set/map
     std::pair<iterator, bool> insert_unique(link_type new_node)
@@ -498,15 +536,32 @@ public:
         init_empty();
         copy_from(other);
     }
-    bst(bst&& other, Allocator&& _alloc = Allocator()) // 3
+    bst(bst&& other) // 3
         : node_count(0)
         , key_cmp(std::move(other.key_cmp))
-        , alloc(std::move(_alloc))
+        , alloc(std::move(other.alloc))
         , node_alloc(alloc)
         , header(nullptr)
     {
         init_empty();
         move_from(std::move(other));
+    }
+    bst(bst&& other, const Allocator& _alloc) // 4
+        : node_count(0)
+        , key_cmp(std::move(other.key_cmp))
+        , alloc(_alloc)
+        , node_alloc(alloc)
+        , header(nullptr)
+    {
+        init_empty();
+        if (_alloc == other.get_allocator()) // move the whole tree
+        {
+            move_from(std::move(other));
+        }
+        else // move every element
+        {
+            move_elements_from(std::move(other));
+        }
     }
     ~bst()
     {
@@ -785,7 +840,17 @@ public:
         node_count--;
         return ret;
     }
-    size_type erase(const key_type& k) // 2
+    iterator erase(const_iterator first, const_iterator last) // 2
+    {
+        iterator ret = iterator((link_type)first.node, header);
+        while (first != last)
+        {
+            ret = erase(first);
+            first = ret;
+        }
+        return ret;
+    }
+    size_type erase(const key_type& k) // 3
     {
         size_type count = 0;
         iterator iter = find(k);

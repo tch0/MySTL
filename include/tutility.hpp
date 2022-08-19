@@ -3,6 +3,7 @@
 
 #include <type_traits>
 #include <cstddef>
+#include <utility>
 
 namespace tstd
 {
@@ -25,6 +26,34 @@ constexpr void swap(T (&a)[N], T (&b)[N]) noexcept(std::is_nothrow_swappable_v<T
         swap(a[i], b[i]);
     }
 }
+
+namespace impl
+{
+
+// types for set/map/multimap/unorder_set/unordered_map/unordered_multiset/unordered_multimap
+// for set/multiset/...
+template<typename T>
+class identity
+{
+public:
+    T& operator()(T& value)
+    {
+        return value;
+    }
+};
+
+// for map/multimap/...
+template<typename T1, typename T2>
+class first_of_pair
+{
+public:
+    T1& operator()(std::pair<T1, T2>& p)
+    {
+        return p.first;
+    }
+};
+
+} // namespace impl
 
 } // namespace tstd
 

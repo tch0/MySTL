@@ -20,6 +20,7 @@ int main(int argc, char const *argv[])
 {
     bool showDetails = parseDetailFlag(argc, argv);
     testTreeImpl<tstd::impl::bst>(showDetails, "tstd::impl::bst");
+    std::cout << std::endl;
     return 0;
 }
 
@@ -232,6 +233,18 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
             {
                 t1.insert(elem);
             }
+            auto iter = t1.erase(t1.find(10), t1.find(30));
+            util.assertEqual(t1.size(), 80);
+            util.assertSorted(t1.begin(), t1.end());
+            util.assertEqual(*iter, 30);
+        }
+        // 3
+        {
+            bst<int, int, identity<int>> t1;
+            for (auto elem : vec)
+            {
+                t1.insert(elem);
+            }
             for (int i = 10; i < 30; i++)
             {
                 auto count = t1.erase(i);
@@ -300,6 +313,12 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
         }
     }
     {
+        // observers
+        bst<int, int, identity<int>> t1;
+        util.assertEqual(typeid(t1.key_comp()) == typeid(std::less<int>), true);
+        util.assertEqual(typeid(t1.value_comp()) == typeid(std::less<int>), true);
+    }
+    {
         // comparisons
         bst<int, int, identity<int>> t1;
         bst<int, int, identity<int>> t2;
@@ -317,13 +336,6 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
         util.assertEqual(t1 < t2, false);
         util.assertEqual(t1 <= t2, false);
     }
-    {
-        // observers
-        bst<int, int, identity<int>> t1;
-        util.assertEqual(typeid(t1.key_comp()) == typeid(std::less<int>), true);
-        util.assertEqual(typeid(t1.value_comp()) == typeid(std::less<int>), true);
-    }
-    
     // other template arguments test
     // support multi, customized compare/key/value
     using bst_map = bst<const int, std::pair<const int, std::string>, FirstOfPair<const int, std::string>, true, std::greater<int>>;
@@ -483,6 +495,20 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
                 m1.insert(std::make_pair(elem, std::to_string(elem)));
                 m1.insert(std::make_pair(elem, std::to_string(elem) + "__2"));
             }
+            // in descending order
+            auto iter = m1.erase(m1.lower_bound(30), m1.lower_bound(10));
+            util.assertEqual(m1.size(), 160);
+            util.assertSorted(m1.begin(), m1.end(), cmp);
+            util.assertEqual((*iter).first, 10);
+        }
+        // 3
+        {
+            bst_map m1;
+            for (auto elem : vec)
+            {
+                m1.insert(std::make_pair(elem, std::to_string(elem)));
+                m1.insert(std::make_pair(elem, std::to_string(elem) + "__2"));
+            }
             for (int i = 10; i < 30; i++)
             {
                 auto count = m1.erase(i);
@@ -575,5 +601,3 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
     }
     util.showFinalResult();
 }
-
-
