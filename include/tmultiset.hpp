@@ -1,5 +1,5 @@
-#ifndef TSET_HPP
-#define TSET_HPP
+#ifndef TMULTISET_HPP
+#define TMULTISET_HPP
 
 #include <functional>
 #include <cstddef>
@@ -9,38 +9,36 @@
 #include <utility>
 #include <tstl_allocator.hpp>
 #include <titerator.hpp>
-#include <tstl_bst.hpp>
-#include <tutility.hpp>
 
 namespace tstd
 {
 
 template<typename Key, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<Key>,
-    typename UnderlyingTree = tstd::impl::bst<Key, Key, tstd::impl::identity<Key>, false, Compare, Allocator>>
-class set;
+    typename UnderlyingTree = tstd::impl::bst<Key, Key, tstd::impl::identity<Key>, true, Compare, Allocator>>
+class multiset;
 
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator==(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
+bool operator==(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator!=(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
+bool operator!=(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator<(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
+bool operator<(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator<=(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
+bool operator<=(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator>(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
+bool operator>(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator>=(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
+bool operator>=(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
 
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-class set
+class multiset
 {
-    friend bool operator== <Key, Compare, Allocator, UnderlyingTree>(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
-    friend bool operator!= <Key, Compare, Allocator, UnderlyingTree>(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
-    friend bool operator<  <Key, Compare, Allocator, UnderlyingTree>(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
-    friend bool operator<= <Key, Compare, Allocator, UnderlyingTree>(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
-    friend bool operator>  <Key, Compare, Allocator, UnderlyingTree>(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
-    friend bool operator>= <Key, Compare, Allocator, UnderlyingTree>(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs);
+    friend bool operator== <Key, Compare, Allocator, UnderlyingTree>(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
+    friend bool operator!= <Key, Compare, Allocator, UnderlyingTree>(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
+    friend bool operator<  <Key, Compare, Allocator, UnderlyingTree>(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
+    friend bool operator<= <Key, Compare, Allocator, UnderlyingTree>(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
+    friend bool operator>  <Key, Compare, Allocator, UnderlyingTree>(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
+    friend bool operator>= <Key, Compare, Allocator, UnderlyingTree>(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs);
 public:
     using key_type = Key;
     using value_type = Key;
@@ -57,25 +55,25 @@ public:
     using const_iterator = typename UnderlyingTree::const_iterator;
     using reverse_iterator = typename UnderlyingTree::reverse_iterator;
     using const_reverse_iterator = typename UnderlyingTree::const_reverse_iterator;
-    // node_type and insert_return_type(since C++17) are not supported
+    // node_type (since C++17) is not supported
 private:
     UnderlyingTree tree;
 public:
-    set() // 1
+    multiset() // 1
         : tree()
     {
     }
-    explicit set(const Compare& comp, const Allocator& _alloc = Allocator()) // 2
+    explicit multiset(const Compare& comp, const Allocator& _alloc = Allocator()) // 2
         : tree(comp, _alloc)
     {
     }
-    explicit set(const Allocator& _alloc) // 3
-        : set(Compare(), _alloc)
+    explicit multiset(const Allocator& _alloc) // 3
+        : multiset(Compare(), _alloc)
     {
 
     }
     template<typename InputIterator>
-    set(InputIterator first, InputIterator last, const Compare& comp = Compare(), const Allocator& _alloc = Allocator()) // 4
+    multiset(InputIterator first, InputIterator last, const Compare& comp = Compare(), const Allocator& _alloc = Allocator()) // 4
         : tree(comp, _alloc)
     {
         for (; first != last; ++first)
@@ -84,51 +82,51 @@ public:
         }
     }
     template<typename InputIterator>
-    set(InputIterator first, InputIterator last, const Allocator _alloc) // 5
-        : set(first, last, Compare(), _alloc)
+    multiset(InputIterator first, InputIterator last, const Allocator _alloc) // 5
+        : multiset(first, last, Compare(), _alloc)
     {
     }
-    set(const set& other) // 6
+    multiset(const multiset& other) // 6
         : tree(other.tree)
     {
     }
-    set(const set& other, const Allocator& _alloc) // 7
+    multiset(const multiset& other, const Allocator& _alloc) // 7
         : tree(other.tree, _alloc)
     {
     }
-    set(set&& other) // 8
+    multiset(multiset&& other) // 8
         : tree(std::move(other.tree))
     {
     }
-    set(set&& other, const Allocator& _alloc) // 9
+    multiset(multiset&& other, const Allocator& _alloc) // 9
         : tree(std::move(other.tree), _alloc)
     {
     }
-    set(std::initializer_list<value_type> il, const Compare& comp = Compare(), const Allocator& _alloc = Allocator()) // 10
-        : set(il.begin(), il.end(), comp, _alloc)
+    multiset(std::initializer_list<value_type> il, const Compare& comp = Compare(), const Allocator& _alloc = Allocator()) // 10
+        : multiset(il.begin(), il.end(), comp, _alloc)
     {
     }
-    set(std::initializer_list<value_type> il, const Allocator& _alloc) // 11
-        : set(il, Compare(), _alloc)
+    multiset(std::initializer_list<value_type> il, const Allocator& _alloc) // 11
+        : multiset(il, Compare(), _alloc)
     {
     }
-    ~set()
+    ~multiset()
     {
     }
     // assignment
-    set& operator=(const set& other) // 1
+    multiset& operator=(const multiset& other) // 1
     {
         tree = other.tree;
         return *this;
     }
-    set& operator=(set&& other) noexcept(std::allocator_traits<Allocator>::is_always_equal::value && std::is_nothrow_move_assignable<Compare>::value) // 2
+    multiset& operator=(multiset&& other) noexcept(std::allocator_traits<Allocator>::is_always_equal::value && std::is_nothrow_move_assignable<Compare>::value) // 2
     {
         tree = std::move(other.tree);
         return *this;
     }
-    set& operator=(std::initializer_list<value_type> il) // 3
+    multiset& operator=(std::initializer_list<value_type> il) // 3
     {
-        tree.clear();
+         tree.clear();
         for (auto& elem : il)
         {
             tree.insert(elem);
@@ -140,7 +138,7 @@ public:
     {
         return tree.get_allocator();
     }
-    // iterators
+     // iterators
     iterator begin() noexcept
     {
         return tree.begin();
@@ -208,13 +206,13 @@ public:
         tree.clear();
     }
     // insert
-    std::pair<iterator, bool> insert(const value_type& value) // 1
+    iterator insert(const value_type& value) // 1
     {
-        return tree.insert(value);
+        return tree.insert(value).first;
     }
-    std::pair<iterator, bool> insert(value_type&& value) // 2
+    iterator insert(value_type&& value) // 2
     {
-        return tree.insert(std::move(value));
+        return tree.insert(std::move(value)).first;
     }
     iterator insert(const_iterator hint, const value_type& value) // 3
     {
@@ -227,7 +225,7 @@ public:
     template<typename InputIterator>
     void insert(InputIterator first, InputIterator last) // 5
     {
-        for (; first != last; ++first)
+         for (; first != last; ++first)
         {
             tree.insert(*first);
         }
@@ -236,24 +234,24 @@ public:
     {
         insert(il.begin(), il.end());
     }
-    // insert_return_type insert(node_type&& nh) // 7
+    // iterator insert(node_type&& nh) // 7
     // {
     // }
-    // iterator insert(const_iterator hint, node_type&& nh) // 8
+    // iteartor insert(const_iterator hint, node_type&& nh) // 8
     // {
     // }
 
     // emplace
     template<typename... Args>
-    std::pair<iterator, bool> emplace(Args&&... args)
+    iterator emplace(Args&&... args)
     {
-        return tree.emplace(std::forward<Args>(args)...);
+        return tree.emplace(std::forward<Args>(args)...).first;
     }
     // emplace_hint
     template<typename... Args>
-    std::pair<iterator, bool> emplace_hint(const_iterator hint, Args&&... args)
+    iterator emplace_hint(const_iterator hint, Args&&... args)
     {
-        return tree.emplace(std::forward<Args>(args)...);
+        return tree.emplace(std::forward<Args>(args)...).first;
     }
     // erase
     iterator erase(const_iterator pos) // 1
@@ -266,9 +264,8 @@ public:
     }
     size_type erase(const key_type& key) // 3
     {
-        return tree.erase(key);
+        return erase(key);
     }
-    // participate in overload resolution only when K can not convert to iterator or const_iteraotr implicitly
     // since C++23
     template<typename K,
         typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
@@ -277,7 +274,7 @@ public:
         return tree.erase(Key(std::forward<K>(k)));
     }
     // swap
-    void swap(set& other) noexcept(std::allocator_traits<Allocator>::is_always_equal::value && std::is_nothrow_swappable_v<Compare>)
+    void swap(multiset& other) noexcept(std::allocator_traits<Allocator>::is_always_equal::value && std::is_nothrow_swappable_v<Compare>)
     {
         tree.swap(other.tree);
     }
@@ -287,14 +284,13 @@ public:
     // count
     size_type count(const Key& key) const // 1
     {
-        return tree.find(key) != tree.end() ? 1 : 0;
-        // another option: tstd::distance(tree.lower_bound(key), tree.upper_bound(key));
+        return tstd::distance(tree.lower_bound(key), tree.upper_bound(key));
     }
     template<typename K,
         typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
     size_type count(const K& x) const // 2
     {
-        return tree.find(Key(x)) != tree.end() ? 1 : 0;
+        return tstd::distance(tree.lower_bound(Key(x)), tree.upper_bound(Key(x)));
     }
     // find
     iterator find(const Key& key) // 1
@@ -405,43 +401,43 @@ public:
 // non-member operations
 // comparisons
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator==(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs)
+bool operator==(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs)
 {
     return lhs.tree == rhs.tree;
 }
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator!=(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs)
+bool operator!=(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs)
 {
     return lhs.tree != rhs.tree;
 }
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator<(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs)
+bool operator<(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs)
 {
     return lhs.tree < rhs.tree;
 }
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator<=(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs)
+bool operator<=(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs)
 {
     return lhs.tree <= rhs.tree;
 }
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator>(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs)
+bool operator>(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs)
 {
     return lhs.tree > rhs.tree;
 }
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-bool operator>=(const tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs)
+bool operator>=(const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, const tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs)
 {
     return lhs.tree >= rhs.tree;
 }
 
-// global swap for tstd::set
+// global swap for tstd::multiset
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>
-void swap(tstd::set<Key, Compare, Allocator, UnderlyingTree>& lhs, tstd::set<Key, Compare, Allocator, UnderlyingTree>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+void swap(tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& lhs, tstd::multiset<Key, Compare, Allocator, UnderlyingTree>& rhs) noexcept(noexcept(lhs.swap(rhs)))
 {
     lhs.swap(rhs);
 }
 
 } // namespace tstd
 
-#endif // TSET_HPP
+#endif // TMULTISET_HPP
