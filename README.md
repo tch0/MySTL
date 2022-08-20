@@ -49,3 +49,5 @@ C++ 标准模板库的完整内容见[Cpp_STL_ReferenceManual.pdf](https://www.c
 |[`<tdeque.hpp>`](https://github.com/tch0/MySTL/blob/master/include/tdeque.hpp)<br/>对应于<br/>[`<deque>`](https://zh.cppreference.com/w/cpp/header/deque)|类：`deque`<br/>函数：`operator ==/!=/</<=/>/>=`, `tstd::swap`
 |[`<tstack.hpp>`](https://github.com/tch0/MySTL/blob/master/include/tstack.hpp)<br/>对应于<br/>[`<stack>`](https://zh.cppreference.com/w/cpp/header/stack)|类：`stack`<br/>函数：`operator ==/!=/</<=/>/>=`, `tstd::swap`
 |[`<tqueue.hpp>`](https://github.com/tch0/MySTL/blob/master/include/tqueue.hpp)<br/>对应于<br/>[`<queue>`](https://zh.cppreference.com/w/cpp/header/queue)|类：`queue`, `priority_queue`<br/>函数：`operator ==/!=/</<=/>/>=`, `tstd::swap`
+|[`<tset.hpp>`](https://github.com/tch0/MySTL/blob/master/include/tset.hpp)<br/>对应于<br/>[`<set>`](https://zh.cppreference.com/w/cpp/header/set)|类：`set`, `multiset`<br/>函数：`operator ==/!=/</<=/>/>=`, `tstd::swap`
+|[`<tmap.hpp>`](https://github.com/tch0/MySTL/blob/master/include/tmap.hpp)<br/>对应于<br/>[`<map>`](https://zh.cppreference.com/w/cpp/header/map)|类：`map`, `multimap`<br/>函数：`operator ==/!=/</<=/>/>=`, `tstd::swap`

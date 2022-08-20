@@ -286,8 +286,7 @@ public:
     {
         return tstd::distance(tree.lower_bound(key), tree.upper_bound(key));
     }
-    template<typename K,
-        typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
+    template<typename K>
     size_type count(const K& x) const // 2
     {
         return tstd::distance(tree.lower_bound(Key(x)), tree.upper_bound(Key(x)));
@@ -301,14 +300,12 @@ public:
     {
         return tree.find(key);
     }
-    template<typename K,
-        typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
+    template<typename K>
     iterator find(const K& x) // 3
     {
         return tree.find(Key(x));
     }
-    template<typename K,
-        typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
+    template<typename K>
     const_iterator find(const K& x) const // 4
     {
         return tree.find(Key(x));
@@ -318,8 +315,7 @@ public:
     {
         return tree.find(key) != tree.end();
     }
-    template<typename K,
-        typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
+    template<typename K>
     bool contains(const K& x) const // 2
     {
         return tree.find(Key(x)) != tree.end();
@@ -333,14 +329,12 @@ public:
     {
         return {tree.lower_bound(key), tree.upper_bound(key)};
     }
-    template<typename K,
-        typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
+    template<typename K>
     std::pair<iterator, iterator> equal_range(const K& x) // 3
     {
         return {tree.lower_bound(Key(x)), tree.upper_bound(Key(x))};
     }
-    template<typename K,
-        typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
+    template<typename K>
     std::pair<const_iterator, const_iterator> equal_range(const K& x) const // 4
     {
         return {tree.lower_bound(Key(x)), tree.upper_bound(Key(x))};
@@ -354,14 +348,12 @@ public:
     {
         return tree.lower_bound(key);
     }
-    template<typename K,
-        typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
+    template<typename K>
     iterator lower_bound(const K& x) // 3
     {
         return tree.lower_bound(Key(x));
     }
-    template<typename K,
-        typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
+    template<typename K>
     const_iterator lower_bound(const K& x) const // 4
     {
         return tree.lower_bound(Key(x));
@@ -375,14 +367,12 @@ public:
     {
         return tree.upper_bound(key);
     }
-    template<typename K,
-        typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
+    template<typename K>
     iterator upper_bound(const K& x) // 3
     {
         return tree.upper_bound(Key(x));
     }
-    template<typename K,
-        typename = std::enable_if_t<!std::is_convertible_v<K, iterator> && !std::is_convertible_v<K, const_iterator>>>
+    template<typename K>
     const_iterator upper_bound(const K& x) const // 4
     {
         return tree.upper_bound(Key(x));
