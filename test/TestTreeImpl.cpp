@@ -8,7 +8,7 @@
 #include <tstl_bst.hpp>
 #include "TestUtil.hpp"
 
-// test of the binary search implementation
+// test of the binary search tree implementation
 // 1. bst
 // 2. rb-tree: todo yet!
 // 3. avl-tree: todo yet!

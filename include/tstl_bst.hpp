@@ -397,7 +397,7 @@ private:
             rightmost() = header;
         }
     }
-    // insert to set/map
+    // insert to set/map, do not insert if exist
     std::pair<iterator, bool> insert_unique(link_type new_node)
     {
         const key_type k = key(new_node);
