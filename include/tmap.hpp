@@ -11,6 +11,8 @@
 #include <stdexcept>
 #include <tstl_allocator.hpp>
 #include <titerator.hpp>
+#include <tstl_bst.hpp>
+#include <tutility.hpp>
 #include <tmultimap.hpp> // multimap is in <map>
 
 namespace tstd

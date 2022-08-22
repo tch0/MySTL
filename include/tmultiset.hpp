@@ -9,6 +9,8 @@
 #include <utility>
 #include <tstl_allocator.hpp>
 #include <titerator.hpp>
+#include <tstl_bst.hpp>
+#include <tutility.hpp>
 
 namespace tstd
 {

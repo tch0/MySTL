@@ -197,6 +197,7 @@ struct __bst_iterator : public __bst_iterator_base
 template<typename Key, typename Value, typename KeyOfValue, bool Multi = false, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<Value>>
 class bst
 {
+private:
     using base_ptr = __bst_node_base*;
     using bst_node = __bst_node<Value>;
     using bst_node_allocator = typename Allocator::template rebind<bst_node>::other;

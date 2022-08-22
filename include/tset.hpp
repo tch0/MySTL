@@ -252,9 +252,9 @@ public:
     }
     // emplace_hint
     template<typename... Args>
-    std::pair<iterator, bool> emplace_hint(const_iterator hint, Args&&... args)
+    iterator emplace_hint(const_iterator hint, Args&&... args)
     {
-        return tree.emplace(std::forward<Args>(args)...);
+        return tree.emplace(std::forward<Args>(args)...).first;
     }
     // erase
     iterator erase(const_iterator pos) // 1

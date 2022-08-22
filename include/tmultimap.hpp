@@ -7,9 +7,10 @@
 #include <type_traits>
 #include <limits>
 #include <utility>
-#include <stdexcept>
 #include <tstl_allocator.hpp>
 #include <titerator.hpp>
+#include <tstl_bst.hpp>
+#include <tutility.hpp>
 
 namespace tstd
 {

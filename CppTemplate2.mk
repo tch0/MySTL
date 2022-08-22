@@ -20,6 +20,8 @@ target =
 # debug
 ifeq ($(debug), yes)
 CXXFLAGS += -g
+else
+CXXFLAGS += -O3
 endif
 
 # filenames and targets
