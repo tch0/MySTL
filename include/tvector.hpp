@@ -596,7 +596,7 @@ private:
         T* new_start = alloc.allocate(new_cap * sizeof(T));
         T* new_finish = new_start + size();
         T* new_end_of_storage = new_start + new_cap;
-        uninitialized_move(start, finish, new_start);
+        tstd::uninitialized_move(start, finish, new_start);
         clear();
         free_all_spaces();
         start = new_start;
@@ -614,11 +614,11 @@ private:
         }
         if (idx + count >= size())
         {
-            uninitialized_copy(start + idx, finish, start + idx + count);
+            tstd::uninitialized_copy(start + idx, finish, start + idx + count);
         }
         else // idx + count < size()
         {
-            uninitialized_copy(finish - count, finish, finish);
+            tstd::uninitialized_copy(finish - count, finish, finish);
             // move elements from back to front
             move_range_from_back_to_front(start + idx, finish - count, start + idx + count);
         }

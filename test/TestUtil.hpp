@@ -80,7 +80,7 @@ public:
         }
     }
 
-    void showFinalResult(const std::source_location& loc = std::source_location::current())
+    void showFinalResult()
     {
         std::cout << std::boolalpha << std::dec;
         std::cout << "Test result of " << target << ": "
@@ -133,8 +133,8 @@ public:
             std::cout << std::boolalpha << std::dec;
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertSequenceEqual: " << (res ? "passed" : "==================== failed")
-                << "\n\tleft value: " << printContainerElememts(c1, 20) // class template argument deducing
-                << "\n\tright value: " << printContainerElememts(c2, 20) << std::endl;
+                << "\n\tleft sequence: " << printContainerElememts(c1, 20)
+                << "\n\tright sequence: " << printContainerElememts(c2, 20) << std::endl;
         }
     }
 
@@ -149,8 +149,8 @@ public:
             std::cout << std::boolalpha << std::dec;
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertArrayEqual: " << (res ? "passed" : "==================== failed")
-                << "\n\tleft value: " << printArrayElements(arr1, size, 20)
-                << "\n\tright value: " << printArrayElements(arr2, size, 20) << std::endl;
+                << "\n\tleft array: " << printArrayElements(arr1, size, 20)
+                << "\n\tright array: " << printArrayElements(arr2, size, 20) << std::endl;
         }
     }
 
@@ -166,8 +166,8 @@ public:
             std::cout << std::boolalpha << std::dec;
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertRangeEqual: " << (res ? "passed" : "==================== failed")
-                << "\n\tleft value: " << PrintSequenceElements(b1, e1, 20)
-                << "\n\tright value: " << PrintSequenceElements(b2, std::next(b2, std::distance(b1, e1)), 20)  << std::endl;
+                << "\n\tleft range: " << PrintSequenceElements(b1, e1, 20)
+                << "\n\tright range: " << PrintSequenceElements(b2, std::next(b2, std::distance(b1, e1)), 20)  << std::endl;
         }
     }
     // assert a sequence is sorted
@@ -183,6 +183,37 @@ public:
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertSorted: " << (res ? "passed" : "==================== failed")
                 << "\n\tsequence: " << PrintSequenceElements(b, e, 20) << std::endl;
+        }
+    }
+    // assert two set is equal, do not consider order of elements.
+    template<typename Container1, typename Container2>
+    void assertSetEqual(const Container1& c1, const Container2& c2, const std::source_location& loc = std::source_location::current())
+    {
+        bool res = (std::size(c1) == std::size(c2) && std::is_permutation(c1.begin(), c1.end(), c2.begin()));
+        passedCount += (res ? 1 : 0);
+        totalCount++;
+        if (showDetails)
+        {
+            std::cout << std::boolalpha << std::dec;
+            std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
+                << "assertSequenceEqual: " << (res ? "passed" : "==================== failed")
+                << "\n\tleft set: " << printContainerElememts(c1, 20)
+                << "\n\tright set: " << printContainerElememts(c2, 20) << std::endl;
+        }
+    }
+    template<typename ForwardIterator1, typename ForwardIterator2>
+    void assertSetEqual(ForwardIterator1 b1, ForwardIterator1 e1, ForwardIterator2 b2, ForwardIterator2 e2, const std::source_location& loc = std::source_location::current())
+    {
+        bool res = (std::distance(b1, e1) == std::distance(b2, e2) && std::is_permutation(b1, e1, b2));
+        passedCount += (res ? 1 : 0);
+        totalCount++;
+        if (showDetails)
+        {
+            std::cout << std::boolalpha << std::dec;
+            std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
+                << "assertSetEqual: " << (res ? "passed" : "==================== failed")
+                << "\n\tleft set: " << PrintSequenceElements(b1, e1, 20)
+                << "\n\tright set: " << PrintSequenceElements(b2, e2, 20)  << std::endl;
         }
     }
 private:

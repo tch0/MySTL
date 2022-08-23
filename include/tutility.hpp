@@ -36,7 +36,7 @@ template<typename T>
 class identity
 {
 public:
-    T& operator()(T& value)
+    T& operator()(T& value) const
     {
         return value;
     }
@@ -47,7 +47,11 @@ template<typename T1, typename T2>
 class first_of_pair
 {
 public:
-    T1& operator()(std::pair<T1, T2>& p)
+    T1& operator()(std::pair<T1, T2>& p) const
+    {
+        return p.first;
+    }
+    const T1& operator()(const std::pair<T1, T2>& p) const
     {
         return p.first;
     }

@@ -291,7 +291,8 @@ private:
     }
     static Key& key(link_type x)
     {
-        return KeyOfValue()(value(x));
+        static KeyOfValue get_key;
+        return get_key(value(x));
     }
     // get minimum and maximum
     static link_type minimum(link_type x)
