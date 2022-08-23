@@ -17,7 +17,7 @@ namespace tstd
 {
 
 template<typename Key, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<Key>,
-    typename UnderlyingTree = tstd::impl::bst<Key, Key, tstd::impl::identity<Key>, false, Compare, Allocator>>
+    typename UnderlyingTree = tstd::impl::bst<Key, Key, tstd::impl::identity, false, Compare, Allocator>>
 class set;
 
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>

@@ -16,7 +16,7 @@ namespace tstd
 {
 
 template<typename Key, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<Key>,
-    typename UnderlyingTree = tstd::impl::bst<Key, Key, tstd::impl::identity<Key>, true, Compare, Allocator>>
+    typename UnderlyingTree = tstd::impl::bst<Key, Key, tstd::impl::identity, true, Compare, Allocator>>
 class multiset;
 
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>

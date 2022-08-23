@@ -32,13 +32,13 @@ namespace impl
 
 // types for set/map/multimap/unorder_set/unordered_map/unordered_multiset/unordered_multimap
 // for set/multiset/...
-template<typename T>
 class identity
 {
 public:
-    T& operator()(T& value) const
+    template<typename T>
+    T&& operator()(T&& value) const
     {
-        return value;
+        return std::forward<T>(value);
     }
 };
 

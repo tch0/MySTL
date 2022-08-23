@@ -34,6 +34,7 @@ all_test_targets += TestTreeImpl
 all_test_targets += TestAssociativeContainers
 all_test_targets += TestAlgorithms
 all_test_targets += TestHashtableImpl
+all_test_targets += TestUnorderedContainers
 
 # add all efficiency test targets here
 all_efficiency_test_targets += 

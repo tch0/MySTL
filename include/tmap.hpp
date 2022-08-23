@@ -160,7 +160,7 @@ public:
         auto iter = find(key);
         if (iter == end())
         {
-            throw std::out_of_range("map::at do not have this key");
+            throw std::out_of_range("map::at: do not have this key");
         }
         return iter->second;
     }
@@ -169,7 +169,7 @@ public:
         auto iter = find(key);
         if (iter == end())
         {
-            throw std::out_of_range("map::at do not have this key");
+            throw std::out_of_range("map::at: do not have this key");
         }
         return iter->second;
     }

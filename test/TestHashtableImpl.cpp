@@ -71,7 +71,7 @@ void testHashtableImpl(bool showDetails)
     std::iota(vec.begin(), vec.end(), 1);
     std::random_shuffle(vec.begin(), vec.end());
 
-    using ht_int = tstd::impl::hash_table<int, int, tstd::impl::identity<const int>>;
+    using ht_int = tstd::impl::hash_table<int, int, tstd::impl::identity>;
     // constructors
     {
         // 1
