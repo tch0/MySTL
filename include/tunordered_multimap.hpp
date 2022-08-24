@@ -247,7 +247,7 @@ public:
     // erase
     iterator erase(const_iterator pos) // 1
     {
-        return table.erase(pos).first;
+        return table.erase(pos);
     }
     iterator erase(const_iterator first, const_iterator last) // 2
     {
@@ -406,7 +406,7 @@ public:
     }
 
     // observers
-    hasher hash_fucntion() const
+    hasher hash_function() const
     {
         return table.hash_function();
     }

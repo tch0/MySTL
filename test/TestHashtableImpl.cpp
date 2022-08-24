@@ -22,6 +22,7 @@ int main(int argc, char const *argv[])
 {
     bool showDetails = parseDetailFlag(argc, argv);
     testHashtableImpl(showDetails);
+    std::cout << std::endl;
     return 0;
 }
 

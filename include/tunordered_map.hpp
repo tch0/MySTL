@@ -523,7 +523,7 @@ public:
     }
 
     // observers
-    hasher hash_fucntion() const
+    hasher hash_function() const
     {
         return table.hash_function();
     }
