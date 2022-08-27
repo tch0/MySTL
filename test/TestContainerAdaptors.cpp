@@ -5,6 +5,7 @@
 #include <stack>
 #include <queue>
 #include <string>
+#include <random>
 #include <functional>
 #include <tstack.hpp>
 #include <tdeque.hpp>
@@ -73,7 +74,7 @@ void testStackImpl(bool showDetails, const std::string& underlyingContainer)
 
     std::vector<int> vec(100);
     std::iota(vec.begin(), vec.end(), 1);
-    std::random_shuffle(vec.begin(), vec.end());
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
     {
         // constructors
         // 1
@@ -247,7 +248,7 @@ void testQueueImpl(bool showDetails, const std::string& underlyingContainer)
 
     std::vector<int> vec(100);
     std::iota(vec.begin(), vec.end(), 1);
-    std::random_shuffle(vec.begin(), vec.end());
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
     {
         // constructors
         // 1
@@ -437,7 +438,7 @@ void testPriorityQueueImpl(bool showDetails, const std::string& underlyingContai
     // auxiliary objects
     std::vector<int> vec(100);
     std::iota(vec.begin(), vec.end(), 1);
-    std::random_shuffle(vec.begin(), vec.end());
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
     auto less = Compare<int>(true);
     auto greater = Compare<int>(false);
     tstd::allocator<int> talloc;

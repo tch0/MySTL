@@ -51,7 +51,7 @@ void testSet(bool showDetails)
     TestUtil util(showDetails, "set");
     std::vector<int> vec(100);
     std::iota(vec.begin(), vec.end(), 1);
-    std::random_shuffle(vec.begin(), vec.end());
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
 
     // constructors
     {
@@ -418,7 +418,7 @@ void testMultiset(bool showDetails)
     vec.resize(300);
     std::copy(vec.begin(), vec.begin() + 100, vec.begin() + 100);
     std::copy(vec.begin(), vec.begin() + 100, vec.begin() + 200);
-    std::random_shuffle(vec.begin(), vec.end());
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
 
     // constructors
     {
@@ -783,7 +783,7 @@ void testMap(bool showDetails)
     {
         std::vector<int> tmp(100);
         std::iota(tmp.begin(), tmp.end(), 1);
-        std::random_shuffle(tmp.begin(), tmp.end());
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937());
         for (auto& elem : tmp)
         {
             vec.emplace_back(elem, std::to_string(elem));
@@ -1233,7 +1233,7 @@ void testMultimap(bool showDetails)
     {
         std::vector<int> tmp(100);
         std::iota(tmp.begin(), tmp.end(), 1);
-        std::random_shuffle(tmp.begin(), tmp.end());
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937());
         for (auto& elem : tmp)
         {
             vec.emplace_back(elem, std::to_string(elem));

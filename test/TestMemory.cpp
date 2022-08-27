@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <random>
 #include <tmemory.hpp>
 #include "TestUtil.hpp"
 

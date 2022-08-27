@@ -63,7 +63,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
     TestUtil util(showDetails, treeType);
     std::vector<int> vec(100);
     std::iota(vec.begin(), vec.end(), 1);
-    std::random_shuffle(vec.begin(), vec.end());
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
     {
         // constructors
         // 1: default constructor

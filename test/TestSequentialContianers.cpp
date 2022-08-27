@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <functional>
 #include <string>
+#include <random>
 #include <tmemory.hpp>
 #include <tvector.hpp>
 #include <tarray.hpp>
@@ -75,7 +76,7 @@ void testVector(bool showDetails)
     {
         std::vector<int> vec(100);
         std::iota(vec.begin(), vec.end(), 1);
-        std::random_shuffle(vec.begin(), vec.end());
+        std::shuffle(vec.begin(), vec.end(), std::mt19937());
         // 5
         tstd::vector<int> vec1(vec.begin(), vec.end());
         std::vector<int> vec2(vec.begin(), vec.end());
@@ -204,7 +205,7 @@ void testVector(bool showDetails)
             // 4
             std::vector<int> tmp(100);
             std::iota(tmp.begin(), tmp.end(), 1);
-            std::random_shuffle(tmp.begin(), tmp.end());
+            std::shuffle(tmp.begin(), tmp.end(), std::mt19937());
             vec1.insert(vec1.begin() + 33, tmp.begin(), tmp.end());
             vec2.insert(vec2.begin() + 33, tmp.begin(), tmp.end());
             util.assertSequenceEqual(vec1, vec2);
@@ -449,7 +450,7 @@ void testList(bool showDetails)
             // 5
             std::vector<int> vec(100);
             std::iota(vec.begin(), vec.end(), 1);
-            std::random_shuffle(vec.begin(), vec.end());
+            std::shuffle(vec.begin(), vec.end(), std::mt19937());
             tstd::list<int> list1(vec.begin(), vec.end());
             std::list<int> list2(vec.begin(), vec.end());
             util.assertSequenceEqual(list1, list2);
@@ -457,7 +458,7 @@ void testList(bool showDetails)
         {
             std::vector<int> vec(100);
             std::iota(vec.begin(), vec.end(), 1);
-            std::random_shuffle(vec.begin(), vec.end());
+            std::shuffle(vec.begin(), vec.end(), std::mt19937());
             tstd::list<int> tmp1(vec.begin(), vec.end());
             std::list<int> tmp2(vec.begin(), vec.end());
             // 6
@@ -496,7 +497,7 @@ void testList(bool showDetails)
         // assignment
         std::vector<int> vec(1000);
         std::iota(vec.begin(), vec.end(), 1);
-        std::random_shuffle(vec.begin(), vec.end());
+        std::shuffle(vec.begin(), vec.end(), std::mt19937());
 
         // operator=
         tstd::list<int> list1;
@@ -584,7 +585,7 @@ void testList(bool showDetails)
     {
         std::vector<int> vec(1000);
         std::iota(vec.begin(), vec.end(), 1);
-        std::random_shuffle(vec.begin(), vec.end());
+        std::shuffle(vec.begin(), vec.end(), std::mt19937());
 
         // modifiers
         tstd::list<int> list1{1, 2, 3, 4, 5};
@@ -708,7 +709,7 @@ void testList(bool showDetails)
     {
         std::vector<int> vec(1000);
         std::iota(vec.begin(), vec.end(), 1);
-        std::random_shuffle(vec.begin(), vec.end());
+        std::shuffle(vec.begin(), vec.end(), std::mt19937());
 
         // oeprations/algorithms
         // merge
@@ -921,7 +922,7 @@ void testForwardList(bool showDetails)
 
     std::vector<int> vec(100);
     std::iota(vec.begin(), vec.end(), 1);
-    std::random_shuffle(vec.begin(), vec.end());
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
     {
         // constructors
         {
@@ -1382,7 +1383,7 @@ void testDeque(bool showDetails)
     // a range for test
     std::vector<int> vec(100);
     std::iota(vec.begin(), vec.end(), 1);
-    std::random_shuffle(vec.begin(), vec.end());
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
     {
         // constructors
         // 1

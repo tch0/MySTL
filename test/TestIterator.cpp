@@ -4,6 +4,7 @@
 #include <string>
 #include <forward_list>
 #include <algorithm>
+#include <random>
 #include <titerator.hpp>
 #include <tvector.hpp>
 #include "TestUtil.hpp"
@@ -39,7 +40,7 @@ void testReverseIterator(bool showDetails)
     TestUtil util(showDetails, "reverse iterator");
     std::vector<int> vec(100);
     std::iota(vec.begin(), vec.end(), 1);
-    std::random_shuffle(vec.begin(), vec.end());
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
 
     // reverse iterator
     {
@@ -146,7 +147,7 @@ void testMoveIterator(bool showDetails)
     TestUtil util(showDetails, "move iterator");
     std::vector<int> vec(100);
     std::iota(vec.begin(), vec.end(), 1);
-    std::random_shuffle(vec.begin(), vec.end());
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
 
     // move iterator
     {

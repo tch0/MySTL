@@ -70,7 +70,7 @@ void testHashtableImpl(bool showDetails)
     TestUtil util(showDetails, "tstd::impl::hash_table");
     std::vector<int> vec(100);
     std::iota(vec.begin(), vec.end(), 1);
-    std::random_shuffle(vec.begin(), vec.end());
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
 
     using ht_int = tstd::impl::hash_table<int, int, tstd::impl::identity>;
     // constructors
@@ -510,7 +510,7 @@ void testHashtableImpl(bool showDetails)
         std::list<std::pair<const Foo, std::string>> tmplist(vec_foo.begin(), vec_foo.end());
         for (int i = 13; i < 26; ++i)
         {
-            ht.erase(Foo(i)); // erase the first one
+            ht.erase(Foo(i));
             tmplist.remove_if([i](const std::pair<const Foo, std::string>& p) -> bool { return p.first == i; });
         }
         for (int i = 51; i < 89; ++i)
