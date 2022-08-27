@@ -216,8 +216,199 @@ void testNumericAlgorithms(bool showDetails)
 void testNonModifyingSequenceAlgorithms(bool showDetails)
 {
     TestUtil util(showDetails, "non-modifying sequence algorithms");
-    {
 
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 1);
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
+    // all_of
+    {
+        auto res1 = std::all_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 10; });
+        auto res2 = tstd::all_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 10; });
+        util.assertEqual(res1, res2);
+        res1 = std::all_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 0; });
+        res2 = tstd::all_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 0; });
+        util.assertEqual(res1, res2);
+        res1 = std::all_of(vec.begin(), vec.end(), [](int a) -> bool { return a <= 100; });
+        res2 = tstd::all_of(vec.begin(), vec.end(), [](int a) -> bool { return a <= 100; });
+        util.assertEqual(res1, res2);
+    }
+    // any_of
+    {
+        auto res1 = std::any_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 10; });
+        auto res2 = tstd::any_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 10; });
+        util.assertEqual(res1, res2);
+        res1 = std::any_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 0; });
+        res2 = tstd::any_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 0; });
+        util.assertEqual(res1, res2);
+        res1 = std::any_of(vec.begin(), vec.end(), [](int a) -> bool { return a <= 0; });
+        res2 = tstd::any_of(vec.begin(), vec.end(), [](int a) -> bool { return a <= 0; });
+        util.assertEqual(res1, res2);
+    }
+    // none_of
+    {
+        auto res1 = std::none_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 10; });
+        auto res2 = tstd::none_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 10; });
+        util.assertEqual(res1, res2);
+        res1 = std::none_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 0; });
+        res2 = tstd::none_of(vec.begin(), vec.end(), [](int a) -> bool { return a > 0; });
+        util.assertEqual(res1, res2);
+        res1 = std::none_of(vec.begin(), vec.end(), [](int a) -> bool { return a <= 0; });
+        res2 = tstd::none_of(vec.begin(), vec.end(), [](int a) -> bool { return a <= 0; });
+        util.assertEqual(res1, res2);
+    }
+    // for_each
+    {
+        int sum1 = 1;
+        int sum2 = 1;
+        std::for_each(vec.begin(), vec.end(), [&sum1](int a) { sum1 += a; });
+        tstd::for_each(vec.begin(), vec.end(), [&sum2](int a) { sum2 += a; });
+        util.assertEqual(sum1, sum2);
+    }
+    // for_each_n
+    {
+        int sum1 = 1;
+        int sum2 = 1;
+        auto iter1 = std::for_each_n(vec.begin(), 10, [&sum1](int a) { sum1 += a; });
+        auto iter2 = tstd::for_each_n(vec.begin(), 10, [&sum2](int a) { sum2 += a; });
+        util.assertEqual(sum1, sum2);
+        util.assertEqual(iter1 == iter2, true);
+    }
+    // count
+    {
+        auto res1 = std::count(vec.begin(), vec.end(), 0);
+        auto res2 = tstd::count(vec.begin(), vec.end(), 0);
+        util.assertEqual(res1, res2);
+        res1 = std::count(vec.begin(), vec.end(), 10);
+        res2 = tstd::count(vec.begin(), vec.end(), 10);
+        util.assertEqual(res1, res2);
+    }
+    // count_if
+    {
+        auto res1 = std::count_if(vec.begin(), vec.end(), [](int a) -> bool { return a > 20; });
+        auto res2 = tstd::count_if(vec.begin(), vec.end(), [](int a) -> bool { return a > 20; });
+        util.assertEqual(res1, res2);
+    }
+    // mismatch
+    {
+        std::vector<int> tmp(vec);
+        tmp[30] = -1;
+        // 1
+        auto p1 = std::mismatch(vec.begin(), vec.end(), tmp.begin());
+        auto p2 = tstd::mismatch(vec.begin(), vec.end(), tmp.begin());
+        util.assertEqual(p1 == p2, true);
+        // 2
+        p1 = std::mismatch(vec.begin(), vec.end(), tmp.begin(), std::equal_to<int>());
+        p2 = tstd::mismatch(vec.begin(), vec.end(), tmp.begin(), std::equal_to<int>());
+        util.assertEqual(p1 == p2, true);
+        // 3
+        p1 = std::mismatch(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        p2 = tstd::mismatch(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        util.assertEqual(p1 == p2, true);
+        // 4
+        p1 = std::mismatch(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::equal_to<int>());
+        p2 = tstd::mismatch(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::equal_to<int>());
+        util.assertEqual(p1 == p2, true);
+    }
+    // find
+    {
+        auto iter1 = std::find(vec.begin(), vec.end(), 10);
+        auto iter2 = tstd::find(vec.begin(), vec.end(), 10);
+        util.assertEqual(iter1 == iter2, true);
+    }
+    // find_if
+    {
+        auto iter1 = std::find_if(vec.begin(), vec.end(), [](int a) -> bool { return a > 40; });
+        auto iter2 = tstd::find_if(vec.begin(), vec.end(), [](int a) -> bool { return a > 40; });
+        util.assertEqual(iter1 == iter2, true);
+    }
+    // find_if_not
+    {
+        auto iter1 = std::find_if_not(vec.begin(), vec.end(), [](int a) -> bool { return a > 40; });
+        auto iter2 = tstd::find_if_not(vec.begin(), vec.end(), [](int a) -> bool { return a > 40; });
+        util.assertEqual(iter1 == iter2, true);
+    }
+    // find_end
+    {
+        std::vector<int> tmp(100, 1);
+        tmp.resize(200, 2);
+        tmp.resize(300, 3);
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937());
+        std::vector<int> seq{1, 2, 3};
+        // 1
+        auto iter1 = std::find_end(tmp.begin(), tmp.end(), seq.begin(), seq.end());
+        auto iter2 = tstd::find_end(tmp.begin(), tmp.end(), seq.begin(), seq.end());
+        util.assertEqual(iter1 - tmp.begin(), iter2 - tmp.begin());
+        util.assertEqual(iter1 == iter2, true);
+        // 2
+        iter1 = std::find_end(tmp.begin(), tmp.end(), seq.begin(), seq.end(), std::equal_to<int>());
+        iter2 = tstd::find_end(tmp.begin(), tmp.end(), seq.begin(), seq.end(), std::equal_to<int>());
+        util.assertEqual(iter1 - tmp.begin(), iter2 - tmp.begin());
+        util.assertEqual(iter1 == iter2, true);
+    }
+    // find_first_of
+    {
+        // 1
+        std::vector<int> tmp{1, 2, 3, 4, 5};
+        auto iter1 = std::find_first_of(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        auto iter2 = tstd::find_first_of(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        util.assertEqual(iter1 - vec.begin(), iter2 - vec.begin());
+        util.assertEqual(iter1 == iter2, true);
+        // 2
+        iter1 = std::find_first_of(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::equal_to<int>());
+        iter2 = tstd::find_first_of(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::equal_to<int>());
+        util.assertEqual(iter1 - vec.begin(), iter2 - vec.begin());
+        util.assertEqual(iter1 == iter2, true);
+    }
+    // adjacent_find
+    {
+        std::vector<int> tmp(vec);
+        tmp.resize(120, 1);
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937());
+        // 1
+        auto iter1 = std::adjacent_find(tmp.begin(), tmp.end());
+        auto iter2 = tstd::adjacent_find(tmp.begin(), tmp.end());
+        util.assertEqual(iter1 - tmp.begin(), iter2 - tmp.begin());
+        util.assertEqual(iter1 == iter2, true);
+        // 2
+        iter1 = std::adjacent_find(tmp.begin(), tmp.end(), std::equal_to<int>());
+        iter2 = tstd::adjacent_find(tmp.begin(), tmp.end(), std::equal_to<int>());
+        util.assertEqual(iter1 - tmp.begin(), iter2 - tmp.begin());
+        util.assertEqual(iter1 == iter2, true);
+    }
+    // search
+    {
+        std::vector<int> tmp(100, 1);
+        tmp.resize(200, 2);
+        tmp.resize(300, 3);
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937());
+        std::vector<int> seq{1, 2, 3};
+        // 1
+        auto iter1 = std::search(tmp.begin(), tmp.end(), seq.begin(), seq.end());
+        auto iter2 = tstd::search(tmp.begin(), tmp.end(), seq.begin(), seq.end());
+        util.assertEqual(iter1 - tmp.begin(), iter2 - tmp.begin());
+        util.assertEqual(iter1 == iter2, true);
+        // 2
+        iter1 = std::search(tmp.begin(), tmp.end(), seq.begin(), seq.end(), std::equal_to<int>());
+        iter2 = tstd::search(tmp.begin(), tmp.end(), seq.begin(), seq.end(), std::equal_to<int>());
+        util.assertEqual(iter1 - tmp.begin(), iter2 - tmp.begin());
+        util.assertEqual(iter1 == iter2, true);
+        // 3: not implemented!
+    }
+    // search_n
+    {
+        std::vector<int> tmp(vec);
+        tmp.resize(120, 1);
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937());
+        // 1
+        auto iter1 = std::search_n(tmp.begin(), tmp.end(), 2, 1);
+        auto iter2 = tstd::search_n(tmp.begin(), tmp.end(), 2, 1);
+        util.assertEqual(iter1 - tmp.begin(), iter2 - tmp.begin());
+        util.assertEqual(iter1 == iter2, true);
+        // 2
+        iter1 = std::search_n(tmp.begin(), tmp.end(), 2, 1, std::equal_to<int>());
+        iter2 = tstd::search_n(tmp.begin(), tmp.end(), 2, 1, std::equal_to<int>());
+        util.assertEqual(iter1 - tmp.begin(), iter2 - tmp.begin());
+        util.assertEqual(iter1 == iter2, true);
     }
     util.showFinalResult();
 }
@@ -381,8 +572,60 @@ void testMinimumMaximumAlgorithms(bool showDetails)
 void testComparisonAlgorithms(bool showDetails)
 {
     TestUtil util(showDetails, "comparison algorithms");
-    {
 
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 1);
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
+    // equal
+    {
+        std::vector<int> tmp(vec);
+        // 1
+        auto res1 = std::equal(vec.begin(), vec.end(), tmp.begin());
+        auto res2 = tstd::equal(vec.begin(), vec.end(), tmp.begin());
+        util.assertEqual(res1, res2);
+        // 2
+        res1 = std::equal(vec.begin(), vec.end(), tmp.begin(), std::equal_to<int>());
+        res2 = tstd::equal(vec.begin(), vec.end(), tmp.begin(), std::equal_to<int>());
+        util.assertEqual(res1, res2);
+        // 3
+        res1 = std::equal(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        res2 = tstd::equal(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        util.assertEqual(res1, res2);
+        // 4
+        res1 = std::equal(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::equal_to<int>());
+        res2 = tstd::equal(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::equal_to<int>());
+        util.assertEqual(res1, res2);
+        
+        tmp[10] = -1;
+        // 1
+        res1 = std::equal(vec.begin(), vec.end(), tmp.begin());
+        res2 = tstd::equal(vec.begin(), vec.end(), tmp.begin());
+        util.assertEqual(res1, res2);
+        // 2
+        res1 = std::equal(vec.begin(), vec.end(), tmp.begin(), std::equal_to<int>());
+        res2 = tstd::equal(vec.begin(), vec.end(), tmp.begin(), std::equal_to<int>());
+        util.assertEqual(res1, res2);
+        // 3
+        res1 = std::equal(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        res2 = tstd::equal(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        util.assertEqual(res1, res2);
+        // 4
+        res1 = std::equal(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::equal_to<int>());
+        res2 = tstd::equal(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::equal_to<int>());
+        util.assertEqual(res1, res2);
+    }
+    // lexicographical_compare
+    {
+        std::vector<int> tmp(vec);
+        tmp[50] = -1;
+        // 1
+        auto res1 = std::lexicographical_compare(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        auto res2 = tstd::lexicographical_compare(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        util.assertEqual(res1, res2);
+        // 2
+        res1 = std::lexicographical_compare(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::greater<int>());
+        res2 = tstd::lexicographical_compare(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::greater<int>());
+        util.assertEqual(res1, res2);
     }
     util.showFinalResult();
 }

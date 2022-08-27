@@ -97,7 +97,7 @@ constexpr InputIterator for_each_n(InputIterator first, Size n, UnaryFunction f)
     {
         f(*first);
     }
-    return f;
+    return first;
 }
 
 // count
@@ -365,7 +365,7 @@ constexpr ForwardIterator1 search(ForwardIterator1 first, ForwardIterator1 last,
             {
                 return last;
             }
-            if (!(*it != *s_it))
+            if (!(*it == *s_it))
             {
                 break;
             }
@@ -434,7 +434,7 @@ constexpr ForwardIterator search_n(ForwardIterator first, ForwardIterator last, 
             {
                 return last; // exhausted the list
             }
-            if (!(*last == value))
+            if (!(*first == value))
             {
                 break; // too few in a row
             }
@@ -469,7 +469,7 @@ constexpr ForwardIterator search_n(ForwardIterator first, ForwardIterator last, 
             {
                 return last; // exhausted the list
             }
-            if (!p(*last, value))
+            if (!p(*first, value))
             {
                 break; // too few in a row
             }
