@@ -5,6 +5,8 @@
 #include <type_traits>
 #include <utility>
 #include <functional>
+#include <cstdlib>
+#include <random>
 #include <tutility.hpp>
 #include <titerator.hpp>
 #include <tstl_heap.hpp> // heap algorithms
@@ -479,6 +481,636 @@ constexpr ForwardIterator search_n(ForwardIterator first, ForwardIterator last, 
 }
 
 // ======================================== modifying sequence algorithms ==========================================================================
+// copy
+// complexity: exactly last-first assignments
+template<typename InputIterator, typename OutputIterator>
+constexpr OutputIterator copy(InputIterator first, InputIterator last, OutputIterator d_first)
+{
+    for (; first != last; ++first)
+    {
+        *d_first++ = *first;
+    }
+    return d_first;
+}
+// copy_if
+// complexity: exactly last-first applications of predicate
+template<typename InputIterator, typename OutputIterator, typename UnaryPredicate>
+constexpr OutputIterator copy_if(InputIterator first, InputIterator last, OutputIterator d_first, UnaryPredicate p)
+{
+    for (; first != last; ++first)
+    {
+        if (p(*first))
+        {
+            *d_first++ = *first;
+        }
+    }
+    return d_first;
+}
+
+// copy_n
+// complexity: if count > 0, exactly count assignments
+template<typename InputIterator, typename Size, typename OutputIterator>
+constexpr OutputIterator copy_n(InputIterator first, Size count, OutputIterator result)
+{
+    for (; count > 0; --count, ++first, ++result)
+    {
+        *result = *first;
+    }
+    return result;
+}
+
+// copy_backward
+// complexity: exactly last-first asignments
+template<typename BidirectionalIterator1, typename BidirectionalIterator2>
+BidirectionalIterator2 copy_backward(BidirectionalIterator1 first, BidirectionalIterator1 last, BidirectionalIterator2 d_last)
+{
+    while (first != last)
+    {
+        *(--d_last) = *(--last);
+    }
+    return d_last;
+}
+
+// move: move elements in range to another range
+// complexity: exactly last-first move assignments
+template<typename InputIterator, typename OutputIterator>
+constexpr OutputIterator move(InputIterator first, InputIterator last, OutputIterator d_first)
+{
+    for (; first != last; ++first, ++d_first)
+    {
+        *d_first = std::move(*first);
+    }
+    return d_first;
+}
+
+// move_backward
+// complexity: exactly last-first move assignments
+template<typename BidirectionalIterator1, typename BidirectionalIterator2>
+BidirectionalIterator2 move_backward(BidirectionalIterator1 first, BidirectionalIterator1 last, BidirectionalIterator2 d_last)
+{
+    while (first != last)
+    {
+        *(--d_last) = std::move(*(--last));
+    }
+    return d_last;
+}
+
+// fill
+// complexity: exactly last-first assignments
+template<typename ForwardIterator, typename T>
+constexpr void fill(ForwardIterator first, ForwardIterator last, const T& value)
+{
+    for (; first != last; ++first)
+    {
+        *first = value;
+    }
+}
+
+// fill_n
+// complexity: exactly count assignments
+template<typename OutputIterator, typename Size, typename T>
+constexpr OutputIterator fill_n(OutputIterator first, Size count, const T& value)
+{
+    for (; count > 0; --count, ++first)
+    {
+        *first = value;
+    }
+    return first;
+}
+
+// transform
+// complexity: exactly last1-first1 applications of op
+template<typename InputIterator, typename OutputIterator, typename UnaryOperation>
+constexpr OutputIterator transform(InputIterator first1, InputIterator last1, OutputIterator d_first, UnaryOperation op) // 1
+{
+    for (; first1 != last1; ++first1, ++d_first)
+    {
+        *d_first = op(*first1);
+    }
+    return d_first;
+}
+template<typename InputIterator1, typename InputIterator2, typename OutputIterator, typename BinaryOperation>
+constexpr OutputIterator transform(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, OutputIterator d_first, BinaryOperation op) // 2
+{
+    for (; first1 != last1; ++first1, ++first2, ++d_first)
+    {
+        *d_first = op(*first1, *first2);
+    }
+    return d_first;
+}
+
+// generate
+// complexity: exactly last-first calls of g() and assignments
+template<typename ForwardIterator, typename Generator>
+constexpr void generate(ForwardIterator first, ForwardIterator last, Generator g)
+{
+    for (; first != last; ++first)
+    {
+        *first = g();
+    }
+}
+
+// generate_n
+// complexity: exactly count calls of g() and assignments if count > 0
+template<typename OutputIterator, typename Size, typename Generator>
+constexpr OutputIterator generate_n(OutputIterator first, Size count, Generator g)
+{
+    for (; count > 0; --count, ++first)
+    {
+        *first = g();
+    }
+    return first;
+}
+
+// remove: keep the relative order of rest elements, do not change the size of container
+// complexity: exactly last-first applications of operator==
+template<typename ForwardIterator, typename T>
+constexpr ForwardIterator remove(ForwardIterator first, ForwardIterator last, const T& value)
+{
+    first = std::find(first, last, value);
+    if (first != last)
+    {
+        for (ForwardIterator it = first; ++it != last;)
+        {
+            if (!(*it == value))
+            {
+                *first++ = std::move(*it);
+            }
+        }
+    }
+    return first;
+}
+// remove_if
+// complexity: exactly last-first applications of predicate
+template<typename ForwardIterator, typename UnaryPreciate>
+constexpr ForwardIterator remove_if(ForwardIterator first, ForwardIterator last, UnaryPreciate p)
+{
+    first = std::find_if(first, last, p);
+    if (first != last)
+    {
+        for (ForwardIterator it = first; ++it != last;)
+        {
+            if (!p(*it))
+            {
+                *first++ = std::move(*it);
+            }
+        }
+    }
+    return first;
+}
+
+// remove_copy
+// complexity: exactly last-first applications of operator==
+template<typename InputIterator, typename OutputIterator, typename T>
+constexpr OutputIterator remove_copy(InputIterator first, InputIterator last, OutputIterator d_first, const T& value)
+{
+    for (; first != last; ++first)
+    {
+        if (!(*first == value))
+        {
+            *d_first++ = *first;
+        }
+    }
+    return d_first;
+}
+// remove_copy_if
+// complexity: exactly last-first applications of predicate
+template<typename InputIterator, typename OutputIterator, typename UnaryPredicate>
+constexpr OutputIterator remove_copy_if(InputIterator first, InputIterator last, OutputIterator d_first, UnaryPredicate p)
+{
+    for (; first != last; ++first)
+    {
+        if (!p(*first))
+        {
+            *d_first++ = *first;
+        }
+    }
+    return d_first;
+}
+
+// replace
+// complexity: exactly last-first applications of operator==
+template<typename ForwardIterator, typename T>
+constexpr void replace(ForwardIterator first, ForwardIterator last, const T& old_value, const T& new_value)
+{
+    for (; first != last; ++first)
+    {
+        if (*first == old_value)
+        {
+            *first = new_value;
+        }
+    }
+}
+// replace_if
+// complexity: exactly last-first applications of predicate
+template<typename ForwardIterator, typename UnaryPreciate, typename T>
+constexpr void replace_if(ForwardIterator first, ForwardIterator last, UnaryPreciate p, const T& new_value)
+{
+    for (; first != last; ++first)
+    {
+        if (p(*first))
+        {
+            *first = new_value;
+        }
+    }
+}
+
+// replace_copy
+// complexity: exactly last-first applications of operator==
+template<typename InputIterator, typename OutputIterator, typename T>
+constexpr OutputIterator replace_copy(InputIterator first, InputIterator last, OutputIterator d_first, const T& old_value, const T& new_value)
+{
+    for (; first != last; ++first, ++d_first)
+    {
+        *d_first = (*first == old_value) ? new_value : *first;
+    }
+    return d_first;
+}
+// replace_copy_if
+// complexity: exactly last-first applications of predicate
+template<typename InputIterator, typename OutputIterator, typename UnaryPredicate, typename T>
+constexpr OutputIterator replace_copy_if(InputIterator first, InputIterator last, OutputIterator d_first, UnaryPredicate p, const T& new_value)
+{
+    for (; first != last; ++first, ++d_first)
+    {
+        *d_first = p(*first) ? new_value : *first;
+    }
+    return d_first;
+}
+
+// swap
+// defined in <tutility.hpp>
+
+// swap_ranges
+// complexity: O(last1-first1)
+template<typename ForwardIterator1, typename ForwardIterator2>
+constexpr void iter_swap(ForwardIterator1 a, ForwardIterator2 b);
+template<typename ForwardIterator1, typename ForwardIterator2>
+constexpr ForwardIterator2 swap_ranges(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2)
+{
+    for (; first1 != last1; ++first1, ++first2)
+    {
+        std::iter_swap(first1, first2);
+    }
+    return first2;
+}
+
+// iter_swap
+// complexity: O(1)
+template<typename ForwardIterator1, typename ForwardIterator2>
+constexpr void iter_swap(ForwardIterator1 a, ForwardIterator2 b)
+{
+    using tstd::swap;
+    swap(*a, *b);
+}
+
+// reverse
+// compelxity: exactly swap (last-first)/2 times
+template<typename BidirectionalIterator>
+constexpr void reverse(BidirectionalIterator first, BidirectionalIterator last)
+{
+    if constexpr (is_random_access_iterator_v<BidirectionalIterator>)
+    {
+        if (first == last)
+            return;
+        for (--last; first < last; ++first, --last)
+        {
+            tstd::iter_swap(first, last);
+        }
+    }
+    else // bidirectional iterator
+    {
+        while ((first != last) && (first != --last))
+        {
+            tstd::iter_swap(first++, last);
+        }
+    }
+}
+
+// reverse_copy
+// complexity: exactly last-first assignments
+template<typename BidirectionalIterator, typename OutputIterator>
+constexpr OutputIterator reverse_copy(BidirectionalIterator first, BidirectionalIterator last, OutputIterator d_first)
+{
+    while (first != last)
+    {
+        *d_first++ = *--last;
+    }
+    return d_first;
+}
+
+// rotate: rotate range, let n_first be the new first element, n_first-1 be new last element. return the iterator that old first element locate(first + (last - n_first))
+// complexity: O(last-first)
+template<typename ForwardIterator>
+constexpr ForwardIterator rotate(ForwardIterator first, ForwardIterator n_first, ForwardIterator last)
+{
+    if (first == n_first)
+        return last;
+    if (n_first == last)
+        return first;
+    auto read = n_first;
+    auto write = first;
+    auto next_read = first;
+    while (read != last)
+    {
+        if (write == next_read)
+        {
+            next_read = read;
+        }
+        std::iter_swap(write++, read++);
+    }
+    tstd::rotate(write, next_read, last);
+    return write;
+}
+
+// rotate_copy: rotate and copy to another list
+// complexity: O(last-first)
+template<typename ForwardIterator, typename OutputIterator>
+constexpr OutputIterator rotate_copy(ForwardIterator first, ForwardIterator n_first, ForwardIterator last, OutputIterator d_first)
+{
+    d_first = tstd::copy(n_first, last, d_first);
+    return tstd::copy(first, n_first, d_first);
+}
+
+// shift_left
+// complexity: at most (last-first)-n assginments
+template<typename ForwardIterator>
+constexpr ForwardIterator shift_left(ForwardIterator first, ForwardIterator last, typename std::iterator_traits<ForwardIterator>::difference_type n)
+{
+    if (n <= 0 || n > tstd::distance(first, last))
+    {
+        return first;
+    }
+    return tstd::move(tstd::next(first, n), last, first);
+}
+// shift_right
+// complexity: at most (last-first)-n assignments or swaps
+template<typename ForwardIterator>
+constexpr ForwardIterator shift_right(ForwardIterator first, ForwardIterator last, typename std::iterator_traits<ForwardIterator>::difference_type n)
+{
+    if (n == 0)
+        return first;
+    if constexpr (is_bidirectional_iterator_v<ForwardIterator>)
+    {
+        return tstd::move_backward(first, std::prev(last, n), last);
+    }
+    else // forward iterator
+    {
+        auto result = std::next(first, n);
+        if (result == last)
+            return last;
+        auto dest_head = first;
+        auto dest_tail = result;
+        while (dest_head != result)
+        {
+            if (dest_tail == last)
+            {
+                std::move(first, dest_head, result);
+                return result;
+            }
+            ++dest_head;
+            ++dest_tail;
+        }
+        for (;;)
+        {
+            auto cursor = first;
+            while (cursor != result)
+            {
+                if (dest_tail == last)
+                {
+                    dest_head = std::move(cursor, result, dest_head);
+                    std::move(first, cursor, dest_head);
+                    return result;
+                }
+                tstd::iter_swap(cursor, dest_head);
+                ++dest_head;
+                ++dest_tail;
+                ++cursor;
+            }
+        }
+        return last;
+    }
+}
+
+// random_shuffle
+// deprecated in C++ 14, removed in C++17
+// complexity: O(last-first)
+template<typename RandomIterator>
+void random_shuffle(RandomIterator first, RandomIterator last)
+{
+    typename std::iterator_traits<RandomIterator>::difference_type i, n;
+    n = last - first;
+    for (i = n-1; i > 0; --i)
+    {
+        using tstd::swap;
+        swap(first[i], first[std::rand() % (i+1)]);
+    }
+}
+// r should be a function obejct that receive a nubmer N and generate numbers from 0 to N-1
+template<typename RandomIterator, typename RandomFunc>
+void random_shuffle(RandomIterator first, RandomIterator last, RandomFunc&& r)
+{
+    typename std::iterator_traits<RandomIterator>::difference_type i, n;
+    n = last - first;
+    for (i = n-1; i > 0; --i)
+    {
+        using tstd::swap;
+        swap(first[i], first[r(i+1)]);
+    }
+}
+
+// shuffle
+// complexity: O(last-first)
+// g should be a random engine
+template<typename RandomIterator, typename URBG>
+void shuffle(RandomIterator first, RandomIterator last, URBG&& g)
+{
+    using diff_t = typename std::iterator_traits<RandomIterator>::difference_type;
+    using distr_t = std::uniform_int_distribution<diff_t>;
+    using param_t = typename distr_t::param_type;
+    
+    distr_t D;
+    diff_t n = last - first;
+    for (diff_t i = n-1; i > 0; --i)
+    {
+        using tstd::swap;
+        swap(first[i], first[D(g, param_t(0, i))]);
+    }
+}
+
+// sample: sample n elements from sequence [first, last) randomly, write to output iterator, using g generate random number
+// complexity: O(last-first)
+// copy from libstdc++, doesn't understand yet!
+template<typename PopulationIterator, typename SampleIterator, typename Distance, typename URBG>
+SampleIterator sample(PopulationIterator first, PopulationIterator last, SampleIterator out, Distance n, URBG&& g)
+{
+    if (is_forward_iterator_v<PopulationIterator>)
+    {
+        using distrib_type = std::uniform_int_distribution<Distance>;
+        using param_type = typename distrib_type::param_type;
+        using USize = std::make_unsigned_t<Distance>;
+        using Gen = std::remove_reference_t<URBG>;
+        using UC_type = std::common_type_t<typename Gen::result_type, USize>;
+
+        if (first == last)
+        {
+            return out;
+        }
+        distrib_type d;
+        Distance unsampled_size = std::distance(first, last);
+        n = std::min(n, unsampled_size);
+        const UC_type range = g.max() - g.min();
+        if (range / UC_type(unsampled_size) >= unsampled_size)
+        {
+            while (n != 0 && unsampled_size >= 2)
+            {
+                Distance n1 = d(g, param_type(0, unsampled_size-1));
+                --unsampled_size;
+                if (n1 < n)
+                {
+                    *out++ = *first;
+                    --n;
+                }
+                ++first;
+            }
+        }
+        for (; n != 0; ++first)
+        {
+            if (d(g, param_type(0, --unsampled_size)) < n)
+            {
+                *out++ = *first;
+                --n;
+            }
+        }
+        return out;
+    }
+    else // input iterator
+    {
+        static_assert(is_random_access_iterator_v<SampleIterator>, "if population is input iterator, then output should be random access iterator");
+        using distrib_type = std::uniform_int_distribution<Distance>;
+        using param_type = typename distrib_type::param_type;
+        distrib_type d;
+        Distance sample_size = 0;
+        while (first != last && sample_size != n)
+        {
+            out[sample_size++] = *first;
+            ++first;
+        }
+        for (auto pop_size = sample_size; first != last; ++first, ++pop_size)
+        {
+            const auto k = d(g, param_type(0, pop_size)); // random number between 0 to pop_size
+            if (k < n)
+            {
+                out[k] = *first;
+            }
+        }
+        return out + sample_size;
+    }
+}
+
+// unique
+// complexity: exactly last-first applications of predicate
+template<typename ForwardIterator>
+constexpr ForwardIterator unique(ForwardIterator first, ForwardIterator last)
+{
+    if (first == last)
+        return last;
+    ForwardIterator result = first;
+    while (++first != last)
+    {
+        if (!(*result == *first) && ++result != first)
+        {
+            *result = std::move(*first);
+        }
+    }
+    return ++result;
+}
+template<typename ForwardIterator, typename BinaryPredicate>
+constexpr ForwardIterator unique(ForwardIterator first, ForwardIterator last, BinaryPredicate p)
+{
+    if (first == last)
+        return last;
+    ForwardIterator result = first;
+    while (++first != last)
+    {
+        if (!p(*result, *first) && ++result != first)
+        {
+            *result = std::move(*first);
+        }
+    }
+    return ++result;
+}
+
+// unique_copy
+// complexity: exactly last-first applications of predicate
+template<typename InputIterator, typename OutputIterator>
+constexpr OutputIterator unique_copy(InputIterator first, InputIterator last, OutputIterator d_first)
+{
+    if (first == last)
+        return d_first;
+    if constexpr (is_forward_iterator_v<InputIterator>)
+    {
+        InputIterator next = first;
+        *d_first = *first;
+        while (++next != last)
+        {
+            if (!(*next == *first))
+            {
+                first = next;
+                *++d_first = *first;
+            }
+        }
+        return ++d_first;
+    }
+    else // input iterator
+    {
+        typename std::iterator_traits<InputIterator>::value_type value = *first;
+        *d_first = value;
+        while (!(++first == last))
+        {
+            if (!(*first == value))
+            {
+                value = *first;
+                *++d_first = value;
+            }
+        }
+        return ++d_first;
+    }
+}
+template<typename InputIterator, typename OutputIterator, typename BinaryPredicate>
+constexpr OutputIterator unique_copy(InputIterator first, InputIterator last, OutputIterator d_first, BinaryPredicate p)
+{
+    if (first == last)
+        return d_first;
+    if constexpr (is_forward_iterator_v<InputIterator>)
+    {
+        InputIterator next = first;
+        *d_first = *first;
+        while (++next != last)
+        {
+            if (!p(*next, *first))
+            {
+                first = next;
+                *++d_first = *first;
+            }
+        }
+        return ++d_first;
+    }
+    else // input iterator
+    {
+        typename std::iterator_traits<InputIterator>::value_type value = *first;
+        *d_first = value;
+        while (!(++first == last))
+        {
+            if (!p(*first, value))
+            {
+                value = *first;
+                *++d_first = value;
+            }
+        }
+        return ++d_first;
+    }
+}
 
 // ======================================== partitioning algorithms ================================================================================
 

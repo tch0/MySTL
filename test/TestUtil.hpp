@@ -196,7 +196,7 @@ public:
         {
             std::cout << std::boolalpha << std::dec;
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
-                << "assertSequenceEqual: " << (res ? "passed" : "==================== failed")
+                << "assertSetEqual: " << (res ? "passed" : "==================== failed")
                 << "\n\tleft set: " << printContainerElememts(c1, 20)
                 << "\n\tright set: " << printContainerElememts(c2, 20) << std::endl;
         }

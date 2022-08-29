@@ -1,8 +1,11 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <list>
+#include <forward_list>
 #include <numeric>
 #include <random>
+#include <iterator>
 #include <talgorithm.hpp>
 #include <tnumeric.hpp>
 #include "TestUtil.hpp"
@@ -416,8 +419,401 @@ void testNonModifyingSequenceAlgorithms(bool showDetails)
 void testModifyingSequenceAlgorithms(bool showDetails)
 {
     TestUtil util(showDetails, "modifying sequence algorithms");
-    {
 
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 1);
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
+    // copy
+    {
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        std::copy(vec.begin(), vec.end(), tmp1.begin());
+        tstd::copy(vec.begin(), vec.end(), tmp2.begin());
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // copy_if
+    {
+        std::vector<int> tmp1(50);
+        std::vector<int> tmp2(50);
+        std::copy_if(vec.begin(), vec.end(), tmp1.begin(), [](int a)->bool { return a <= 50; });
+        tstd::copy_if(vec.begin(), vec.end(), tmp2.begin(), [](int a)->bool { return a <= 50; });
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // copy_n
+    {
+        std::vector<int> tmp1(50);
+        std::vector<int> tmp2(50);
+        std::copy_n(vec.begin(), 50, tmp1.begin());
+        tstd::copy_n(vec.begin(), 50, tmp2.begin());
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // copy_backward
+    {
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        std::copy_backward(vec.begin(), vec.end(), tmp1.end());
+        tstd::copy_backward(vec.begin(), vec.end(), tmp2.end());
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // move
+    {
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        std::move(vec.begin(), vec.end(), tmp1.begin());
+        tstd::move(vec.begin(), vec.end(), tmp2.begin());
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // move_backward
+    {
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        std::move_backward(vec.begin(), vec.end(), tmp1.end());
+        tstd::move_backward(vec.begin(), vec.end(), tmp2.end());
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // fill
+    {
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        std::fill(tmp1.begin(), tmp1.end(), 999);
+        tstd::fill(tmp2.begin(), tmp2.end(), 999);
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // fill_n
+    {
+        std::vector<int> tmp1(50);
+        std::vector<int> tmp2(50);
+        std::fill_n(tmp1.begin(), 50, 999);
+        tstd::fill_n(tmp2.begin(), 50, 999);
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // transform
+    {
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        std::transform(vec.begin(), vec.end(), tmp1.begin(), [](int a)->int { return a + 1; });
+        tstd::transform(vec.begin(), vec.end(), tmp2.begin(), [](int a)->int { return a + 1; });
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // transform
+    {
+        std::vector<int> vec2(100);
+        std::iota(vec2.begin(), vec2.end(), 1);
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        std::transform(vec.begin(), vec.end(), vec2.begin(), tmp1.begin(), [](int a, int b)->int { return a * b + 1; });
+        tstd::transform(vec.begin(), vec.end(), vec2.begin(), tmp2.begin(), [](int a, int b)->int { return a * b + 1; });
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // generate
+    {
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        int init = 100;
+        auto g1 = [&init]() -> int { return init += 2; };
+        std::generate(tmp1.begin(), tmp1.end(), g1);
+        init = 100;
+        auto g2 = [&init]() -> int { return init += 2; };
+        tstd::generate(tmp2.begin(), tmp2.end(), g2);
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // generate_n
+    {
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        int init = 100;
+        auto g1 = [&init]() -> int { return init += 2; };
+        std::generate_n(tmp1.begin(), 100, g1);
+        init = 100;
+        auto g2 = [&init]() -> int { return init += 2; };
+        tstd::generate_n(tmp2.begin(), 100, g2);
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // remove
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        auto iter1 = std::remove(tmp1.begin(), tmp1.end(), 10);
+        auto iter2 = tstd::remove(tmp2.begin(), tmp2.end(), 10);
+        util.assertEqual(iter1 - tmp1.begin(), iter2 - tmp2.begin());
+        util.assertRangeEqual(tmp1.begin(), iter1, tmp2.begin());
+    }
+    // remove_if
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        auto p = [](int a) -> bool { return a < 50; };
+        auto iter1 = std::remove_if(tmp1.begin(), tmp1.end(), p);
+        auto iter2 = tstd::remove_if(tmp2.begin(), tmp2.end(), p);
+        util.assertEqual(iter1 - tmp1.begin(), iter2 - tmp2.begin());
+        util.assertRangeEqual(tmp1.begin(), iter1, tmp2.begin());
+    }
+    // remove_copy
+    {
+        std::vector<int> tmp1(vec), tmp1d(100);
+        std::vector<int> tmp2(vec), tmp2d(100);
+        auto iter1 = std::remove_copy(tmp1.begin(), tmp1.end(), tmp1d.begin(), 10);
+        auto iter2 = tstd::remove_copy(tmp2.begin(), tmp2.end(), tmp2d.begin(), 10);
+        util.assertEqual(iter1 - tmp1d.begin(), iter2 - tmp2d.begin());
+        util.assertRangeEqual(tmp1d.begin(), iter1, tmp2d.begin());
+    }
+    // remove_copy_if
+    {
+        std::vector<int> tmp1(vec), tmp1d(100);
+        std::vector<int> tmp2(vec), tmp2d(100);
+        auto p = [](int a) -> bool { return a < 50; };
+        auto iter1 = std::remove_copy_if(tmp1.begin(), tmp1.end(), tmp1d.begin(), p);
+        auto iter2 = tstd::remove_copy_if(tmp2.begin(), tmp2.end(), tmp2d.begin(), p);
+        util.assertEqual(iter1 - tmp1d.begin(), iter2 - tmp2d.begin());
+        util.assertRangeEqual(tmp1d.begin(), iter1, tmp2d.begin());
+    }
+    // replace
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        std::replace(tmp1.begin(), tmp1.end(), 10, 110);
+        tstd::replace(tmp2.begin(), tmp2.end(), 10, 110);
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // replace_if
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        auto p = [](int a) -> bool { return a < 50; };
+        std::replace_if(tmp1.begin(), tmp1.end(), p, 110);
+        tstd::replace_if(tmp2.begin(), tmp2.end(), p, 110);
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // replace_copy
+    {
+        std::vector<int> tmp1(vec), tmp1d(100);
+        std::vector<int> tmp2(vec), tmp2d(100);
+        std::replace_copy(tmp1.begin(), tmp1.end(), tmp1d.begin(), 10, 110);
+        tstd::replace_copy(tmp2.begin(), tmp2.end(), tmp2d.begin(), 10, 110);
+        util.assertSequenceEqual(tmp1d, tmp2d);
+    }
+    // replace_copy_if
+    {
+        std::vector<int> tmp1(vec), tmp1d(100);
+        std::vector<int> tmp2(vec), tmp2d(100);
+        auto p = [](int a) -> bool { return a < 50; };
+        std::replace_copy_if(tmp1.begin(), tmp1.end(), tmp1d.begin(), p, 110);
+        tstd::replace_copy_if(tmp2.begin(), tmp2.end(), tmp2d.begin(), p, 110);
+        util.assertSequenceEqual(tmp1d, tmp2d);
+    }
+    // swap
+    {
+        int a1 = 1, b1 = 2;
+        int a2 = 1, b2 = 2;
+        std::swap(a1, b1);
+        tstd::swap(a2, b2);
+        util.assertEqual(a1, a2);
+        util.assertEqual(b1, b2);
+        {
+            // for array
+            int a1[3] = {1, 2, 3}, b1[3] = {4, 5, 6};
+            int a2[3] = {1, 2, 3}, b2[3] = {4, 5, 6};
+            std::swap(a1, b1);
+            tstd::swap(a2, b2);
+            util.assertArrayEqual(a1, a2, 3);
+            util.assertArrayEqual(b1, b2, 3);
+        }
+    }
+    // swap_ranges
+    {
+        std::vector<int> tmp1(vec), tmp1c(100);
+        std::vector<int> tmp2(vec), tmp2c(100);
+        std::swap_ranges(tmp1.begin(), tmp1.end(), tmp1c.begin());
+        tstd::swap_ranges(tmp2.begin(), tmp2.end(), tmp2c.begin());
+        util.assertSequenceEqual(tmp1, tmp2);
+        util.assertSequenceEqual(tmp1c, tmp2c);
+    }
+    // iter_swap
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        std::iter_swap(tmp1.begin(), tmp1.end() - 1);
+        tstd::iter_swap(tmp2.begin(), tmp2.end() - 1);
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // reverse
+    {
+        // random access iteraor
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        std::reverse(tmp1.begin(), tmp1.end());
+        tstd::reverse(tmp2.begin(), tmp2.end());
+        util.assertSequenceEqual(tmp1, tmp2);
+        // bidirectional iterator
+        std::list<int> tmpl1(vec.begin(), vec.end());
+        std::list<int> tmpl2(vec.begin(), vec.end());
+        std::reverse(tmpl1.begin(), tmpl1.end());
+        tstd::reverse(tmpl2.begin(), tmpl2.end());
+        util.assertSequenceEqual(tmpl1, tmpl2);
+    }
+    // reverse_copy
+    {
+        std::list<int> tmpl1(100);
+        std::list<int> tmpl2(100);
+        std::reverse_copy(vec.begin(), vec.end(), tmpl1.begin());
+        tstd::reverse_copy(vec.begin(), vec.end(), tmpl2.begin());
+        util.assertSequenceEqual(tmpl1, tmpl2);
+    }
+    // rotate
+    {
+        std::forward_list<int> tmp1(vec.begin(), vec.end());
+        std::forward_list<int> tmp2(vec.begin(), vec.end());
+        auto iter1 = std::rotate(tmp1.begin(), std::next(tmp1.begin(), 50), tmp1.end());
+        auto iter2 = tstd::rotate(tmp2.begin(), std::next(tmp2.begin(), 50), tmp2.end());
+        util.assertSequenceEqual(tmp1, tmp2);
+        util.assertEqual(std::distance(tmp1.begin(), iter1), std::distance(tmp2.begin(), iter2));
+    }
+    // rotate_copy
+    {
+        std::forward_list<int> tmp1(100);
+        std::forward_list<int> tmp2(100);
+        auto iter1 = std::rotate_copy(vec.begin(), vec.begin() + 50, vec.end(), tmp1.begin());
+        auto iter2 = tstd::rotate_copy(vec.begin(), vec.begin() + 50, vec.end(), tmp2.begin());
+        util.assertSequenceEqual(tmp1, tmp2);
+        util.assertEqual(std::distance(tmp1.begin(), iter1), std::distance(tmp2.begin(), iter2));
+    }
+    // shift_left
+    {
+        std::forward_list<int> tmp1(vec.begin(), vec.end());
+        std::forward_list<int> tmp2(vec.begin(), vec.end());
+        auto iter1 = std::shift_left(tmp1.begin(), tmp1.end(), 50);
+        auto iter2 = tstd::shift_left(tmp2.begin(), tmp2.end(), 50);
+        util.assertSequenceEqual(tmp1, tmp2);
+        util.assertEqual(std::distance(tmp1.begin(), iter1), std::distance(tmp2.begin(), iter2));
+    }
+    // shift_right
+    {
+        // bidirectional iterator
+        {
+            std::list<int> tmp1(vec.begin(), vec.end());
+            std::list<int> tmp2(vec.begin(), vec.end());
+            auto iter1 = std::shift_right(tmp1.begin(), tmp1.end(), 50);
+            auto iter2 = tstd::shift_right(tmp2.begin(), tmp2.end(), 50);
+            util.assertEqual(std::distance(tmp1.begin(), iter1), std::distance(tmp2.begin(), iter2));
+            util.assertSequenceEqual(tmp1, tmp2);
+        }
+        // forward iterator
+        {
+            std::forward_list<int> tmp1(vec.begin(), vec.end());
+            std::forward_list<int> tmp2(vec.begin(), vec.end());
+            auto iter1 = std::shift_right(tmp1.begin(), tmp1.end(), 50);
+            auto iter2 = tstd::shift_right(tmp2.begin(), tmp2.end(), 50);
+            util.assertEqual(std::distance(tmp1.begin(), iter1), std::distance(tmp2.begin(), iter2));
+            util.assertSequenceEqual(tmp1, tmp2);
+        }
+    }
+    // random_shuffle
+    {
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        // 1
+        std::iota(tmp1.begin(), tmp1.end(), 1);
+        std::iota(tmp2.begin(), tmp2.end(), 1);
+        std::random_shuffle(tmp1.begin(), tmp1.end());
+        tstd::random_shuffle(tmp2.begin(), tmp2.end());
+        if (showDetails)
+        {
+            std::cout << "random_shuffle test 1: " << std::endl;
+            std::cout << "\tstd::random_shuffle: " << printContainerElememts(tmp1, 100) << std::endl;
+            std::cout << "\ttstd::random_shuffle: " << printContainerElememts(tmp2, 100) << std::endl;
+        }
+        util.assertSetEqual(tmp1, tmp2);
+        // 2
+        auto gen = [](int a) -> int { return std::rand() % a; };
+        std::iota(tmp1.begin(), tmp1.end(), 1);
+        std::iota(tmp2.begin(), tmp2.end(), 1);
+        std::random_shuffle(tmp1.begin(), tmp1.end(), gen);
+        tstd::random_shuffle(tmp2.begin(), tmp2.end(), gen);
+        if (showDetails)
+        {
+            std::cout << "random_shuffle test 2: " << std::endl;
+            std::cout << "\tstd::random_shuffle: " << printContainerElememts(tmp1, 100) << std::endl;
+            std::cout << "\ttstd::random_shuffle: " << printContainerElememts(tmp2, 100) << std::endl;
+        }
+        util.assertSetEqual(tmp1, tmp2);
+    }
+    // shuffle
+    {
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        std::iota(tmp1.begin(), tmp1.end(), 1);
+        std::iota(tmp2.begin(), tmp2.end(), 1);
+        std::shuffle(tmp1.begin(), tmp1.end(), std::mt19937());
+        tstd::shuffle(tmp2.begin(), tmp2.end(), std::mt19937());
+        if (showDetails)
+        {
+            std::cout << "shuffle test: " << std::endl;
+            std::cout << "\tstd::shuffle: " << printContainerElememts(tmp1, 100) << std::endl;
+            std::cout << "\ttstd::shuffle: " << printContainerElememts(tmp2, 100) << std::endl;
+        }
+        util.assertSetEqual(tmp1, tmp2);
+    }
+    // sample
+    {
+        std::vector<int> tmp1(50);
+        std::vector<int> tmp2(50);
+        std::sample(vec.begin(), vec.end(), tmp1.begin(), 50, std::mt19937());
+        tstd::sample(vec.begin(), vec.end(), tmp2.begin(), 50, std::mt19937());
+        if (showDetails)
+        {
+            std::cout << "shuffle test: " << std::endl;
+            std::cout << "\tstd::sample: " << printContainerElememts(tmp1, 50) << std::endl;
+            std::cout << "\ttstd::sample: " << printContainerElememts(tmp2, 50) << std::endl;
+        }
+        // can not assert here!
+    }
+    // unique
+    {
+        // 1
+        {
+            std::vector<int> tmp1{1, 2, 2, 1, 2, 2, 1, 1, 1, 3, 3, 3, 2, 5};
+            std::vector<int> tmp2{1, 2, 2, 1, 2, 2, 1, 1, 1, 3, 3, 3, 2, 5};
+            auto iter1 = std::unique(tmp1.begin(), tmp1.end());
+            auto iter2 = tstd::unique(tmp2.begin(), tmp2.end());
+            util.assertEqual(std::distance(tmp1.begin(), iter1), std::distance(tmp2.begin(), iter2));
+            util.assertSequenceEqual(tmp1, tmp2);
+        }
+        // 2
+        {
+            std::vector<int> tmp1{1, 2, 2, 1, 2, 2, 1, 1, 1, 3, 3, 3, 2, 5};
+            std::vector<int> tmp2{1, 2, 2, 1, 2, 2, 1, 1, 1, 3, 3, 3, 2, 5};
+            auto p = [](int a, int b) -> bool { return a == b; };
+            auto iter1 = std::unique(tmp1.begin(), tmp1.end(), p);
+            auto iter2 = tstd::unique(tmp2.begin(), tmp2.end(), p);
+            util.assertEqual(std::distance(tmp1.begin(), iter1), std::distance(tmp2.begin(), iter2));
+            util.assertSequenceEqual(tmp1, tmp2);
+        }
+    }
+    // unique_copy
+    {
+        // 1
+        {
+            std::vector<int> tmp1{1, 2, 2, 1, 2, 2, 1, 1, 1, 3, 3, 3, 2, 5};
+            std::vector<int> tmp2{1, 2, 2, 1, 2, 2, 1, 1, 1, 3, 3, 3, 2, 5};
+            std::vector<int> tmp1c(tmp1.size());
+            std::vector<int> tmp2c(tmp2.size());
+            auto iter1 = std::unique_copy(tmp1.begin(), tmp1.end(), tmp1c.begin());
+            auto iter2 = tstd::unique_copy(tmp2.begin(), tmp2.end(), tmp2c.begin());
+            util.assertEqual(std::distance(tmp1c.begin(), iter1), std::distance(tmp2c.begin(), iter2));
+            util.assertSequenceEqual(tmp1c, tmp2c);
+        }
+        // 2
+        {
+            std::vector<int> tmp1{1, 2, 2, 1, 2, 2, 1, 1, 1, 3, 3, 3, 2, 5};
+            std::vector<int> tmp2{1, 2, 2, 1, 2, 2, 1, 1, 1, 3, 3, 3, 2, 5};
+            std::vector<int> tmp1c(tmp1.size());
+            std::vector<int> tmp2c(tmp2.size());
+            auto p = [](int a, int b) -> bool { return a == b; };
+            auto iter1 = std::unique_copy(tmp1.begin(), tmp1.end(), tmp1c.begin(), p);
+            auto iter2 = tstd::unique_copy(tmp2.begin(), tmp2.end(), tmp2c.begin(), p);
+            util.assertEqual(std::distance(tmp1c.begin(), iter1), std::distance(tmp2c.begin(), iter2));
+            util.assertSequenceEqual(tmp1c, tmp2c);
+        }
     }
     util.showFinalResult();
 }
@@ -475,8 +871,8 @@ void testHeapAlgorithms(bool showDetails)
     std::vector<int> vec(100);
     std::iota(vec.begin(), vec.end(), 1);
     std::shuffle(vec.begin(), vec.end(), std::mt19937());
+    // is_heap_until
     {
-        // is_heap_until
         std::vector<int> v(vec);
         auto res1 = tstd::is_heap_until(v.begin(), v.end());
         auto res2 = std::is_heap_until(v.begin(), v.end());
@@ -485,8 +881,8 @@ void testHeapAlgorithms(bool showDetails)
         res2 = std::is_heap_until(v.begin(), v.end(), std::greater<int>());
         util.assertEqual(res1 == res2, true);
     }
+    // is_heap
     {
-        // is_heap
         std::vector<int> v(vec);
         util.assertEqual(tstd::is_heap(vec.begin(), vec.end()), std::is_heap(vec.begin(), vec.end()));
         util.assertEqual(tstd::is_heap(vec.begin(), vec.end(), std::greater<int>()), std::is_heap(vec.begin(), vec.end(), std::greater<int>()));
@@ -497,8 +893,8 @@ void testHeapAlgorithms(bool showDetails)
         util.assertEqual(tstd::is_heap(vec.begin(), vec.end()), std::is_heap(vec.begin(), vec.end()));
         util.assertEqual(tstd::is_heap(vec.begin(), vec.end(), std::greater<int>()), std::is_heap(vec.begin(), vec.end(), std::greater<int>()));
     }
+    // push_heap, pop_heap
     {
-        // push_heap, pop_heap
         std::vector<int> v1(vec);
         std::vector<int> v2(vec);
         for (auto iter = v1.begin(); iter <= v1.end(); ++iter)
@@ -539,8 +935,8 @@ void testHeapAlgorithms(bool showDetails)
         }
         util.assertSequenceEqual(v1, v2);
     }
+    // make_heap, sort_heap
     {
-        // make_heap, sort_heap
         std::vector<int> v1(vec);
         std::vector<int> v2(vec);
         tstd::make_heap(v1.begin(), v1.end());
