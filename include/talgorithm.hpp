@@ -35,6 +35,57 @@ inline constexpr bool is_random_access_iterator_v = std::is_base_of<std::random_
 #define STATIC_ASSERT_RANDOM_ACCESS_ITERATOR(Iterator) \
     static_assert(tstd::is_random_access_iterator_v<Iterator>)
 
+namespace impl
+{
+// temporary buffer for those algorithms that need extra memory
+template<typename ForwardIterator, typename T, typename Allocator = tstd::allocator<T>>
+class TemporaryBuffer
+{
+public:
+    using iterator = T*;
+    using reverse_iterator = tstd::reverse_iterator<iterator>;
+    TemporaryBuffer(ForwardIterator seed, std::size_t n) 
+        : elem_count(n == 0 ? 1 : n)
+        , data(nullptr)
+        , alloc()
+    {
+        data = static_cast<T*>(alloc.allocate(elem_count));
+        for (int i = 0; i < elem_count; ++i)
+        {
+            alloc.construct(data+i, std::move(*seed));
+        }
+        *seed = std::move(*data);
+    }
+    ~TemporaryBuffer()
+    {
+        for (int i = 0; i < elem_count; ++i)
+        {
+            alloc.destroy(data+i);
+        }
+        alloc.deallocate(data, elem_count);
+    }
+    T* begin()
+    {
+        return data;
+    }
+    T* end()
+    {
+        return data + elem_count;
+    }
+    reverse_iterator rbegin()
+    {
+        return reverse_iterator(data + elem_count);
+    }
+    reverse_iterator rend()
+    {
+        return reverse_iterator(data);
+    }
+private:
+    T* data;
+    std::size_t elem_count;
+    tstd::allocator<T> alloc;
+};
+}
 
 //========================================= non-modifying sequence algorithms ======================================================================
 // all_of
@@ -1178,40 +1229,35 @@ constexpr std::pair<OutputIterator1, OutputIterator2> partition_copy(InputIterat
 
 // stable_partition: partition but stable
 // complexity: exactly N applications of predicate and swaps, if memory is insufficient at most NlogN swaps,
-//             at here we don't check memory, always N swaps, and it will try to allocate a buffer.
+//             at here we don't check memory, always N swaps, and it will try to allocate a temporary buffer.
 template<typename BidirectionalIterator, typename UnaryPredicate>
 BidirectionalIterator stable_partition(BidirectionalIterator first, BidirectionalIterator last, UnaryPredicate p)
 {
+    if (first == last)
+    {
+        return first;
+    }
     using value_t = typename std::iterator_traits<BidirectionalIterator>::value_type;
     using diff_t = typename std::iterator_traits<BidirectionalIterator>::difference_type;
     diff_t N = tstd::distance(first, last);
-    tstd::allocator<value_t> alloc;
-    value_t* buffer = alloc.allocate(N);
-    value_t* buffer_first = buffer;
-    value_t* buffer_last = buffer + N;
-    // unintialized version of partition_copy
+    // with the help of a temporary buffer
+    tstd::impl::TemporaryBuffer<BidirectionalIterator, value_t> buffer(first, N);
+    auto buffer_iter = buffer.begin();
+    auto rbuffer_iter = buffer.rbegin();
     for (auto iter = first; iter != last; ++iter)
     {
         if (p(*iter))
         {
-            tstd::uninitialized_move(iter, tstd::next(iter), buffer_first);
-            ++buffer_first;
+            *buffer_iter++ = std::move(*iter);
         }
         else
         {
-            tstd::uninitialized_move(iter, tstd::next(iter), tstd::reverse_iterator(buffer_last));
-            --buffer_last;
+            *rbuffer_iter++ = std::move(*iter);
         }
     }
     // move to the source range
-    BidirectionalIterator mid = tstd::move(buffer, buffer_first, first);
-    tstd::move(tstd::reverse_iterator(buffer + N), tstd::reverse_iterator(buffer_last), mid);
-    // destroy and release memory
-    for (std::size_t i = 0; i < N; ++i)
-    {
-        alloc.destroy(buffer + i);
-    }
-    alloc.deallocate(buffer, N);
+    BidirectionalIterator mid = tstd::move(buffer.begin(), buffer_iter, first);
+    tstd::move(buffer.rbegin(), rbuffer_iter, mid);
     return mid;
 }
 
@@ -1494,20 +1540,10 @@ void stable_sort(RandomIterator first, RandomIterator last) // 1
         return;
     }
     using value_t = typename std::iterator_traits<RandomIterator>::value_type;
-    tstd::allocator<value_t> alloc;
     auto N = last - first;
-    // allocate buffer
-    value_t* buffer = alloc.allocate(N);
-    // initialize the buffer
-    tstd::uninitialized_move(first, last, buffer);
-    tstd::move(buffer, buffer+N, first);
-    tstd::impl::merge_sort(first, last, buffer);
-    // destroy and release buffer
-    for (int i = 0; i < N; ++i)
-    {
-        alloc.destroy(buffer+i);
-    }
-    alloc.deallocate(buffer, N);
+    // with the helper of a temporary buffer
+    tstd::impl::TemporaryBuffer<RandomIterator, value_t> buffer(first, N);
+    tstd::impl::merge_sort(first, last, buffer.begin());
 }
 template<typename RandomIterator, typename Compare>
 void stable_sort(RandomIterator first, RandomIterator last, Compare comp) // 2
@@ -1517,20 +1553,10 @@ void stable_sort(RandomIterator first, RandomIterator last, Compare comp) // 2
         return;
     }
     using value_t = typename std::iterator_traits<RandomIterator>::value_type;
-    tstd::allocator<value_t> alloc;
     auto N = last - first;
-    // allocate buffer
-    value_t* buffer = alloc.allocate(N);
-    // initialize the buffer
-    tstd::uninitialized_move(first, last, buffer);
-    tstd::move(buffer, buffer+N, first);
-    tstd::impl::merge_sort(first, last, buffer, comp);
-    // destroy and release buffer
-    for (int i = 0; i < N; ++i)
-    {
-        alloc.destroy(buffer+i);
-    }
-    alloc.deallocate(buffer, N);
+   // with the helper of a temporary buffer
+    tstd::impl::TemporaryBuffer<RandomIterator, value_t> buffer(first, N);
+    tstd::impl::merge_sort(first, last, buffer.begin(), comp);
 }
 
 // nth_element
