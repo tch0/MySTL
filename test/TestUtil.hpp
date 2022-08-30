@@ -67,12 +67,13 @@ PrintSequenceElements<T*> printArrayElements(T* arr, std::size_t size, std::size
 class TestUtil
 {
 public:
-    TestUtil(bool _show, const std::string& _target, int _lineNumberWidth = 4) 
+    TestUtil(bool _show, const std::string& _target, int _lineNumberWidth = 4, int _maxSequenceLength = 20) 
         : passedCount(0)
         , totalCount(0)
         , showDetails(_show)
         , target(_target)
         , lineNumberWidth(_lineNumberWidth)
+        , maxSequenceLength(_maxSequenceLength)
     {
         if (showDetails)
         {
@@ -133,8 +134,8 @@ public:
             std::cout << std::boolalpha << std::dec;
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertSequenceEqual: " << (res ? "passed" : "==================== failed")
-                << "\n\tleft sequence: " << printContainerElememts(c1, 20)
-                << "\n\tright sequence: " << printContainerElememts(c2, 20) << std::endl;
+                << "\n\tleft sequence: " << printContainerElememts(c1, maxSequenceLength)
+                << "\n\tright sequence: " << printContainerElememts(c2, maxSequenceLength) << std::endl;
         }
     }
 
@@ -149,8 +150,8 @@ public:
             std::cout << std::boolalpha << std::dec;
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertArrayEqual: " << (res ? "passed" : "==================== failed")
-                << "\n\tleft array: " << printArrayElements(arr1, size, 20)
-                << "\n\tright array: " << printArrayElements(arr2, size, 20) << std::endl;
+                << "\n\tleft array: " << printArrayElements(arr1, size, maxSequenceLength)
+                << "\n\tright array: " << printArrayElements(arr2, size, maxSequenceLength) << std::endl;
         }
     }
 
@@ -166,8 +167,23 @@ public:
             std::cout << std::boolalpha << std::dec;
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertRangeEqual: " << (res ? "passed" : "==================== failed")
-                << "\n\tleft range: " << PrintSequenceElements(b1, e1, 20)
-                << "\n\tright range: " << PrintSequenceElements(b2, std::next(b2, std::distance(b1, e1)), 20)  << std::endl;
+                << "\n\tleft range: " << PrintSequenceElements(b1, e1, maxSequenceLength)
+                << "\n\tright range: " << PrintSequenceElements(b2, std::next(b2, std::distance(b1, e1)), maxSequenceLength)  << std::endl;
+        }
+    }
+    template<typename ForwardIterator1, typename ForwardIterator2>
+    void assertRangeEqual(ForwardIterator1 b1, ForwardIterator1 e1, ForwardIterator2 b2, ForwardIterator2 e2, const std::source_location& loc = std::source_location::current())
+    {
+        bool res = std::distance(b1, e1) == std::distance(b2, e2) && std::equal(b1, e1, b2);
+        passedCount += (res ? 1 : 0);
+        totalCount++;
+        if (showDetails)
+        {
+            std::cout << std::boolalpha << std::dec;
+            std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
+                << "assertRangeEqual: " << (res ? "passed" : "==================== failed")
+                << "\n\tleft range: " << PrintSequenceElements(b1, e1, maxSequenceLength)
+                << "\n\tright range: " << PrintSequenceElements(b2, e2, maxSequenceLength)  << std::endl;
         }
     }
     // assert a sequence is sorted
@@ -182,7 +198,7 @@ public:
             std::cout << std::boolalpha << std::dec;
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertSorted: " << (res ? "passed" : "==================== failed")
-                << "\n\tsequence: " << PrintSequenceElements(b, e, 20) << std::endl;
+                << "\n\tsequence: " << PrintSequenceElements(b, e, maxSequenceLength) << std::endl;
         }
     }
     // assert two set is equal, do not consider order of elements.
@@ -197,8 +213,8 @@ public:
             std::cout << std::boolalpha << std::dec;
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertSetEqual: " << (res ? "passed" : "==================== failed")
-                << "\n\tleft set: " << printContainerElememts(c1, 20)
-                << "\n\tright set: " << printContainerElememts(c2, 20) << std::endl;
+                << "\n\tleft set: " << printContainerElememts(c1, maxSequenceLength)
+                << "\n\tright set: " << printContainerElememts(c2, maxSequenceLength) << std::endl;
         }
     }
     template<typename ForwardIterator1, typename ForwardIterator2>
@@ -212,14 +228,15 @@ public:
             std::cout << std::boolalpha << std::dec;
             std::cout << loc.file_name() << ":" << std::setw(lineNumberWidth) << loc.line() << ": "
                 << "assertSetEqual: " << (res ? "passed" : "==================== failed")
-                << "\n\tleft set: " << PrintSequenceElements(b1, e1, 20)
-                << "\n\tright set: " << PrintSequenceElements(b2, e2, 20)  << std::endl;
+                << "\n\tleft set: " << PrintSequenceElements(b1, e1, maxSequenceLength)
+                << "\n\tright set: " << PrintSequenceElements(b2, e2, maxSequenceLength)  << std::endl;
         }
     }
 private:
     int passedCount;
     int totalCount;
-    int lineNumberWidth;
+    int lineNumberWidth; // output width of lin number
+    int maxSequenceLength; // max output length of a sequence
     bool showDetails;
     std::string target;
 };

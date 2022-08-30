@@ -6,6 +6,7 @@
 #include <numeric>
 #include <random>
 #include <iterator>
+#include <string>
 #include <talgorithm.hpp>
 #include <tnumeric.hpp>
 #include <tvector.hpp>
@@ -28,19 +29,19 @@ int main(int argc, char const *argv[])
 {
     bool showDetails = parseDetailFlag(argc, argv);
     // <tnumeric.hpp>
-    // testNumericAlgorithms(showDetails);
+    testNumericAlgorithms(showDetails);
     // <talgorithm.hpp>
-    // testNonModifyingSequenceAlgorithms(showDetails);
-    // testModifyingSequenceAlgorithms(showDetails);
+    testNonModifyingSequenceAlgorithms(showDetails);
+    testModifyingSequenceAlgorithms(showDetails);
     testPartitioningAlgorithms(showDetails);
-    // testSortingAlgorithms(showDetails);
-    // testBinarySearchAlgorihms(showDetails);
-    // testSortedRangeAlgorithms(showDetails);
-    // testSetAlgorithms(showDetails);
-    // testHeapAlgorithms(showDetails);
-    // testMinimumMaximumAlgorithms(showDetails);
-    // testComparisonAlgorithms(showDetails);
-    // testPermutationAlgorithms(showDetails);
+    testSortingAlgorithms(showDetails);
+    testBinarySearchAlgorihms(showDetails);
+    testSortedRangeAlgorithms(showDetails);
+    testSetAlgorithms(showDetails);
+    testHeapAlgorithms(showDetails);
+    testMinimumMaximumAlgorithms(showDetails);
+    testComparisonAlgorithms(showDetails);
+    testPermutationAlgorithms(showDetails);
     std::cout << std::endl;
     return 0;
 }
@@ -911,8 +912,158 @@ void testPartitioningAlgorithms(bool showDetails)
 void testSortingAlgorithms(bool showDetails)
 {
     TestUtil util(showDetails, "sorting algorithms");
+    
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 1);
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
+    // is_sorted
+    {
+        std::vector<int> tmp(vec);
+        std::sort(tmp.begin(), tmp.end());
+        // 1
+        auto res1 = std::is_sorted(tmp.begin(), tmp.end());
+        auto res2 = tstd::is_sorted(tmp.begin(), tmp.end());
+        util.assertEqual(res1, res2);
+        res1 = std::is_sorted(vec.begin(), vec.end());
+        res2 = tstd::is_sorted(vec.begin(), vec.end());
+        util.assertEqual(res1, res2);
+        // 2
+        std::sort(tmp.begin(), tmp.end(), std::greater<int>());
+        res1 = std::is_sorted(tmp.begin(), tmp.end());
+        res2 = tstd::is_sorted(tmp.begin(), tmp.end());
+        util.assertEqual(res1, res2);
+        res1 = std::is_sorted(tmp.begin(), tmp.end(), std::greater<int>());
+        res2 = tstd::is_sorted(tmp.begin(), tmp.end(), std::greater<int>());
+        util.assertEqual(res1, res2);
+    }
+    // is_sorted_until
+    {
+        std::vector<int> tmp(vec);
+        std::sort(tmp.begin(), tmp.begin() + 50);
+        // 1
+        auto iter1 = std::is_sorted_until(tmp.begin(), tmp.end());
+        auto iter2 = tstd::is_sorted_until(tmp.begin(), tmp.end());
+        util.assertEqual(iter1 == iter2, true);
+        // 2
+        std::sort(tmp.begin(), tmp.begin() + 50, std::greater<int>());
+        iter1 = std::is_sorted_until(tmp.begin(), tmp.end(), std::greater<int>());
+        iter2 = tstd::is_sorted_until(tmp.begin(), tmp.end(), std::greater<int>());
+        util.assertEqual(iter1 == iter2, true);
+    }
+    // sort
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        // 1
+        std::sort(tmp1.begin(), tmp1.end());
+        tstd::sort(tmp2.begin(), tmp2.end());
+        util.assertSequenceEqual(tmp1, tmp2);
+        // 2
+        std::sort(tmp1.begin(), tmp1.end(), std::greater<int>());
+        tstd::sort(tmp2.begin(), tmp2.end(), std::greater<int>());
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // partial_sort
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        // 1
+        std::partial_sort(tmp1.begin(), tmp1.begin() + 47, tmp1.end());
+        tstd::partial_sort(tmp2.begin(), tmp2.begin() + 47, tmp2.end());
+        util.assertRangeEqual(tmp1.begin(), tmp1.begin() + 47, tmp2.begin());
+        util.assertSetEqual(tmp1, tmp2);
+        // 2
+        std::partial_sort(tmp1.begin(), tmp1.begin() + 47, tmp1.end(), std::greater<int>());
+        tstd::partial_sort(tmp2.begin(), tmp2.begin() + 47, tmp2.end(), std::greater<int>());
+        util.assertRangeEqual(tmp1.begin(), tmp1.begin() + 47, tmp2.begin());
+        util.assertSetEqual(tmp1, tmp2);
+    }
+    // partial_sort_copy
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        {
+            std::vector<int> tmp1d(50);
+            std::vector<int> tmp2d(50);
+            // 1
+            auto iter1 = std::partial_sort_copy(tmp1.begin(), tmp1.end(), tmp1d.begin(), tmp1d.end());
+            auto iter2 = tstd::partial_sort_copy(tmp2.begin(), tmp2.end(), tmp2d.begin(), tmp2d.end());
+            util.assertEqual(iter1 - tmp1d.begin(), iter2 - tmp2d.begin());
+            util.assertSequenceEqual(tmp1d, tmp2d);
+            // 2
+            iter1 = std::partial_sort_copy(tmp1.begin(), tmp1.end(), tmp1d.begin(), tmp1d.end(), std::greater<int>());
+            iter2 = tstd::partial_sort_copy(tmp2.begin(), tmp2.end(), tmp2d.begin(), tmp2d.end(), std::greater<int>());
+            util.assertEqual(iter1 - tmp1d.begin(), iter2 - tmp2d.begin());
+            util.assertSequenceEqual(tmp1d, tmp2d);
+        }
+        {
+            std::vector<int> tmp1d(150);
+            std::vector<int> tmp2d(150);
+            // 1
+            auto iter1 = std::partial_sort_copy(tmp1.begin(), tmp1.end(), tmp1d.begin(), tmp1d.end());
+            auto iter2 = tstd::partial_sort_copy(tmp2.begin(), tmp2.end(), tmp2d.begin(), tmp2d.end());
+            util.assertEqual(iter1 - tmp1d.begin(), iter2 - tmp2d.begin());
+            util.assertRangeEqual(tmp1d.begin(), iter1, tmp2d.begin(), iter2);
+            // 2
+            iter1 = std::partial_sort_copy(tmp1.begin(), tmp1.end(), tmp1d.begin(), tmp1d.end(), std::greater<int>());
+            iter2 = tstd::partial_sort_copy(tmp2.begin(), tmp2.end(), tmp2d.begin(), tmp2d.end(), std::greater<int>());
+            util.assertEqual(iter1 - tmp1d.begin(), iter2 - tmp2d.begin());
+            util.assertRangeEqual(tmp1d.begin(), tmp1d.begin() + 100, tmp2d.begin());
+        }
+    }
+    // stable_sort
     {
 
+        // 1
+        {
+            std::vector<int> tmp1{1, 2, 2, 3, 1, 1, 1, 10, 2};
+            std::vector<int> tmp2{1, 2, 2, 3, 1, 1, 1, 10, 2};
+            std:stable_sort(tmp1.begin(), tmp1.end());
+            tstd:stable_sort(tmp2.begin(), tmp2.end());
+            util.assertSequenceEqual(tmp1, tmp2);
+        }
+        // 2
+        {
+            std::vector<std::pair<int, std::string>> tmp1{{1, "1_x"}, {2, "2_v"}, {2, "2_c"}, {1, "1_d"}, {1, "1_e"}, {4, "4_f"}, {5, "5_g"}, {6, "6_h"}, {8, "8_i"}, {1, "1_j"}, {1, "1_k"}, {2, "2_l"}};
+            std::vector<std::pair<int, std::string>> tmp2(tmp1);
+            auto cmp = [](const std::pair<int, std::string>& p1, const std::pair<int, std::string>& p2) -> bool { return p1.first < p2.first; };
+            std::stable_sort(tmp1.begin(), tmp1.end(), cmp);
+            tstd::stable_sort(tmp2.begin(), tmp2.end(), cmp);
+            util.assertSequenceEqual(tmp1, tmp2);
+        }
+        {
+            std::vector<std::pair<int, std::string>> tmp1{{1, "1_x"}, {2, "2_v"}, {2, "2_c"}, {1, "1_d"}, {1, "1_e"}, {4, "4_f"}, {5, "5_g"}, {6, "6_h"}, {8, "8_i"}, {1, "1_j"}, {1, "1_k"}, {2, "2_l"}};
+            std::vector<std::pair<int, std::string>> tmp2(tmp1);
+            auto cmp = [](const std::pair<int, std::string>& p1, const std::pair<int, std::string>& p2) -> bool { return p1.first > p2.first; };
+            std::stable_sort(tmp1.begin(), tmp1.end(), cmp);
+            tstd::stable_sort(tmp2.begin(), tmp2.end(), cmp);
+            util.assertSequenceEqual(tmp1, tmp2);
+        }
+    }
+    // nth_element
+    {
+        // 1
+        {
+            std::vector<int> tmp1(vec);
+            std::vector<int> tmp2(vec);
+            std::nth_element(tmp1.begin(), tmp1.begin() + 50, tmp1.end());
+            tstd::nth_element(tmp2.begin(), tmp2.begin() + 50, tmp2.end());
+            util.assertSetEqual(tmp1, tmp2);
+            util.assertEqual(*(tmp1.begin() + 50), *(tmp2.begin() + 50));
+            util.assertSetEqual(tmp1.begin(), tmp1.begin() + 49, tmp2.begin(), tmp2.begin() + 49);
+            util.assertSetEqual(tmp1.begin() + 50, tmp1.end(), tmp2.begin() + 50, tmp2.end());
+        }
+        // 2
+        {
+            std::vector<int> tmp1(vec);
+            std::vector<int> tmp2(vec);
+            std::nth_element(tmp1.begin(), tmp1.begin() + 50, tmp1.end(), std::greater<int>());
+            tstd::nth_element(tmp2.begin(), tmp2.begin() + 50, tmp2.end(), std::greater<int>());
+            util.assertSetEqual(tmp1, tmp2);
+            util.assertEqual(*(tmp1.begin() + 50), *(tmp2.begin() + 50));
+            util.assertSetEqual(tmp1.begin(), tmp1.begin() + 49, tmp2.begin(), tmp2.begin() + 49);
+            util.assertSetEqual(tmp1.begin() + 50, tmp1.end(), tmp2.begin() + 50, tmp2.end());
+        }
     }
     util.showFinalResult();
 }

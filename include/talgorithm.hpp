@@ -628,7 +628,7 @@ constexpr OutputIterator generate_n(OutputIterator first, Size count, Generator 
 template<typename ForwardIterator, typename T>
 constexpr ForwardIterator remove(ForwardIterator first, ForwardIterator last, const T& value)
 {
-    first = std::find(first, last, value);
+    first = tstd::find(first, last, value);
     if (first != last)
     {
         for (ForwardIterator it = first; ++it != last;)
@@ -646,7 +646,7 @@ constexpr ForwardIterator remove(ForwardIterator first, ForwardIterator last, co
 template<typename ForwardIterator, typename UnaryPreciate>
 constexpr ForwardIterator remove_if(ForwardIterator first, ForwardIterator last, UnaryPreciate p)
 {
-    first = std::find_if(first, last, p);
+    first = tstd::find_if(first, last, p);
     if (first != last)
     {
         for (ForwardIterator it = first; ++it != last;)
@@ -751,7 +751,7 @@ constexpr ForwardIterator2 swap_ranges(ForwardIterator1 first1, ForwardIterator1
 {
     for (; first1 != last1; ++first1, ++first2)
     {
-        std::iter_swap(first1, first2);
+        tstd::iter_swap(first1, first2);
     }
     return first2;
 }
@@ -818,7 +818,7 @@ constexpr ForwardIterator rotate(ForwardIterator first, ForwardIterator n_first,
         {
             next_read = read;
         }
-        std::iter_swap(write++, read++);
+        tstd::iter_swap(write++, read++);
     }
     tstd::rotate(write, next_read, last);
     return write;
@@ -853,11 +853,11 @@ constexpr ForwardIterator shift_right(ForwardIterator first, ForwardIterator las
         return first;
     if constexpr (is_bidirectional_iterator_v<ForwardIterator>)
     {
-        return tstd::move_backward(first, std::prev(last, n), last);
+        return tstd::move_backward(first, tstd::prev(last, n), last);
     }
     else // forward iterator
     {
-        auto result = std::next(first, n);
+        auto result = tstd::next(first, n);
         if (result == last)
             return last;
         auto dest_head = first;
@@ -958,8 +958,8 @@ SampleIterator sample(PopulationIterator first, PopulationIterator last, SampleI
             return out;
         }
         distrib_type d;
-        Distance unsampled_size = std::distance(first, last);
-        n = std::min(n, unsampled_size);
+        Distance unsampled_size = tstd::distance(first, last);
+        n = std::min(n, unsampled_size); // todo: replace with tstd::min
         const UC_type range = g.max() - g.min();
         if (range / UC_type(unsampled_size) >= unsampled_size)
         {
@@ -1146,7 +1146,7 @@ constexpr ForwardIterator partition(ForwardIterator first, ForwardIterator last,
     {
         return first;
     }
-    for (ForwardIterator it = std::next(first); it != last; ++it)
+    for (ForwardIterator it = tstd::next(first); it != last; ++it)
     {
         if (p(*it))
         {
@@ -1194,12 +1194,12 @@ BidirectionalIterator stable_partition(BidirectionalIterator first, Bidirectiona
     {
         if (p(*iter))
         {
-            tstd::uninitialized_move(iter, std::next(iter), buffer_first);
+            tstd::uninitialized_move(iter, tstd::next(iter), buffer_first);
             ++buffer_first;
         }
         else
         {
-            tstd::uninitialized_move(iter, std::next(iter), tstd::reverse_iterator(buffer_last));
+            tstd::uninitialized_move(iter, tstd::next(iter), tstd::reverse_iterator(buffer_last));
             --buffer_last;
         }
     }
@@ -1223,12 +1223,12 @@ constexpr ForwardIterator partition_point(ForwardIterator first, ForwardIterator
 {
     ForwardIterator it;
     typename std::iterator_traits<ForwardIterator>::difference_type count, step;
-    count = std::distance(first, last);
+    count = tstd::distance(first, last);
     while (count > 0)
     {
         it = first;
         step = count / 2;
-        std::advance(it, step);
+        tstd::advance(it, step);
         if (p(*it)) // on the right of it
         {
             first = ++it;
@@ -1243,6 +1243,346 @@ constexpr ForwardIterator partition_point(ForwardIterator first, ForwardIterator
 }
 
 // ======================================== sorting algorithms =====================================================================================
+// is_sorted
+// complexity: O(last-first)
+template<typename ForwardIterator>
+constexpr ForwardIterator is_sorted_until(ForwardIterator first, ForwardIterator last);
+template<typename ForwardIterator, typename Compare>
+constexpr ForwardIterator is_sorted_until(ForwardIterator first, ForwardIterator last, Compare comp);
+template<typename ForwardIterator>
+constexpr bool is_sorted(ForwardIterator first, ForwardIterator last) // 1
+{
+    return tstd::is_sorted_until(first, last) == last;
+}
+template<typename ForwardIterator, typename Compare>
+constexpr bool is_sorted(ForwardIterator first, ForwardIterator last, Compare comp) // 2
+{
+    return tstd::is_sorted_until(first, last, comp) == last;
+}
+
+// is_sorted_until
+// compelxity: O(last-first)
+template<typename ForwardIterator>
+constexpr ForwardIterator is_sorted_until(ForwardIterator first, ForwardIterator last) // 1
+{
+    return tstd::is_sorted_until(first, last, std::less<>());
+}
+template<typename ForwardIterator, typename Compare>
+constexpr ForwardIterator is_sorted_until(ForwardIterator first, ForwardIterator last, Compare comp) // 2
+{
+    if (first != last)
+    {
+        ForwardIterator next = first;
+        while (++next != last)
+        {
+            if (comp(*next, *first))
+            {
+                return next;
+            }
+            first = next;
+        }
+    }
+    return last;
+}
+
+// sort: quick sort, not stable
+// complexity: average O(NlogN)
+template<typename RandomIterator>
+constexpr void sort(RandomIterator first, RandomIterator last) // 1
+{
+    if (first == last)
+    {
+        return;
+    }
+    auto pivot = *tstd::next(first, tstd::distance(first, last) / 2);
+    auto middle1 = tstd::partition(first, last, [pivot](const auto& elem) { return elem < pivot; });
+    auto middle2 = tstd::partition(middle1, last, [pivot](const auto& elem) { return !(pivot < elem); });
+    tstd::sort(first, middle1);
+    tstd::sort(middle2, last);
+}
+template<typename RandomIterator, typename Compare>
+constexpr void sort(RandomIterator first, RandomIterator last, Compare comp) // 2
+{
+    if (first == last)
+    {
+        return;
+    }
+    auto pivot = *tstd::next(first, tstd::distance(first, last) / 2);
+    auto middle1 = tstd::partition(first, last, [pivot, &comp](const auto& elem) { return comp(elem, pivot); });
+    auto middle2 = tstd::partition(middle1, last, [pivot, &comp](const auto& elem) { return !comp(pivot, elem); });
+    tstd::sort(first, middle1, comp);
+    tstd::sort(middle2, last, comp);
+}
+
+// partial_sort: sort [first, middle) subrange in range [first, last), not stable
+// complexity: O((last-first)log(middle-first))
+template<typename RandomIterator>
+constexpr void partial_sort(RandomIterator first, RandomIterator middle, RandomIterator last) // 1
+{
+    if (first == last)
+    {
+        return;
+    }
+    auto N = tstd::distance(first, middle);
+    auto pivot = *tstd::next(first, tstd::distance(first, last) / 2);
+    auto middle1 = tstd::partition(first, last, [pivot](const auto& elem) { return elem < pivot; });
+    auto middle2 = tstd::partition(middle1, last, [pivot](const auto& elem) { return !(pivot < elem); });
+    if (tstd::distance(first, middle2) < N)
+    {
+        tstd::sort(first, middle1);
+        tstd::partial_sort(middle2, tstd::next(first, N), last);
+    }
+    else if (tstd::distance(first, middle1) <= N)
+    {
+        tstd::sort(first, middle1);
+    }
+    else // middle1-frist > N
+    {
+        tstd::partial_sort(first, tstd::next(first, N), middle1);
+    }
+}
+template<typename RandomIterator, typename Compare>
+constexpr void partial_sort(RandomIterator first, RandomIterator middle, RandomIterator last, Compare comp) // 2
+{
+    if (first == last)
+    {
+        return;
+    }
+    auto N = tstd::distance(first, middle);
+    auto pivot = *tstd::next(first, tstd::distance(first, last) / 2);
+    auto middle1 = tstd::partition(first, last, [pivot, &comp](const auto& elem) { return comp(elem, pivot); });
+    auto middle2 = tstd::partition(middle1, last, [pivot, &comp](const auto& elem) { return !comp(pivot, elem); });
+    if (tstd::distance(first, middle2) < N)
+    {
+        tstd::sort(first, middle1, comp);
+        tstd::partial_sort(middle2, tstd::next(first, N), last, comp);
+    }
+    else if (tstd::distance(first, middle1) <= N)
+    {
+        tstd::sort(first, middle1, comp);
+    }
+    else // middle1-frist > N
+    {
+        tstd::partial_sort(first, tstd::next(first, N), middle1, comp);
+    }
+}
+
+// partial_sort_copy: partial_sort but copy to another range, use heap sort
+// complexity: O((last-first)*log(min(last-first, d_last-d_first)))
+template<typename InputIterator, typename RandomIterator>
+constexpr RandomIterator partial_sort_copy(InputIterator first, InputIterator last, RandomIterator d_first, RandomIterator d_last) // 1
+{
+    if (first == last || d_first == d_last)
+        return d_first;
+    auto N1 = tstd::distance(first, last);
+    auto N2 = tstd::distance(d_first, d_last);
+    if (N1 <= N2)
+    {
+        tstd::copy(first, last, d_first);
+        tstd::make_heap(d_first, d_first + N1);
+        tstd::sort_heap(d_first, d_first + N1);
+        return d_first + N1;
+    }
+    else // N1 > N2
+    {
+        // copy first N2 elements
+        tstd::copy(first, first + N2, d_first);
+        tstd::make_heap(d_first, d_last);
+        // process rest elements
+        for (auto iter = first + N2; iter != last; ++iter)
+        {
+            if (*iter < *d_first) // replace *d_first with *iter
+            {
+                tstd::pop_heap(d_first, d_last);
+                *(d_last-1) = *iter;
+                tstd::push_heap(d_first, d_last);
+            }
+            // else do nothing
+        }
+        tstd::sort_heap(d_first, d_last);
+        return d_last;
+    }
+}
+template<typename InputIterator, typename RandomIterator, typename Compare>
+constexpr RandomIterator partial_sort_copy(InputIterator first, InputIterator last, RandomIterator d_first, RandomIterator d_last, Compare comp) // 2
+{
+    if (first == last || d_first == d_last)
+        return d_first;
+    auto N1 = tstd::distance(first, last);
+    auto N2 = tstd::distance(d_first, d_last);
+    if (N1 <= N2)
+    {
+        tstd::copy(first, last, d_first);
+        tstd::make_heap(d_first, d_first + N1, comp);
+        tstd::sort_heap(d_first, d_first + N1, comp);
+        return d_first + N1;
+    }
+    else // N1 > N2
+    {
+        // copy first N2 elements
+        tstd::copy(first, first + N2, d_first);
+        tstd::make_heap(d_first, d_last, comp);
+        // process rest elements
+        for (auto iter = first + N2; iter != last; ++iter)
+        {
+            if (comp(*iter, *d_first)) // replace *d_first with *iter, rebuild the heap
+            {
+                tstd::pop_heap(d_first, d_last, comp);
+                *(d_last-1) = *iter;
+                tstd::push_heap(d_first, d_last, comp);
+            }
+            // else do nothing
+        }
+        tstd::sort_heap(d_first, d_last, comp);
+        return d_last;
+    }
+}
+
+// stable_sort: use merge sort
+// complexity: O(N*log(N)^2) applications of comp, if additional memory is available then will be O(NlogN), always O(NlogN) in my implementation.
+namespace impl
+{
+// stable_sort helpers
+template<typename RandomIterator1, typename RandomIterator2, typename Compare>
+void merge_sort(RandomIterator1 first, RandomIterator1 last, RandomIterator2 buf, Compare comp);
+template<typename RandomIterator1, typename RandomIterator2>
+void merge_sort(RandomIterator1 first, RandomIterator1 last, RandomIterator2 buf) // 1
+{
+    tstd::impl::merge_sort(first, last, buf, std::less<>());
+}
+template<typename RandomIterator1, typename RandomIterator2, typename Compare>
+void merge_sort(RandomIterator1 first, RandomIterator1 last, RandomIterator2 buf, Compare comp) // 2
+{
+    if (last - first <= 1)
+    {
+        return;
+    }
+    auto mid = first + (last - first) / 2;
+    // [first, mid) and [mid, last)
+    merge_sort(first, mid, buf, comp);
+    merge_sort(mid, last, buf, comp);
+    auto iter1 = first;
+    auto iter2 = mid;
+    auto buf_first = buf;
+    while (iter1 != mid && iter2 != last)
+    {
+        if (comp(*iter2, *iter1))
+        {
+            *buf_first++ = std::move(*iter2++);
+        }
+        else
+        {
+            *buf_first++ = std::move(*iter1++);
+        }
+    }
+    while (iter1 != mid)
+    {
+        *buf_first++ = std::move(*iter1++);
+    }
+    while (iter2 != last)
+    {
+        *buf_first++ = std::move(*iter2++);
+    }
+    tstd::move(buf, buf + (last-first), first);
+}
+}
+template<typename RandomIterator>
+void stable_sort(RandomIterator first, RandomIterator last) // 1
+{
+    if (first == last)
+    {
+        return;
+    }
+    using value_t = typename std::iterator_traits<RandomIterator>::value_type;
+    tstd::allocator<value_t> alloc;
+    auto N = last - first;
+    // allocate buffer
+    value_t* buffer = alloc.allocate(N);
+    // initialize the buffer
+    tstd::uninitialized_move(first, last, buffer);
+    tstd::move(buffer, buffer+N, first);
+    tstd::impl::merge_sort(first, last, buffer);
+    // destroy and release buffer
+    for (int i = 0; i < N; ++i)
+    {
+        alloc.destroy(buffer+i);
+    }
+    alloc.deallocate(buffer, N);
+}
+template<typename RandomIterator, typename Compare>
+void stable_sort(RandomIterator first, RandomIterator last, Compare comp) // 2
+{
+    if (first == last)
+    {
+        return;
+    }
+    using value_t = typename std::iterator_traits<RandomIterator>::value_type;
+    tstd::allocator<value_t> alloc;
+    auto N = last - first;
+    // allocate buffer
+    value_t* buffer = alloc.allocate(N);
+    // initialize the buffer
+    tstd::uninitialized_move(first, last, buffer);
+    tstd::move(buffer, buffer+N, first);
+    tstd::impl::merge_sort(first, last, buffer, comp);
+    // destroy and release buffer
+    for (int i = 0; i < N; ++i)
+    {
+        alloc.destroy(buffer+i);
+    }
+    alloc.deallocate(buffer, N);
+}
+
+// nth_element
+// complexity: O(N) in average
+template<typename RandomIterator>
+constexpr void nth_element(RandomIterator first, RandomIterator nth, RandomIterator last) // 1
+{
+    if (first == last)
+    {
+        return;
+    }
+    auto N = nth - first;
+    auto pivot = *tstd::next(first, tstd::distance(first, last) / 2);
+    auto middle1 = tstd::partition(first, last, [pivot](const auto& elem) { return elem < pivot; });
+    auto middle2 = tstd::partition(middle1, last, [pivot](const auto& elem) { return !(pivot < elem); });
+    if (tstd::distance(first, middle2) < N)
+    {
+        tstd::nth_element(middle2, nth, last);
+    }
+    else if (tstd::distance(first, middle1) <= N)
+    {
+        return;
+    }
+    else // middle1-frist > N
+    {
+        tstd::nth_element(first, nth, middle1);
+    }
+}
+template<typename RandomIterator, typename Compare>
+constexpr void nth_element(RandomIterator first, RandomIterator nth, RandomIterator last, Compare comp) // 2
+{
+    if (first == last)
+    {
+        return;
+    }
+    auto N = nth - first;
+    auto pivot = *tstd::next(first, tstd::distance(first, last) / 2);
+    auto middle1 = tstd::partition(first, last, [pivot, &comp](const auto& elem) { return comp(elem, pivot); });
+    auto middle2 = tstd::partition(middle1, last, [pivot, &comp](const auto& elem) { return !comp(pivot, elem); });
+    if (tstd::distance(first, middle2) < N)
+    {
+        tstd::nth_element(middle2, nth, last, comp);
+    }
+    else if (tstd::distance(first, middle1) <= N)
+    {
+        return;
+    }
+    else // middle1-frist > N
+    {
+        tstd::nth_element(first, nth, middle1, comp);
+    }
+}
 
 // ======================================== binary search algorithms ===============================================================================
 
