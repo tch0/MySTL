@@ -8,6 +8,7 @@
 #include <iterator>
 #include <talgorithm.hpp>
 #include <tnumeric.hpp>
+#include <tvector.hpp>
 #include "TestUtil.hpp"
 
 void testNumericAlgorithms(bool showDetails);
@@ -27,19 +28,19 @@ int main(int argc, char const *argv[])
 {
     bool showDetails = parseDetailFlag(argc, argv);
     // <tnumeric.hpp>
-    testNumericAlgorithms(showDetails);
+    // testNumericAlgorithms(showDetails);
     // <talgorithm.hpp>
-    testNonModifyingSequenceAlgorithms(showDetails);
-    testModifyingSequenceAlgorithms(showDetails);
+    // testNonModifyingSequenceAlgorithms(showDetails);
+    // testModifyingSequenceAlgorithms(showDetails);
     testPartitioningAlgorithms(showDetails);
-    testSortingAlgorithms(showDetails);
-    testBinarySearchAlgorihms(showDetails);
-    testSortedRangeAlgorithms(showDetails);
-    testSetAlgorithms(showDetails);
-    testHeapAlgorithms(showDetails);
-    testMinimumMaximumAlgorithms(showDetails);
-    testComparisonAlgorithms(showDetails);
-    testPermutationAlgorithms(showDetails);
+    // testSortingAlgorithms(showDetails);
+    // testBinarySearchAlgorihms(showDetails);
+    // testSortedRangeAlgorithms(showDetails);
+    // testSetAlgorithms(showDetails);
+    // testHeapAlgorithms(showDetails);
+    // testMinimumMaximumAlgorithms(showDetails);
+    // testComparisonAlgorithms(showDetails);
+    // testPermutationAlgorithms(showDetails);
     std::cout << std::endl;
     return 0;
 }
@@ -761,7 +762,7 @@ void testModifyingSequenceAlgorithms(bool showDetails)
         tstd::sample(vec.begin(), vec.end(), tmp2.begin(), 50, std::mt19937());
         if (showDetails)
         {
-            std::cout << "shuffle test: " << std::endl;
+            std::cout << "sample test: " << std::endl;
             std::cout << "\tstd::sample: " << printContainerElememts(tmp1, 50) << std::endl;
             std::cout << "\ttstd::sample: " << printContainerElememts(tmp2, 50) << std::endl;
         }
@@ -821,8 +822,88 @@ void testModifyingSequenceAlgorithms(bool showDetails)
 void testPartitioningAlgorithms(bool showDetails)
 {
     TestUtil util(showDetails, "partitioning algorithms");
-    {
 
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 1);
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
+    // is_partitioned
+    {
+        auto res1 = std::is_partitioned(vec.begin(), vec.end(), [](int a) { return a > 0; });
+        auto res2 = tstd::is_partitioned(vec.begin(), vec.end(), [](int a) { return a > 0; });
+        util.assertEqual(res1, res2);
+        res1 = std::is_partitioned(vec.begin(), vec.end(), [](int a) { return a < 0; });
+        res2 = tstd::is_partitioned(vec.begin(), vec.end(), [](int a) { return a < 0; });
+        util.assertEqual(res1, res2);
+        res1 = std::is_partitioned(vec.begin(), vec.end(), [](int a) { return a < 50; });
+        res2 = tstd::is_partitioned(vec.begin(), vec.end(), [](int a) { return a < 50; });
+        util.assertEqual(res1, res2);
+        std::vector<int> tmp{1, 1, 2, 2, 3, 3, 4};
+        res1 = std::is_partitioned(tmp.begin(), tmp.end(), [](int a) { return a < 3; });
+        res2 = tstd::is_partitioned(tmp.begin(), tmp.end(), [](int a) { return a < 3; });
+        util.assertEqual(res1, res2);
+        res1 = std::is_partitioned(tmp.begin(), tmp.end(), [](int a) { return a > 4; });
+        res2 = tstd::is_partitioned(tmp.begin(), tmp.end(), [](int a) { return a > 4; });
+        util.assertEqual(res1, res2);
+    }
+    // partition
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        auto p = [](int a) -> bool { return a > 50; };
+        auto iter1 = std::partition(tmp1.begin(), tmp1.end(), p);
+        auto iter2 = tstd::partition(tmp2.begin(), tmp2.end(), p);
+        util.assertEqual(std::distance(tmp1.begin(), iter1), std::distance(tmp2.begin(), iter2));
+        util.assertSetEqual(tmp1, tmp2); // not guarantee sequence equality
+        util.assertEqual(std::is_partitioned(tmp1.begin(), tmp1.end(), p), tstd::is_partitioned(tmp2.begin(), tmp2.end(), p));
+        {
+            auto p = [](int a) -> bool { return a < 50; };
+            auto iter1 = std::partition(tmp1.begin(), tmp1.end(), p);
+            auto iter2 = tstd::partition(tmp2.begin(), tmp2.end(), p);
+            util.assertEqual(std::distance(tmp1.begin(), iter1), std::distance(tmp2.begin(), iter2));
+            util.assertSetEqual(tmp1, tmp2); // not guarantee sequence equality
+            util.assertEqual(std::is_partitioned(tmp1.begin(), tmp1.end(), p), tstd::is_partitioned(tmp2.begin(), tmp2.end(), p));
+        }
+    }
+    // partition_copy
+    {
+        std::vector<int> tmp1t, tmp1f;
+        std::vector<int> tmp2t, tmp2f;
+        auto pred = [](int a) -> bool { return a > 50; };
+        auto p1 = std::partition_copy(vec.begin(), vec.end(), std::back_inserter(tmp1t), std::back_inserter(tmp1f), pred);
+        auto p2 = std::partition_copy(vec.begin(), vec.end(), std::back_inserter(tmp2t), std::back_inserter(tmp2f), pred);
+        util.assertEqual(tmp1t.size(), tmp2t.size());
+        util.assertEqual(tmp1f.size(), tmp2f.size());
+        util.assertSequenceEqual(tmp1t, tmp2t);
+        util.assertSequenceEqual(tmp1f, tmp2f);
+    }
+    // stable_partition
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        auto p = [](int a) -> bool { return a > 50; };
+        auto iter1 = std::stable_partition(tmp1.begin(), tmp1.end(), p);
+        auto iter2 = tstd::stable_partition(tmp2.begin(), tmp2.end(), p);
+        util.assertEqual(std::distance(tmp1.begin(), iter1), std::distance(tmp2.begin(), iter2));
+        util.assertSequenceEqual(tmp1, tmp2); // should guarantee sequence equality
+        util.assertEqual(std::is_partitioned(tmp1.begin(), tmp1.end(), p), tstd::is_partitioned(tmp2.begin(), tmp2.end(), p));
+        {
+            auto p = [](int a) -> bool { return a < 50; };
+            auto iter1 = std::stable_partition(tmp1.begin(), tmp1.end(), p);
+            auto iter2 = tstd::stable_partition(tmp2.begin(), tmp2.end(), p);
+            util.assertEqual(std::distance(tmp1.begin(), iter1), std::distance(tmp2.begin(), iter2));
+            util.assertSequenceEqual(tmp1, tmp2);  // not guarantee sequence equality
+            util.assertEqual(std::is_partitioned(tmp1.begin(), tmp1.end(), p), tstd::is_partitioned(tmp2.begin(), tmp2.end(), p));
+        }
+    }
+    // partition_point
+    {
+        std::vector<int> tmp(vec);
+        auto p = [](int a) -> bool { return a > 50; };
+        auto iter = std::partition(tmp.begin(), tmp.end(), p);
+        auto iter1 = std::partition_point(tmp.begin(), tmp.end(), p);
+        auto iter2 = tstd::partition_point(tmp.begin(), tmp.end(), p);
+        util.assertEqual(iter == iter1, true);
+        util.assertEqual(iter1 == iter2, true);
     }
     util.showFinalResult();
 }

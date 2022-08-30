@@ -10,6 +10,7 @@
 #include <tutility.hpp>
 #include <titerator.hpp>
 #include <tstl_heap.hpp> // heap algorithms
+#include <tstl_uninitialized.hpp>
 
 namespace tstd
 {
@@ -1113,6 +1114,133 @@ constexpr OutputIterator unique_copy(InputIterator first, InputIterator last, Ou
 }
 
 // ======================================== partitioning algorithms ================================================================================
+// is_partitioned
+// compelxity: at most last-first applications of predicate
+template<typename InputIterator, typename UnaryPredicate>
+constexpr bool is_partitioned(InputIterator first, InputIterator last, UnaryPredicate p)
+{
+    for (; first != last; ++first)
+    {
+        if (!p(*first))
+        {
+            break;
+        }
+    }
+    for (; first != last; ++first)
+    {
+        if (p(*first))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// partition: reorder element in range [first, last), elements that p returns true precede those p returns false, return iterator of first element that p returns false
+// compelxity: last-first applications of predicate, at most last-first swaps
+template<typename ForwardIterator, typename UnaryPredicate>
+constexpr ForwardIterator partition(ForwardIterator first, ForwardIterator last, UnaryPredicate p)
+{
+    first = tstd::find_if_not(first, last, p);
+    if (first == last)
+    {
+        return first;
+    }
+    for (ForwardIterator it = std::next(first); it != last; ++it)
+    {
+        if (p(*it))
+        {
+            tstd::iter_swap(first, it);
+            ++first;
+        }
+    }
+    return first;
+}
+
+// partition_copy: partition and copy two parts to two destination ranges
+// complexity: exactly last-first applications of predicate
+template<typename InputIterator, typename OutputIterator1, typename OutputIterator2, typename UnaryPredicate>
+constexpr std::pair<OutputIterator1, OutputIterator2> partition_copy(InputIterator first, InputIterator last, OutputIterator1 d_first_true, OutputIterator2 d_first_false, UnaryPredicate p)
+{
+    for (; first != last; ++first)
+    {
+        if (p(*first))
+        {
+            *d_first_true++ = *first;
+        }
+        else
+        {
+            *d_first_false = *first;
+        }
+    }
+    return {d_first_true, d_first_false};
+}
+
+// stable_partition: partition but stable
+// complexity: exactly N applications of predicate and swaps, if memory is insufficient at most NlogN swaps,
+//             at here we don't check memory, always N swaps, and it will try to allocate a buffer.
+template<typename BidirectionalIterator, typename UnaryPredicate>
+BidirectionalIterator stable_partition(BidirectionalIterator first, BidirectionalIterator last, UnaryPredicate p)
+{
+    using value_t = typename std::iterator_traits<BidirectionalIterator>::value_type;
+    using diff_t = typename std::iterator_traits<BidirectionalIterator>::difference_type;
+    diff_t N = tstd::distance(first, last);
+    tstd::allocator<value_t> alloc;
+    value_t* buffer = alloc.allocate(N);
+    value_t* buffer_first = buffer;
+    value_t* buffer_last = buffer + N;
+    // unintialized version of partition_copy
+    for (auto iter = first; iter != last; ++iter)
+    {
+        if (p(*iter))
+        {
+            tstd::uninitialized_move(iter, std::next(iter), buffer_first);
+            ++buffer_first;
+        }
+        else
+        {
+            tstd::uninitialized_move(iter, std::next(iter), tstd::reverse_iterator(buffer_last));
+            --buffer_last;
+        }
+    }
+    // move to the source range
+    BidirectionalIterator mid = tstd::move(buffer, buffer_first, first);
+    tstd::move(tstd::reverse_iterator(buffer + N), tstd::reverse_iterator(buffer_last), mid);
+    // destroy and release memory
+    for (std::size_t i = 0; i < N; ++i)
+    {
+        alloc.destroy(buffer + i);
+    }
+    alloc.deallocate(buffer, N);
+    return mid;
+}
+
+// partition_point: get the iterator of first element that p returns false [that means the input range should be partitioned by p already.]
+//                  it's a more general form of lower_bound, pass [&](auto const& e) { return e < value; } as predicate to represent lower_bound.
+// complexity: N = std::distance(first, last), O(logN) applications of predicate, N applications of operator++ of iterator for non-random-access iterator.
+template<typename ForwardIterator, typename UnaryPredicate>
+constexpr ForwardIterator partition_point(ForwardIterator first, ForwardIterator last, UnaryPredicate p)
+{
+    ForwardIterator it;
+    typename std::iterator_traits<ForwardIterator>::difference_type count, step;
+    count = std::distance(first, last);
+    while (count > 0)
+    {
+        it = first;
+        step = count / 2;
+        std::advance(it, step);
+        if (p(*it)) // on the right of it
+        {
+            first = ++it;
+            count -= step + 1;
+        }
+        else // on the left of it
+        {
+            count = step;
+        }
+    }
+    return first;
+}
 
 // ======================================== sorting algorithms =====================================================================================
 

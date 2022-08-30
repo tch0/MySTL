@@ -580,7 +580,7 @@ private:
     {
         if (start)
         {
-            alloc.deallocate(start, sizeof(T) * capacity());
+            alloc.deallocate(start, capacity());
         }
         start = finish = end_of_storage = nullptr;
     }
