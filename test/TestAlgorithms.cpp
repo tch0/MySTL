@@ -1071,8 +1071,72 @@ void testSortingAlgorithms(bool showDetails)
 void testBinarySearchAlgorihms(bool showDetails)
 {
     TestUtil util(showDetails, "binary search algorithms");
-    {
 
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 1);
+    // lower_bound
+    {
+        // 1
+        std::sort(vec.begin(), vec.end());
+        auto iter1 = std::lower_bound(vec.begin(), vec.end(), 16);
+        auto iter2 = tstd::lower_bound(vec.begin(), vec.end(), 16);
+        util.assertEqual(iter1 == iter2, true);
+        iter1 = std::lower_bound(vec.begin(), vec.end(), -1);
+        iter2 = tstd::lower_bound(vec.begin(), vec.end(), -1);
+        util.assertEqual(iter1 == iter2, true);
+        // 2
+        std::sort(vec.begin(), vec.end(), std::greater<>());
+        iter1 = std::lower_bound(vec.begin(), vec.end(), 99, std::greater<>());
+        iter2 = tstd::lower_bound(vec.begin(), vec.end(), 99, std::greater<>());
+        util.assertEqual(iter1 == iter2, true);
+    }
+    // upper_bound
+    {
+        // 1
+        std::sort(vec.begin(), vec.end());
+        auto iter1 = std::upper_bound(vec.begin(), vec.end(), 16);
+        auto iter2 = tstd::upper_bound(vec.begin(), vec.end(), 16);
+        util.assertEqual(iter1 == iter2, true);
+        iter1 = std::upper_bound(vec.begin(), vec.end(), -1);
+        iter2 = tstd::upper_bound(vec.begin(), vec.end(), -1);
+        util.assertEqual(iter1 == iter2, true);
+        // 2
+        std::sort(vec.begin(), vec.end(), std::greater<>());
+        iter1 = std::upper_bound(vec.begin(), vec.end(), 99, std::greater<>());
+        iter2 = tstd::upper_bound(vec.begin(), vec.end(), 99, std::greater<>());
+        util.assertEqual(iter1 == iter2, true);
+    }
+    // binary_search
+    {
+        // 1
+        std::sort(vec.begin(), vec.end());
+        auto res1 = std::binary_search(vec.begin(), vec.end(), 16);
+        auto res2 = tstd::binary_search(vec.begin(), vec.end(), 16);
+        util.assertEqual(res1, res2);
+        res1 = std::binary_search(vec.begin(), vec.end(), -1);
+        res2 = tstd::binary_search(vec.begin(), vec.end(), -1);
+        util.assertEqual(res1, res2);
+        // 2
+        std::sort(vec.begin(), vec.end(), std::greater<>());
+        res1 = std::binary_search(vec.begin(), vec.end(), 60, std::greater<>());
+        res2 = tstd::binary_search(vec.begin(), vec.end(), 60, std::greater<>());
+        util.assertEqual(res1, res2);
+    }
+    // equal_range
+    {
+        // 1
+        std::sort(vec.begin(), vec.end());
+        auto p1 = std::equal_range(vec.begin(), vec.end(), 16);
+        auto p2 = tstd::equal_range(vec.begin(), vec.end(), 16);
+        util.assertEqual(p1 == p2, true);
+        p1 = std::equal_range(vec.begin(), vec.end(), -1);
+        p2 = tstd::equal_range(vec.begin(), vec.end(), -1);
+        util.assertEqual(p1 == p2, true);
+        // 2
+        std::sort(vec.begin(), vec.end(), std::greater<>());
+        p1 = std::equal_range(vec.begin(), vec.end(), 99, std::greater<>());
+        p2 = tstd::equal_range(vec.begin(), vec.end(), 99, std::greater<>());
+        util.assertEqual(p1 == p2, true);
     }
     util.showFinalResult();
 }

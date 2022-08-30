@@ -1584,7 +1584,132 @@ constexpr void nth_element(RandomIterator first, RandomIterator nth, RandomItera
     }
 }
 
-// ======================================== binary search algorithms ===============================================================================
+// ======================================== binary search algorithms (on sorted ranges)=============================================================
+// lower_bound: find first element that >= value
+// complexity: O(log(last-first))
+template<typename ForwardIterator, typename T>
+constexpr ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& value) // 1
+{
+    ForwardIterator it;
+    typename std::iterator_traits<ForwardIterator>::difference_type count, step;
+    count = tstd::distance(first, last);
+    while (count > 0)
+    {
+        it = first;
+        step = count / 2;
+        tstd::advance(it, step);
+        if (*it < value)
+        {
+            first = ++it;
+            count -= step + 1;
+        }
+        else
+        {
+            count = step;
+        }
+    }
+    return first;
+}
+template<typename ForwardIterator, typename T, typename Compare>
+constexpr ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& value, Compare comp) // 2
+{
+    ForwardIterator it;
+    typename std::iterator_traits<ForwardIterator>::difference_type count, step;
+    count = tstd::distance(first, last);
+    while (count > 0)
+    {
+        it = first;
+        step = count / 2;
+        tstd::advance(it, step);
+        if (comp(*it, value))
+        {
+            first = ++it;
+            count -= step + 1;
+        }
+        else
+        {
+            count = step;
+        }
+    }
+    return first;
+}
+
+// upper_bound: find first element that > value
+// compelxity: O(log(last-first))
+template<typename ForwardIterator, typename T>
+constexpr ForwardIterator upper_bound(ForwardIterator first, ForwardIterator last, const T& value) // 1
+{
+    ForwardIterator it;
+    typename std::iterator_traits<ForwardIterator>::difference_type count, step;
+    count = tstd::distance(first, last);
+    while (count > 0)
+    {
+        it = first;
+        step = count / 2;
+        tstd::advance(it, step);
+        if (value < *it)
+        {
+            count = step;
+        }
+        else
+        {
+            first = ++it;
+            count -= step + 1;
+        }
+    }
+    return first;
+}
+template<typename ForwardIterator, typename T, typename Compare>
+constexpr ForwardIterator upper_bound(ForwardIterator first, ForwardIterator last, const T& value, Compare comp) // 2
+{
+    ForwardIterator it;
+    typename std::iterator_traits<ForwardIterator>::difference_type count, step;
+    count = tstd::distance(first, last);
+    while (count > 0)
+    {
+        it = first;
+        step = count / 2;
+        tstd::advance(it, step);
+        if (comp(value, *it))
+        {
+            count = step;
+        }
+        else
+        {
+            first = ++it;
+            count -= step + 1;
+        }
+    }
+    return first;
+}
+
+// binary_search: find if the element is in range [first, last)
+// complexity: O(log(last-first))
+template<typename ForwardIterator, typename T>
+constexpr bool binary_search(ForwardIterator first, ForwardIterator last, const T& value) // 1
+{
+    first = tstd::lower_bound(first, last, value);
+    return (first != last) && !(value < *first);
+}
+template<typename ForwardIterator, typename T, typename Compare>
+constexpr bool binary_search(ForwardIterator first, ForwardIterator last, const T& value, Compare comp) // 2
+{
+    first = tstd::lower_bound(first, last, value, comp);
+    return (first != last) && !comp(value, *first);
+}
+
+// equal_range
+// complexity: O(log(last-first))
+template<typename ForwardIterator, typename T>
+std::pair<ForwardIterator, ForwardIterator> equal_range(ForwardIterator first, ForwardIterator last, const T& value) // 1
+{
+    return {tstd::lower_bound(first, last, value), tstd::upper_bound(first, last, value)};
+}
+template<typename ForwardIterator, typename T, typename Compare>
+std::pair<ForwardIterator, ForwardIterator> equal_range(ForwardIterator first, ForwardIterator last, const T& value, Compare comp) // 2
+{
+    return {tstd::lower_bound(first, last, value, comp), tstd::upper_bound(first, last, value, comp)};
+}
 
 // ======================================== algorithms on sorted ranges ============================================================================
 
