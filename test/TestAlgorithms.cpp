@@ -1144,8 +1144,47 @@ void testBinarySearchAlgorihms(bool showDetails)
 void testSortedRangeAlgorithms(bool showDetails)
 {
     TestUtil util(showDetails, "sorted range algorithms");
+    // merge
     {
-
+        std::vector<int> vec1(50);
+        std::iota(vec1.begin(), vec1.end(), 1);
+        std::vector<int> vec2(50);
+        std::iota(vec2.begin(), vec2.end(), 30);
+        std::vector<int> tmp1(100);
+        std::vector<int> tmp2(100);
+        // 1
+        auto iter1 = std::merge(vec1.begin(), vec1.end(), vec2.begin(), vec2.end(), tmp1.begin());
+        auto iter2 = tstd::merge(vec1.begin(), vec1.end(), vec2.begin(), vec2.end(), tmp2.begin());
+        util.assertEqual(iter1 - tmp1.begin(), iter2 - tmp2.begin());
+        util.assertSequenceEqual(tmp1, tmp2);
+        // 2
+        iter1 = std::merge(vec1.rbegin(), vec1.rend(), vec2.rbegin(), vec2.rend(), tmp1.begin());
+        iter2 = tstd::merge(vec1.rbegin(), vec1.rend(), vec2.rbegin(), vec2.rend(), tmp2.begin());
+        util.assertEqual(iter1 - tmp1.begin(), iter2 - tmp2.begin());
+        util.assertSequenceEqual(tmp1, tmp2);
+    }
+    // inplace_merge
+    {
+        std::vector<int> vec1(100);
+        std::vector<int> vec2(100);
+        std::iota(vec1.begin(), vec1.begin() + 50, 1);
+        std::iota(vec1.begin() + 50, vec1.end(), 20);
+        std::iota(vec2.begin(), vec2.begin() + 50, 1);
+        std::iota(vec2.begin() + 50, vec2.end(), 20);
+        // 1
+        std::inplace_merge(vec1.begin(), vec1.begin() + 50, vec1.end());
+        tstd::inplace_merge(vec2.begin(), vec2.begin() + 50, vec2.end());
+        util.assertSequenceEqual(vec1, vec2);
+        // 2
+        std::iota(vec1.begin(), vec1.begin() + 50, 1);
+        std::iota(vec1.begin() + 50, vec1.end(), 20);
+        std::iota(vec2.begin(), vec2.begin() + 50, 1);
+        std::iota(vec2.begin() + 50, vec2.end(), 20);
+        std::reverse(vec1.begin(), vec1.end());
+        std::reverse(vec2.begin(), vec2.end());
+        std::inplace_merge(vec1.begin(), vec1.begin() + 50, vec1.end());
+        tstd::inplace_merge(vec2.begin(), vec2.begin() + 50, vec2.end());
+        util.assertSequenceEqual(vec1, vec2);
     }
     util.showFinalResult();
 }
@@ -1154,7 +1193,7 @@ void testSetAlgorithms(bool showDetails)
 {
     TestUtil util(showDetails, "set algorithms");
     {
-
+        
     }
     util.showFinalResult();
 }

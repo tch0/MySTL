@@ -235,7 +235,7 @@ public:
 private:
     int passedCount;
     int totalCount;
-    int lineNumberWidth; // output width of lin number
+    int lineNumberWidth; // output width of line number
     int maxSequenceLength; // max output length of a sequence
     bool showDetails;
     std::string target;

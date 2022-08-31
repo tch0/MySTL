@@ -1521,13 +1521,13 @@ void merge_sort(RandomIterator1 first, RandomIterator1 last, RandomIterator2 buf
             *buf_first++ = std::move(*iter1++);
         }
     }
-    while (iter1 != mid)
+    if (iter1 != mid)
     {
-        *buf_first++ = std::move(*iter1++);
+        tstd::move(iter1, mid, buf_first);
     }
-    while (iter2 != last)
+    if (iter2 != last)
     {
-        *buf_first++ = std::move(*iter2++);
+        tstd::move(iter2, last, buf_first);
     }
     tstd::move(buf, buf + (last-first), first);
 }
@@ -1738,6 +1738,114 @@ std::pair<ForwardIterator, ForwardIterator> equal_range(ForwardIterator first, F
 }
 
 // ======================================== algorithms on sorted ranges ============================================================================
+// merge: merge two sorted ranges to destination
+// complexity: at most last1-first1 + last2-first2 - 1 comparisons
+// it's stable, for equal elements, element from first range precede element from the second.
+template<typename InputIterator1, typename InputIterator2, typename OutputIterator>
+constexpr OutputIterator merge(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first)
+{
+    for (; first1 != last1; ++d_first)
+    {
+        if (first2 == last2)
+        {
+            return tstd::copy(first1, last1, d_first);
+        }
+        if (*first2 < *first1)
+        {
+            *d_first = *first2++;
+        }
+        else
+        {
+            *d_first = *first1++;
+        }
+    }
+    return tstd::copy(first2, last2, d_first);
+}
+template<typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
+constexpr OutputIterator merge(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first, Compare comp)
+{
+    for (; first1 != last1; ++d_first)
+    {
+        if (first2 == last2)
+        {
+            return tstd::copy(first1, last1, d_first);
+        }
+        if (comp(*first2, *first1))
+        {
+            *d_first = *first2++;
+        }
+        else
+        {
+            *d_first = *first1++;
+        }
+    }
+    return tstd::copy(first2, last2, d_first);
+}
+
+// inplace_merge: merge two consecutive sorted ranges [first, middle) and [middle, last) to one sorted range [first, last)
+//               it's also stable, for equal elements, element from first range precede element from the second.
+// complexity: if extra memory is available, will be exactly last-first-1 comparisons, or else O(NlogN)
+template<typename BidirectionalIterator>
+void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last)
+{
+    using value_t = typename std::iterator_traits<BidirectionalIterator>::value_type;
+    auto N = last - first;
+    auto iter1 = first;
+    auto iter2 = middle;
+    tstd::impl::TemporaryBuffer<BidirectionalIterator, value_t> buffer(first, N);
+    auto d_iter = buffer.begin();
+    for (; iter1 != middle && iter2 != last; ++d_iter)
+    {
+        if (*iter2 < *iter1)
+        {
+            *d_iter = std::move(*iter2++);
+        }
+        else
+        {
+            *d_iter = std::move(*iter1++);
+        }
+    }
+    if (iter1 != middle)
+    {
+        tstd::move(iter1, middle, d_iter);
+    }
+    if (iter2 != last)
+    {
+        tstd::move(iter2, last, d_iter);
+    }
+    tstd::move(buffer.begin(), buffer.end(), first);
+}
+template<typename BidirectionalIterator, typename Compare>
+void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last, Compare comp)
+{
+    using value_t = typename std::iterator_traits<BidirectionalIterator>::value_type;
+    auto N = last - first;
+    auto iter1 = first;
+    auto iter2 = middle;
+    tstd::impl::TemporaryBuffer<BidirectionalIterator, value_t> buffer(first, N);
+    auto d_iter = buffer.begin();
+    for (; iter1 != middle && iter2 != last; ++d_iter)
+    {
+        if (comp(*iter2, *iter1))
+        {
+            *d_iter = std::move(*iter2++);
+        }
+        else
+        {
+            *d_iter = std::move(*iter1++);
+        }
+    }
+    if (iter1 != middle)
+    {
+        tstd::move(iter1, middle, d_iter);
+    }
+    if (iter2 != last)
+    {
+        tstd::move(iter2, last, d_iter);
+    }
+    tstd::move(buffer.begin(), buffer.end(), first);
+}
+
 
 // ======================================== set algorithms (on sorted ranges) ======================================================================
 
