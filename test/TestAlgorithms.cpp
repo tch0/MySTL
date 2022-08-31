@@ -1192,8 +1192,156 @@ void testSortedRangeAlgorithms(bool showDetails)
 void testSetAlgorithms(bool showDetails)
 {
     TestUtil util(showDetails, "set algorithms");
+    std::vector<int> set1{1, 1, 2, 2, 4, 5, 6, 7, 9};
+    std::vector<int> set2{2, 3, 4, 5, 5, 7, 8, 8};
+    std::vector<int> set3{0, 1, 1, 4, 4, 7, 8, 8, 10};
+    std::vector<int> rset1(set1.rbegin(), set1.rend());
+    std::vector<int> rset2(set2.rbegin(), set2.rend());
+    std::vector<int> rset3(set3.rbegin(), set3.rend());
+    // includes
     {
-        
+        // 1
+        {
+            std::vector<int> tmp{1, 2, 2, 5, 7, 9};
+            auto res1 = std::includes(set1.begin(), set1.end(), tmp.begin(), tmp.end());
+            auto res2 = tstd::includes(set1.begin(), set1.end(), tmp.begin(), tmp.end());
+            util.assertEqual(res1, res2);
+            res1 = std::includes(set1.begin(), set1.end(), set2.begin(), set2.end());
+            res2 = tstd::includes(set1.begin(), set1.end(), set2.begin(), set2.end());
+            util.assertEqual(res1, res2);
+            res1 = std::includes(set2.begin(), set2.end(), tmp.begin(), tmp.end());
+            res2 = tstd::includes(set2.begin(), set2.end(), tmp.begin(), tmp.end());
+            util.assertEqual(res1, res2);
+        }
+        // 2
+        {
+            std::vector<int> tmp{9, 7, 5, 2, 2, 1};
+            auto res1 = std::includes(rset1.begin(), rset1.end(), tmp.begin(), tmp.end(), std::greater<int>());
+            auto res2 = tstd::includes(rset1.begin(), rset1.end(), tmp.begin(), tmp.end(), std::greater<int>());
+            util.assertEqual(res1, res2);
+            res1 = std::includes(rset1.begin(), rset1.end(), rset2.begin(), rset2.end(), std::greater<int>());
+            res2 = tstd::includes(rset1.begin(), rset1.end(), rset2.begin(), rset2.end(), std::greater<int>());
+            util.assertEqual(res1, res2);
+            res1 = std::includes(rset2.begin(), rset2.end(), tmp.begin(), tmp.end(), std::greater<int>());
+            res2 = tstd::includes(rset2.begin(), rset2.end(), tmp.begin(), tmp.end(), std::greater<int>());
+            util.assertEqual(res1, res2);
+        }
+    }
+    // set_difference
+    {
+        // 1
+        {
+            std::vector<int> vec1(100);
+            std::vector<int> vec2(100);
+            auto iter1 = std::set_difference(set1.begin(), set1.end(), set2.begin(), set2.end(), vec1.begin());
+            auto iter2 = tstd::set_difference(set1.begin(), set1.end(), set2.begin(), set2.end(), vec2.begin());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+            iter1 = std::set_difference(set1.begin(), set1.end(), set3.begin(), set3.end(), vec1.begin());
+            iter2 = tstd::set_difference(set1.begin(), set1.end(), set3.begin(), set3.end(), vec2.begin());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+        }
+        // 2
+        {
+            std::vector<int> vec1(100);
+            std::vector<int> vec2(100);
+            auto iter1 = std::set_difference(rset1.begin(), rset1.end(), rset2.begin(), rset2.end(), vec1.begin(), std::greater<int>());
+            auto iter2 = tstd::set_difference(rset1.begin(), rset1.end(), rset2.begin(), rset2.end(), vec2.begin(), std::greater<int>());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+            iter1 = std::set_difference(rset1.begin(), rset1.end(), rset3.begin(), rset3.end(), vec1.begin(), std::greater<int>());
+            iter2 = tstd::set_difference(rset1.begin(), rset1.end(), rset3.begin(), rset3.end(), vec2.begin(), std::greater<int>());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+        }
+    }
+    // set_intersection
+    {
+        // 1
+        {
+            std::vector<int> vec1(100);
+            std::vector<int> vec2(100);
+            auto iter1 = std::set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(), vec1.begin());
+            auto iter2 = tstd::set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(), vec2.begin());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+            iter1 = std::set_intersection(set1.begin(), set1.end(), set3.begin(), set3.end(), vec1.begin());
+            iter2 = tstd::set_intersection(set1.begin(), set1.end(), set3.begin(), set3.end(), vec2.begin());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+        }
+        // 2
+        {
+            std::vector<int> vec1(100);
+            std::vector<int> vec2(100);
+            auto iter1 = std::set_intersection(rset1.begin(), rset1.end(), rset2.begin(), rset2.end(), vec1.begin(), std::greater<int>());
+            auto iter2 = tstd::set_intersection(rset1.begin(), rset1.end(), rset2.begin(), rset2.end(), vec2.begin(), std::greater<int>());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+            iter1 = std::set_intersection(rset1.begin(), rset1.end(), rset3.begin(), rset3.end(), vec1.begin(), std::greater<int>());
+            iter2 = tstd::set_intersection(rset1.begin(), rset1.end(), rset3.begin(), rset3.end(), vec2.begin(), std::greater<int>());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+        }
+    }
+    // set_symmetric_difference
+    {
+        // 1
+        {
+            std::vector<int> vec1(100);
+            std::vector<int> vec2(100);
+            auto iter1 = std::set_symmetric_difference(set1.begin(), set1.end(), set2.begin(), set2.end(), vec1.begin());
+            auto iter2 = tstd::set_symmetric_difference(set1.begin(), set1.end(), set2.begin(), set2.end(), vec2.begin());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+            iter1 = std::set_symmetric_difference(set1.begin(), set1.end(), set3.begin(), set3.end(), vec1.begin());
+            iter2 = tstd::set_symmetric_difference(set1.begin(), set1.end(), set3.begin(), set3.end(), vec2.begin());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+        }
+        // 2
+        {
+            std::vector<int> vec1(100);
+            std::vector<int> vec2(100);
+            auto iter1 = std::set_symmetric_difference(rset1.begin(), rset1.end(), rset2.begin(), rset2.end(), vec1.begin(), std::greater<int>());
+            auto iter2 = tstd::set_symmetric_difference(rset1.begin(), rset1.end(), rset2.begin(), rset2.end(), vec2.begin(), std::greater<int>());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+            iter1 = std::set_symmetric_difference(rset1.begin(), rset1.end(), rset3.begin(), rset3.end(), vec1.begin(), std::greater<int>());
+            iter2 = tstd::set_symmetric_difference(rset1.begin(), rset1.end(), rset3.begin(), rset3.end(), vec2.begin(), std::greater<int>());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+        }
+    }
+    // set_union
+    {
+        // 1
+        {
+            std::vector<int> vec1(100);
+            std::vector<int> vec2(100);
+            auto iter1 = std::set_union(set1.begin(), set1.end(), set2.begin(), set2.end(), vec1.begin());
+            auto iter2 = tstd::set_union(set1.begin(), set1.end(), set2.begin(), set2.end(), vec2.begin());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+            iter1 = std::set_union(set1.begin(), set1.end(), set3.begin(), set3.end(), vec1.begin());
+            iter2 = tstd::set_union(set1.begin(), set1.end(), set3.begin(), set3.end(), vec2.begin());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+        }
+        // 2
+        {
+            std::vector<int> vec1(100);
+            std::vector<int> vec2(100);
+            auto iter1 = std::set_union(rset1.begin(), rset1.end(), rset2.begin(), rset2.end(), vec1.begin(), std::greater<int>());
+            auto iter2 = tstd::set_union(rset1.begin(), rset1.end(), rset2.begin(), rset2.end(), vec2.begin(), std::greater<int>());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+            iter1 = std::set_union(rset1.begin(), rset1.end(), rset3.begin(), rset3.end(), vec1.begin(), std::greater<int>());
+            iter2 = tstd::set_union(rset1.begin(), rset1.end(), rset3.begin(), rset3.end(), vec2.begin(), std::greater<int>());
+            util.assertEqual(iter1 - vec1.begin(), iter2 - vec2.begin());
+            util.assertRangeEqual(vec1.begin(), iter1, vec2.begin(), iter2);
+        }
     }
     util.showFinalResult();
 }

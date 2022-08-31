@@ -1742,7 +1742,7 @@ std::pair<ForwardIterator, ForwardIterator> equal_range(ForwardIterator first, F
 // complexity: at most last1-first1 + last2-first2 - 1 comparisons
 // it's stable, for equal elements, element from first range precede element from the second.
 template<typename InputIterator1, typename InputIterator2, typename OutputIterator>
-constexpr OutputIterator merge(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first)
+constexpr OutputIterator merge(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first) // 1
 {
     for (; first1 != last1; ++d_first)
     {
@@ -1762,7 +1762,7 @@ constexpr OutputIterator merge(InputIterator1 first1, InputIterator1 last1, Inpu
     return tstd::copy(first2, last2, d_first);
 }
 template<typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
-constexpr OutputIterator merge(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first, Compare comp)
+constexpr OutputIterator merge(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first, Compare comp) // 2
 {
     for (; first1 != last1; ++d_first)
     {
@@ -1786,7 +1786,7 @@ constexpr OutputIterator merge(InputIterator1 first1, InputIterator1 last1, Inpu
 //               it's also stable, for equal elements, element from first range precede element from the second.
 // complexity: if extra memory is available, will be exactly last-first-1 comparisons, or else O(NlogN)
 template<typename BidirectionalIterator>
-void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last)
+void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last) // 1
 {
     using value_t = typename std::iterator_traits<BidirectionalIterator>::value_type;
     auto N = last - first;
@@ -1816,7 +1816,7 @@ void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, Bi
     tstd::move(buffer.begin(), buffer.end(), first);
 }
 template<typename BidirectionalIterator, typename Compare>
-void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last, Compare comp)
+void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last, Compare comp) // 2
 {
     using value_t = typename std::iterator_traits<BidirectionalIterator>::value_type;
     auto N = last - first;
@@ -1846,8 +1846,277 @@ void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, Bi
     tstd::move(buffer.begin(), buffer.end(), first);
 }
 
-
 // ======================================== set algorithms (on sorted ranges) ======================================================================
+// set algorithms: use sorted range represent set
+
+// includes: if range [first1, last1) includes range [first2, last2)
+// complexity: at most 2*(N1+N2-1) comparisons where N1 = last1-first1, N2 = last2-first2
+template<typename InputIterator1, typename InputIterator2>
+constexpr bool includes(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2) // 1
+{
+    while (first1 != last1 && first2 != last2)
+    {
+        if (*first1 < *first2)
+        {
+            first1++;
+        }
+        else if (*first2 < *first1)
+        {
+            return false;
+        }
+        else // *first1 == *first2
+        {
+            first1++;
+            first2++;
+        }
+    }
+    return first2 == last2;
+}
+template<typename InputIterator1, typename InputIterator2, typename Compare>
+constexpr bool includes(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, Compare comp) // 2
+{
+    while (first1 != last1 && first2 != last2)
+    {
+        if (comp(*first1, *first2))
+        {
+            first1++;
+        }
+        else if (comp(*first2, *first1))
+        {
+            return false;
+        }
+        else // *first1 == *first2
+        {
+            first1++;
+            first2++;
+        }
+    }
+    return first2 == last2;
+}
+
+// set_difference: the difference of range1 and range2, aka [first1, last1) - [first2, last2)
+// at most 2*(N1+N2)-1 comparisons where N1 = last1-first1, N2 = last2-first2
+template<typename InputIterator1, typename InputIterator2, typename OutputIterator>
+constexpr OutputIterator set_difference(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first) // 1
+{
+    while (first1 != last1 && first2 != last2)
+    {
+        if (*first1 < *first2)
+        {
+            *d_first++ = *first1++;
+        }
+        else if (*first2 < *first1)
+        {
+            first2++;
+        }
+        else // *first1 == *first2
+        {
+            first1++;
+            first2++;
+        }
+    }
+    if (first1 != last1)
+    {
+        d_first = std::copy(first1, last1, d_first);
+    }
+    return d_first;
+}
+template<typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
+constexpr OutputIterator set_difference(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first, Compare comp) // 2
+{
+    while (first1 != last1 && first2 != last2)
+    {
+        if (comp(*first1, *first2))
+        {
+            *d_first++ = *first1++;
+        }
+        else if (comp(*first2, *first1))
+        {
+            first2++;
+        }
+        else // *first1 == *first2
+        {
+            first1++;
+            first2++;
+        }
+    }
+    if (first1 != last1)
+    {
+        d_first = std::copy(first1, last1, d_first);
+    }
+    return d_first;
+}
+
+// set_intersection: intersection of two set2 [first1, last1) and [first2, last2)
+// complexity: at most 2*(N1+N2)-1 comparisons where N1 = last1-first1, N2 = last2-first2
+template<typename InputIterator1, typename InputIterator2, typename OutputIterator>
+constexpr OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first) // 1
+{
+    while (first1 != last1 && first2 != last2)
+    {
+        if (*first1 < *first2)
+        {
+            first1++;
+        }
+        else if (*first2 < *first1)
+        {
+            first2++;
+        }
+        else
+        {
+            *d_first++ = *first1;
+            first1++;
+            first2++;
+        }
+    }
+    return d_first;
+}
+template<typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
+constexpr OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first, Compare comp) // 2
+{
+    while (first1 != last1 && first2 != last2)
+    {
+        if (comp(*first1, *first2))
+        {
+            first1++;
+        }
+        else if (comp(*first2, *first1))
+        {
+            first2++;
+        }
+        else
+        {
+            *d_first++ = *first1;
+            first1++;
+            first2++;
+        }
+    }
+    return d_first;
+}
+
+// set_symmetric_difference: symmetric difference of range1 and range2
+// complexity: at most 2*(N1+N2)-1 comparisons where N1 = last1-first1, N2 = last2-first2
+template<typename InputIterator1, typename InputIterator2, typename OutputIterator>
+constexpr OutputIterator set_symmetric_difference(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first) // 1
+{
+    while (first1 != last1 && first2 != last2)
+    {
+        if (*first1 < *first2)
+        {
+            *d_first++ = *first1++;
+        }
+        else if (*first2 < *first1)
+        {
+            *d_first++ = *first2++;
+        }
+        else // *first1 == *first2
+        {
+            first1++;
+            first2++;
+        }
+    }
+    if (first1 != last1)
+    {
+        d_first = tstd::copy(first1, last1, d_first);
+    }
+    else if (first2 != last2)
+    {
+        d_first = tstd::copy(first2, last2, d_first);
+    }
+    return d_first;
+}
+template<typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
+constexpr OutputIterator set_symmetric_difference(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first, Compare comp) // 2
+{
+    while (first1 != last1 && first2 != last2)
+    {
+        if (comp(*first1, *first2))
+        {
+            *d_first++ = *first1++;
+        }
+        else if (comp(*first2, *first1))
+        {
+            *d_first++ = *first2++;
+        }
+        else // *first1 == *first2
+        {
+            first1++;
+            first2++;
+        }
+    }
+    if (first1 != last1)
+    {
+        d_first = tstd::copy(first1, last1, d_first);
+    }
+    else if (first2 != last2)
+    {
+        d_first = tstd::copy(first2, last2, d_first);
+    }
+    return d_first;
+}
+
+// set_union: union of two sets
+// complexity: at most 2*(N1+N2)-1 comparisons where N1 = last1-first1, N2 = last2-first2
+template<typename InputIterator1, typename InputIterator2, typename OutputIterator>
+constexpr OutputIterator set_union(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first) // 1
+{
+    while (first1 != last1 && first2 != last2)
+    {
+        if (*first1 < *first2)
+        {
+            *d_first++ = *first1++;
+        }
+        else if (*first2 < *first1)
+        {
+            *d_first++ = *first2++;
+        }
+        else // *first == *first2
+        {
+            *d_first++ = *first1;
+            first1++;
+            first2++;
+        }
+    }
+    if (first1 != last1)
+    {
+        d_first = tstd::copy(first1, last1, d_first);
+    }
+    else if (first2 != last2)
+    {
+        d_first = tstd::copy(first2, last2, d_first);
+    }
+    return d_first;
+}
+template<typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
+constexpr OutputIterator set_union(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator d_first, Compare comp) // 2
+{
+    while (first1 != last1 && first2 != last2)
+    {
+        if (comp(*first1, *first2))
+        {
+            *d_first++ = *first1++;
+        }
+        else if (comp(*first2, *first1))
+        {
+            *d_first++ = *first2++;
+        }
+        else // *first == *first2
+        {
+            *d_first++ = *first1;
+            first1++;
+            first2++;
+        }
+    }
+    if (first1 != last1)
+    {
+        d_first = tstd::copy(first1, last1, d_first);
+    }
+    else if (first2 != last2)
+    {
+        d_first = tstd::copy(first2, last2, d_first);
+    }
+    return d_first;
+}
 
 // ======================================== heap algorithms (in <tstl_heap.hpp>) ===================================================================
 
