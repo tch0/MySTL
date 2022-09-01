@@ -1442,8 +1442,139 @@ void testHeapAlgorithms(bool showDetails)
 void testMinimumMaximumAlgorithms(bool showDetails)
 {
     TestUtil util(showDetails, "minimum/maximum algorithms");
+    // max
     {
-
+        // 1
+        auto res1 = std::max(1, 2);
+        auto res2 = tstd::max(1, 2);
+        util.assertEqual(res1, res2);
+        // 2
+        res1 = std::max(1, 2, std::greater<>());
+        res2 = tstd::max(1, 2, std::greater<>());
+        util.assertEqual(res1, res2);
+        // 3
+        res1 = std::max({1, 2, 3, 4, -1, 10});
+        res2 = tstd::max({1, 2, 3, 4, -1, 10});
+        util.assertEqual(res1, res2);
+        // 4
+        res1 = std::max({1, 2, 3, 4, -1, 10}, std::greater<>());
+        res2 = tstd::max({1, 2, 3, 4, -1, 10}, std::greater<>());
+        util.assertEqual(res1, res2);
+    }
+    // max_element
+    {
+        std::vector<int> vec{1, 2, 3, 4, 5, 10, 100, 1024, -1, -100, 999};
+        // 1
+        auto iter1 = std::max_element(vec.begin(), vec.end());
+        auto iter2 = tstd::max_element(vec.begin(), vec.end());
+        util.assertEqual(iter1 == iter2, true);
+        util.assertEqual(*iter1, *iter2);
+        // 2
+        iter1 = std::max_element(vec.begin(), vec.end(), std::greater<>());
+        iter2 = tstd::max_element(vec.begin(), vec.end(), std::greater<>());
+        util.assertEqual(iter1 == iter2, true);
+        util.assertEqual(*iter1, *iter2);
+    }
+    // min
+    {
+        // 1
+        auto res1 = std::min(1, 2);
+        auto res2 = tstd::min(1, 2);
+        util.assertEqual(res1, res2);
+        // 2
+        res1 = std::min(1, 2, std::greater<>());
+        res2 = tstd::min(1, 2, std::greater<>());
+        util.assertEqual(res1, res2);
+    }
+    // min_element
+    {
+        std::vector<int> vec{1, 2, 3, 4, 5, 10, 100, 1024, -1, -100, 999};
+        // 1
+        auto iter1 = std::min_element(vec.begin(), vec.end());
+        auto iter2 = tstd::min_element(vec.begin(), vec.end());
+        util.assertEqual(iter1 == iter2, true);
+        util.assertEqual(*iter1, *iter2);
+        // 2
+        iter1 = std::min_element(vec.begin(), vec.end(), std::greater<>());
+        iter2 = tstd::min_element(vec.begin(), vec.end(), std::greater<>());
+        util.assertEqual(iter1 == iter2, true);
+        util.assertEqual(*iter1, *iter2);
+    }
+    // minamx
+    {
+        // 1
+        {
+            int a = 1, b = 2;
+            auto res1 = std::minmax(a, b);
+            auto res2 = tstd::minmax(a, b);
+            util.assertEqual(res1 == res2, true);
+        }
+        // 2
+        {
+            int a = 1, b = 2;
+            auto res1 = std::minmax(a, b, std::greater<>());
+            auto res2 = tstd::minmax(a, b, std::greater<>());
+            util.assertEqual(res1 == res2, true);
+        }
+        // 3
+        {
+            auto res1 = std::minmax({1, 2, 3, 4, -1, 10});
+            auto res2 = tstd::minmax({1, 2, 3, 4, -1, 10});
+            util.assertEqual(res1 == res2, true);
+        }
+        // 4
+        {
+            auto res1 = std::minmax({1, 2, 3, 4, -1, 10}, std::greater<>());
+            auto res2 = tstd::minmax({1, 2, 3, 4, -1, 10}, std::greater<>());
+            util.assertEqual(res1 == res2, true);
+        }
+    }
+    // minmax_element
+    {
+        std::vector<int> vec{1, 2, 3, 4, 5, 10, 100, 1024, -1, -100, 999};
+        // 1
+        auto p1 = std::minmax_element(vec.begin(), vec.end());
+        auto p2 = tstd::minmax_element(vec.begin(), vec.end());
+        util.assertEqual(p1 == p2, true);
+        // 2
+        p1 = std::minmax_element(vec.begin(), vec.end(), std::greater<>());
+        p2 = tstd::minmax_element(vec.begin(), vec.end(), std::greater<>());
+        util.assertEqual(p1 == p2, true);
+    }
+    // clamp
+    {
+        // 1
+        {
+            auto res1 = std::clamp(50, 1, 100);
+            auto res2 = tstd::clamp(50, 1, 100);
+            util.assertEqual(res1, res2);
+        }
+        {
+            auto res1 = std::clamp(-1, 1, 100);
+            auto res2 = tstd::clamp(-1, 1, 100);
+            util.assertEqual(res1, res2);
+        }
+        {
+            auto res1 = std::clamp(200, 1, 100);
+            auto res2 = tstd::clamp(200, 1, 100);
+            util.assertEqual(res1, res2);
+        }
+        // 2
+        {
+            auto res1 = std::clamp(50, 100, 1, std::greater<>());
+            auto res2 = tstd::clamp(50, 100, 1, std::greater<>());
+            util.assertEqual(res1, res2);
+        }
+        {
+            auto res1 = std::clamp(-1, 100, 1, std::greater<>());
+            auto res2 = tstd::clamp(-1, 100, 1, std::greater<>());
+            util.assertEqual(res1, res2);
+        }
+        {
+            auto res1 = std::clamp(200, 100, 1, std::greater<>());
+            auto res2 = tstd::clamp(200, 100, 1, std::greater<>());
+            util.assertEqual(res1, res2);
+        }
     }
     util.showFinalResult();
 }
@@ -1505,6 +1636,18 @@ void testComparisonAlgorithms(bool showDetails)
         res1 = std::lexicographical_compare(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::greater<int>());
         res2 = tstd::lexicographical_compare(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::greater<int>());
         util.assertEqual(res1, res2);
+    }
+    // lexicographical_compare_three_way
+    {
+        std::vector<int> tmp1{1, 2, 3, 4, 4, 100};
+        std::vector<int> tmp2{1, 2, 3, 4, 5, 1};
+        // 1
+        auto res1 = std::lexicographical_compare_three_way(tmp1.begin(), tmp1.end(), tmp2.begin(), tmp2.end(), std::compare_three_way());
+        auto res2 = tstd::lexicographical_compare_three_way(tmp1.begin(), tmp1.end(), tmp2.begin(), tmp2.end(), std::compare_three_way());
+        util.assertEqual(res1 == res2, true);
+        res1 = std::lexicographical_compare_three_way(tmp1.begin(), tmp1.end(), tmp2.begin(), tmp2.end());
+        res2 = tstd::lexicographical_compare_three_way(tmp1.begin(), tmp1.end(), tmp2.begin(), tmp2.end());
+        util.assertEqual(res1 == res2, true);
     }
     util.showFinalResult();
 }

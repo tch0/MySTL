@@ -7,6 +7,9 @@
 #include <functional>
 #include <cstdlib>
 #include <random>
+#include <initializer_list>
+#include <cassert>
+#include <compare>
 #include <tutility.hpp>
 #include <titerator.hpp>
 #include <tstl_heap.hpp> // heap algorithms
@@ -2121,6 +2124,205 @@ constexpr OutputIterator set_union(InputIterator1 first1, InputIterator1 last1, 
 // ======================================== heap algorithms (in <tstl_heap.hpp>) ===================================================================
 
 // ======================================== minimum/maximum algorithms =============================================================================
+// max: return greater one of given values
+// complexity: exactly one comparison
+template<typename T>
+constexpr const T& max(const T& a, const T& b) // 1
+{
+    return a < b ? b : a;
+}
+template<typename T, typename Compare>
+constexpr const T& max(const T& a, const T& b, Compare comp) // 2
+{
+    return comp(a, b) ? b : a;
+}
+// complexity: exactly il.size()-1 comparisons
+template<typename ForwardIterator>
+constexpr ForwardIterator max_element(ForwardIterator first, ForwardIterator last);
+template<typename ForwardIterator, typename Compare>
+constexpr ForwardIterator max_element(ForwardIterator first, ForwardIterator last, Compare comp);
+template<typename T>
+constexpr T max(std::initializer_list<T> il) // 3
+{
+    return *tstd::max_element(il.begin(), il.end());
+}
+template<typename T, typename Compare>
+constexpr T max(std::initializer_list<T> il, Compare comp) // 4
+{
+    return *tstd::max_element(il.begin(), il.end(), comp);
+}
+
+// max_element: find max element in range [first, last)
+// complexity: exactly max(last-first, 0) comparisons
+template<typename ForwardIterator>
+constexpr ForwardIterator max_element(ForwardIterator first, ForwardIterator last) // 1
+{
+    if (first == last)
+        return last;
+    ForwardIterator largest = first;
+    ++first;
+    for (; first != last; ++first)
+    {
+        if (*largest < *first)
+        {
+            largest = first;
+        }
+    }
+    return largest;
+}
+template<typename ForwardIterator, typename Compare>
+constexpr ForwardIterator max_element(ForwardIterator first, ForwardIterator last, Compare comp) // 2
+{
+    if (first == last)
+        return last;
+    ForwardIterator largest = first;
+    ++first;
+    for (; first != last; ++first)
+    {
+        if (comp(*largest, *first))
+        {
+            largest = first;
+        }
+    }
+    return largest;
+}
+
+// max: return lesser one of given values
+// complexity: exactly one comparison
+template<typename T>
+constexpr const T& min(const T& a, const T& b) // 1
+{
+    return b < a ? b : a;
+}
+template<typename T, typename Compare>
+constexpr const T& min(const T& a, const T& b, Compare comp) // 2
+{
+    return comp(b, a) ? b : a;
+}
+// complexity: exactly il.size()-1 comparisons
+template<typename ForwardIterator, typename Compare>
+constexpr ForwardIterator min_element(ForwardIterator first, ForwardIterator last, Compare comp);
+template<typename ForwardIterator, typename Compare>
+constexpr ForwardIterator min_element(ForwardIterator first, ForwardIterator last, Compare comp);
+template<typename T>
+constexpr T min(std::initializer_list<T> il) // 3
+{
+    return *tstd::min_element(il.begin(), il.end());
+}
+template<typename T, typename Compare>
+constexpr T min(std::initializer_list<T> il, Compare comp) // 4
+{
+    return *tstd::min_element(il.begin(), il.end(), comp);
+}
+
+// min_element: find max element in range [first, last)
+// complexity: exactly max(last-first, 0) comparisons
+template<typename ForwardIterator>
+constexpr ForwardIterator min_element(ForwardIterator first, ForwardIterator last) // 1
+{
+    if (first == last)
+        return last;
+    ForwardIterator smallest = first;
+    ++first;
+    for (; first != last; ++first)
+    {
+        if (*first < *smallest)
+        {
+            smallest = first;
+        }
+    }
+    return smallest;
+}
+template<typename ForwardIterator, typename Compare>
+constexpr ForwardIterator min_element(ForwardIterator first, ForwardIterator last, Compare comp) // 2
+{
+    if (first == last)
+        return last;
+    ForwardIterator smallest = first;
+    ++first;
+    for (; first != last; ++first)
+    {
+        if (comp(*first, *smallest))
+        {
+            smallest = first;
+        }
+    }
+    return smallest;
+}
+
+// minmax: return the (min, max) pair of given values
+// complexity: exactly one comparison
+template<typename T>
+constexpr std::pair<const T&, const T&> minmax(const T& a, const T& b) // 1
+{
+    return b < a ? std::pair<const T&, const T&>{b, a} : std::pair<const T&, const T&>{a, b};
+}
+template<typename T, typename Compare>
+constexpr std::pair<const T&, const T&> minmax(const T& a, const T& b, Compare comp) // 2
+{
+    return comp(b, a) ? std::pair<const T&, const T&>{b, a} : std::pair<const T&, const T&>{a, b};
+}
+// complexity: at most il.size()*2 comparisons
+template<typename ForwardIterator>
+constexpr std::pair<ForwardIterator, ForwardIterator> minmax_element(ForwardIterator first, ForwardIterator last);
+template<typename ForwardIterator, typename Compare>
+constexpr std::pair<ForwardIterator, ForwardIterator> minmax_element(ForwardIterator first, ForwardIterator last, Compare comp);
+template<typename T>
+constexpr std::pair<T, T> minmax(std::initializer_list<T> il) // 3
+{
+    auto p = tstd::minmax_element(il.begin(), il.end());
+    return {*p.first, *p.second};
+}
+template<typename T, typename Compare>
+constexpr std::pair<T, T> minmax(std::initializer_list<T> il, Compare comp) // 4
+{
+    auto p = tstd::minmax_element(il.begin(), il.end(), comp);
+    return {*p.first, *p.second};
+}
+
+// minmax_element: return minimum and maximum element of a sequence
+// complexity: O(2N) applications of predicate
+template<typename ForwardIterator>
+constexpr std::pair<ForwardIterator, ForwardIterator> minmax_element(ForwardIterator first, ForwardIterator last) // 1
+{
+    return std::minmax_element(first, last, std::less<>());
+}
+template<typename ForwardIterator, typename Compare>
+constexpr std::pair<ForwardIterator, ForwardIterator> minmax_element(ForwardIterator first, ForwardIterator last, Compare comp) // 2
+{
+    auto min = first, max = first;
+    if (first == last)
+    {
+        return {min, max};
+    }
+    while (++first != last)
+    {
+        if (comp(*first, *min))
+        {
+            min = first;
+        }
+        if (comp(*max, *first))
+        {
+            max = first;
+        }
+    }
+    return {min, max};
+}
+
+// clamp
+// complexity: at most two comparisons
+template<typename T>
+constexpr const T& clamp(const T& v, const T& lo, const T& hi) // 1
+{
+    assert(!(hi < lo));
+    return v < lo ? lo : hi < v ? hi : v;
+}
+template<typename T, typename Compare>
+constexpr const T& clamp(const T& v, const T& lo, const T& hi, Compare comp) // 2
+{
+    assert(!comp(hi, lo));
+    return comp(v, lo) ? lo : comp(hi, v) ? hi : v; 
+}
 
 // ======================================== comparison algorithms ==================================================================================
 // equal
@@ -2233,7 +2435,7 @@ constexpr auto lexicographical_compare_three_way(InputIterator1 first1, InputIte
 template<typename InputIterator1, typename InputIterator2>
 constexpr auto lexicographical_compare_three_way(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2)
 {
-    return lexicographical_compare_three_way(first1, last1, first2, last2, std::compare_three_way());
+    return tstd::lexicographical_compare_three_way(first1, last1, first2, last2, std::compare_three_way());
 }
 
 // ======================================== permutation algorithms =================================================================================
