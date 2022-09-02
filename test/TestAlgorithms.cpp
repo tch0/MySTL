@@ -1654,9 +1654,81 @@ void testComparisonAlgorithms(bool showDetails)
 
 void testPermutationAlgorithms(bool showDetails)
 {
-    TestUtil util(showDetails, "permutation algorithms");
-    {
+    TestUtil util(showDetails, "permutation algorithms", 4, 100);
 
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 1);
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
+    // is_permutation
+    {
+        std::vector<int> vec1{1, 1, 1, 2, 3, 4, 4, 6, 8, 10};
+        std::vector<int> vec2{1, 10, 1, 3, 2, 4, 6, 8, 1, 4};
+        std::vector<int> tmp(vec);
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937());
+        // 1
+        auto res1 = std::is_permutation(vec.begin(), vec.end(), tmp.begin());
+        auto res2 = tstd::is_permutation(vec.begin(), vec.end(), tmp.begin());
+        util.assertEqual(res1, res2);
+        res1 = std::is_permutation(vec1.begin(), vec1.end(), vec2.begin());
+        res2 = tstd::is_permutation(vec1.begin(), vec1.end(), vec2.begin());
+        util.assertEqual(res1, res2);
+        // 2
+        res1 = std::is_permutation(vec.begin(), vec.end(), tmp.begin(), std::equal_to<>());
+        res2 = tstd::is_permutation(vec.begin(), vec.end(), tmp.begin(), std::equal_to<>());
+        util.assertEqual(res1, res2);
+        res1 = std::is_permutation(vec1.begin(), vec1.end(), vec2.begin(), std::equal_to<>());
+        res2 = tstd::is_permutation(vec1.begin(), vec1.end(), vec2.begin(), std::equal_to<>());
+        util.assertEqual(res1, res2);
+        // 3
+        res1 = std::is_permutation(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        res2 = tstd::is_permutation(vec.begin(), vec.end(), tmp.begin(), tmp.end());
+        util.assertEqual(res1, res2);
+        res1 = std::is_permutation(vec1.begin(), vec1.end(), vec2.begin(), vec2.end());
+        res2 = tstd::is_permutation(vec1.begin(), vec1.end(), vec2.begin(), vec2.end());
+        util.assertEqual(res1, res2);
+        // 4
+        res1 = std::is_permutation(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::equal_to<>());
+        res2 = tstd::is_permutation(vec.begin(), vec.end(), tmp.begin(), tmp.end(), std::equal_to<>());
+        util.assertEqual(res1, res2);
+        res1 = std::is_permutation(vec1.begin(), vec1.end(), vec2.begin(), vec2.end(), std::equal_to<>());
+        res2 = tstd::is_permutation(vec1.begin(), vec1.end(), vec2.begin(), vec2.end(), std::equal_to<>());
+        util.assertEqual(res1, res2);
+    }
+    // next_permutation
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        for (int i = 0; i < 10; ++i)
+        {
+            // 1
+            bool res1 = std::next_permutation(tmp1.begin(), tmp1.end());
+            bool res2 = tstd::next_permutation(tmp2.begin(), tmp2.end());
+            util.assertEqual(res1, res2);
+            util.assertSequenceEqual(tmp1, tmp2);
+            // 2
+            res1 = std::next_permutation(tmp1.begin(), tmp1.end(), std::equal_to<>());
+            res2 = tstd::next_permutation(tmp2.begin(), tmp2.end(), std::equal_to<>());
+            util.assertEqual(res1, res2);
+            util.assertSequenceEqual(tmp1, tmp2);
+        }
+    }
+    // prev_permutation
+    {
+        std::vector<int> tmp1(vec);
+        std::vector<int> tmp2(vec);
+        for (int i = 0; i < 10; ++i)
+        {
+            // 1
+            bool res1 = std::prev_permutation(tmp1.begin(), tmp1.end());
+            bool res2 = tstd::prev_permutation(tmp2.begin(), tmp2.end());
+            util.assertEqual(res1, res2);
+            util.assertSequenceEqual(tmp1, tmp2);
+            // 2
+            res1 = std::prev_permutation(tmp1.begin(), tmp1.end(), std::equal_to<>());
+            res2 = tstd::prev_permutation(tmp2.begin(), tmp2.end(), std::equal_to<>());
+            util.assertEqual(res1, res2);
+            util.assertSequenceEqual(tmp1, tmp2);
+        }
     }
     util.showFinalResult();
 }

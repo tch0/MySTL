@@ -2439,8 +2439,228 @@ constexpr auto lexicographical_compare_three_way(InputIterator1 first1, InputIte
 }
 
 // ======================================== permutation algorithms =================================================================================
+// is_permutation
+// complexity: at most O(N^2) applications of predicate
+// predicate is equivalence test
+template<typename ForwardIterator1, typename ForwardIterator2>
+constexpr bool is_permutation(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2)
+{
+    // skip common prefix
+    std::tie(first1, first2) = tstd::mismatch(first1, last1, first2);
+    // iterate over rest elements, count how many times each element appears in [first2, last2)
+    if (first1 != last1)
+    {
+        ForwardIterator2 last2 = first2;
+        tstd::advance(last2, tstd::distance(first1, last1));
+        for (ForwardIterator1 iter = first1; iter != last1; ++iter)
+        {
+            // *iter has been checked
+            if (iter != tstd::find(first1, iter, *iter))
+                continue;
+            auto ct = tstd::count(first2, last2, *iter);
+            if (ct == 0 || tstd::count(iter, last1, *iter) != ct)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+template<typename ForwardIterator1, typename ForwardIterator2, typename BinaryPredicate>
+constexpr bool is_permutation(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, BinaryPredicate p)
+{
+    // skip common prefix
+    std::tie(first1, first2) = tstd::mismatch(first1, last1, first2);
+    // iterate over rest elements, count how many times each element appears in [first2, last2)
+    if (first1 != last1)
+    {
+        ForwardIterator2 last2 = first2;
+        tstd::advance(last2, tstd::distance(first1, last1));
+        for (ForwardIterator1 iter = first1; iter != last1; ++iter)
+        {
+            auto pred = [iter, &p](auto& val) { return p(val, *iter); };
+            // *iter has been checked
+            if (iter != tstd::find_if(first1, iter, pred))
+                continue;
+            auto ct = tstd::count(first2, last2, *iter);
+            if (ct == 0 || tstd::count_if(iter, last1, pred) != ct)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+template<typename ForwardIterator1, typename ForwardIterator2>
+constexpr bool is_permutation(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2)
+{
+    if (std::distance(first1, last1) != std::distance(first2, last2))
+    {
+        return false;
+    }
+    // skip common prefix
+    std::tie(first1, first2) = tstd::mismatch(first1, last1, first2);
+    // iterate over rest elements, count how many times each element appears in [first2, last2)
+    if (first1 != last1)
+    {
+        for (ForwardIterator1 iter = first1; iter != last1; ++iter)
+        {
+            // *iter has been checked
+            if (iter != tstd::find(first1, iter, *iter))
+                continue;
+            auto ct = tstd::count(first2, last2, *iter);
+            if (ct == 0 || tstd::count(iter, last1, *iter) != ct)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+template<typename ForwardIterator1, typename ForwardIterator2, typename BinaryPredicate>
+constexpr bool is_permutation(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2, BinaryPredicate p)
+{
+    if (std::distance(first1, last1) != std::distance(first2, last2))
+    {
+        return false;
+    }
+    // skip common prefix
+    std::tie(first1, first2) = tstd::mismatch(first1, last1, first2);
+    // iterate over rest elements, count how many times each element appears in [first2, last2)
+    if (first1 != last1)
+    {
+        for (ForwardIterator1 iter = first1; iter != last1; ++iter)
+        {
+            auto pred = [iter, &p](auto& val) { return p(val, *iter); };
+            // *iter has been checked
+            if (iter != tstd::find_if(first1, iter, pred))
+                continue;
+            auto ct = tstd::count(first2, last2, *iter);
+            if (ct == 0 || tstd::count_if(iter, last1, pred) != ct)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// next_permutation: get next permutation in lexicographical order, return true if exist, or else return false(in this case, will get the first permutation)
+// complexity: at most N/2 swaps
+template<typename BidirectionalIterator>
+constexpr bool next_permutation(BidirectionalIterator first, BidirectionalIterator last)
+{
+    // no element
+    if (first == last)
+        return false;
+    // only one element
+    BidirectionalIterator iter = last;
+    if (first == --iter)
+        return false;
+    while (true)
+    {
+        BidirectionalIterator iter1, iter2;
+        iter1 = iter;
+        if (*--iter < *iter1)
+        {
+            iter2 = last;
+            while (!(*iter < *--iter2)) {}
+            tstd::iter_swap(iter, iter2);
+            tstd::reverse(iter1, last);
+            return true;
+        }
+        if (iter == first)
+        {
+            tstd::reverse(first, last);
+            return false;
+        }
+    }
+}
+template<typename BidirectionalIterator, typename Compare>
+constexpr bool next_permutation(BidirectionalIterator first, BidirectionalIterator last, Compare comp)
+{
+    if (first == last)
+        return false;
+    BidirectionalIterator iter = last;
+    if (first == --iter)
+        return false;
+    while (true)
+    {
+        BidirectionalIterator iter1, iter2;
+        iter1 = iter;
+        if (comp(*--iter, *iter1))
+        {
+            iter2 = last;
+            while (!comp(*iter, *--iter2)) {}
+            tstd::iter_swap(iter, iter2);
+            tstd::reverse(iter1, last);
+            return true;
+        }
+        if (iter == first)
+        {
+            tstd::reverse(first, last);
+            return false;
+        }
+    }
+}
+
+// perv_permutation: get pervious permutation in lexicographical order, return true if exist, or else return false(in this case, will get the last permutation)
+// complexity: at most N/2 swaps
+template<typename BidirectionalIterator>
+constexpr bool prev_permutation(BidirectionalIterator first, BidirectionalIterator last)
+{
+    if (first == last)
+        return false;
+    BidirectionalIterator iter = last;
+    if (first == --iter)
+        return false;
+    while (true)
+    {
+        BidirectionalIterator iter1, iter2;
+        iter1 = iter;
+        if (*iter1 < *--iter)
+        {
+            iter2 = last;
+            while (!(*--iter2 < *iter)) {}
+            tstd::iter_swap(iter, iter2);
+            tstd::reverse(iter1, last);
+            return true;
+        }
+        if (iter == first)
+        {
+            tstd::reverse(first, last);
+            return false;
+        }
+    }
+}
+template<typename BidirectionalIterator, typename Compare>
+constexpr bool prev_permutation(BidirectionalIterator first, BidirectionalIterator last, Compare comp)
+{
+    if (first == last)
+        return false;
+    BidirectionalIterator iter = last;
+    if (first == --iter)
+        return false;
+    while (true)
+    {
+        BidirectionalIterator iter1, iter2;
+        iter1 = iter;
+        if (comp(*iter1, *--iter))
+        {
+            iter2 = last;
+            while (!comp(*--iter2, *iter)) {}
+            tstd::iter_swap(iter, iter2);
+            tstd::reverse(iter1, last);
+            return true;
+        }
+        if (iter == first)
+        {
+            tstd::reverse(first, last);
+            return false;
+        }
+    }
+}
 
 } // namespace tstd
-
 
 #endif // TALGORITHM_HPP
