@@ -7,6 +7,7 @@
 #include <tstl_uninitialized.hpp>
 #include <type_traits>
 #include <initializer_list>
+#include <cassert>
 
 namespace tstd
 {
@@ -32,6 +33,7 @@ public:
     // elements access
     constexpr reference at(size_type pos)
     {
+        assert(pos < N);
         if (pos >= N)
         {
             throw std::out_of_range("array::at index out of range");
@@ -40,6 +42,7 @@ public:
     }
     constexpr const_reference at(size_type pos) const
     {
+        assert(pos < N);
         if (pos >= N)
         {
             throw std::out_of_range("array::at index out of range");
@@ -48,26 +51,32 @@ public:
     }
     constexpr reference operator[](size_type pos)
     {
+        assert(pos < N);
         return elements[pos];
     }
     constexpr const_reference operator[](size_type pos) const
     {
+        assert(pos < N);
         return elements[pos];
     }
     constexpr reference front()
     {
+        assert(!empty());
         return elements[0];
     }
     constexpr const_reference front() const
     {
+        assert(!empty());
         return elements[0];
     }
     constexpr reference back()
     {
+        assert(!empty());
         return elements[N-1];
     }
     constexpr const_reference back() const
     {
+        assert(!empty());
         return elements[N-1];
     }
     // iterators

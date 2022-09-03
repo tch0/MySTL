@@ -5,12 +5,14 @@
 #include <tstl_uninitialized.hpp>
 #include <titerator.hpp>
 #include <tutility.hpp>
+#include <talgorithm.hpp>
 #include <initializer_list>
 #include <cstddef>
 #include <type_traits>
 #include <numeric>
 #include <stdexcept> // for std::out_of_range
 #include <iterator>
+#include <cassert>
 
 namespace tstd
 {
@@ -246,7 +248,8 @@ public:
     // element access
     constexpr reference at(size_type pos)
     {
-        if (pos > size())
+        assert(pos < size());
+        if (pos >= size())
         {
             throw std::out_of_range("vector::at : input index is out of bounds");
         }
@@ -254,7 +257,8 @@ public:
     }
     constexpr const_reference at(size_type pos) const
     {
-        if (pos > size())
+        assert(pos < size());
+        if (pos >= size())
         {
             throw std::out_of_range("vector::at : input index is out of bounds");
         }
@@ -262,26 +266,32 @@ public:
     }
     constexpr reference operator[](size_type pos)
     {
+        assert(pos < size());
         return *(begin() + pos);
     }
     constexpr const_reference operator[](size_type pos) const
     {
+        assert(pos < size());
         return *(begin() + pos);
     }
     constexpr reference front()
     {
+        assert(!empty());
         return *begin();
     }
     constexpr const_reference front() const
     {
+        assert(!empty());
         return *begin();
     }
     constexpr reference back()
     {
+        assert(!empty());
         return *(end() - 1);
     }
     constexpr const_reference back() const
     {
+        assert(!empty());
         return *(end() - 1);
     }
     constexpr T* data() noexcept
@@ -475,6 +485,7 @@ public:
     }
     constexpr void pop_back()
     {
+        assert(!empty());
         alloc.destroy(finish - 1);
         --finish;
     }
@@ -534,7 +545,7 @@ public:
 private:
     // auxiliary functions
     template<typename InputIterator>
-    void copy_range(InputIterator first, InputIterator last, iterator dest) // todo: replace with tstd::copy
+    void copy_range(InputIterator first, InputIterator last, iterator dest)
     {
         for (; first != last; ++first, ++dest)
         {
@@ -542,7 +553,7 @@ private:
         }
     }
     // move from front to back
-    void move_range(const_iterator first, const_iterator last, iterator dest) // todo: replace with tstd::move
+    void move_range(const_iterator first, const_iterator last, iterator dest)
     {
         for (; first != last; ++first, ++dest)
         {
@@ -550,7 +561,7 @@ private:
         }
     }
     // move from back to front
-    void move_range_from_back_to_front(const_iterator first, const_iterator last, iterator dest) // todo: replace with tstd::move_backward
+    void move_range_from_back_to_front(const_iterator first, const_iterator last, iterator dest)
     {
         auto count = last - first;
         auto rfirst = make_reverse_iterator(first);
@@ -610,7 +621,7 @@ private:
     {
         while (size() + count > capacity())
         {
-            adjust_capacity(std::max(2*size(), size() + count)); // todo: replaced with tstd::max
+            adjust_capacity(tstd::max(2*size(), size() + count));
         }
         if (idx + count >= size())
         {

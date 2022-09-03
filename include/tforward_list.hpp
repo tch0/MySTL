@@ -9,6 +9,7 @@
 #include <numeric>
 #include <tutility.hpp>
 #include <functional>
+#include <cassert>
 
 namespace tstd
 {
@@ -414,10 +415,12 @@ public:
     // element access
     reference front()
     {
+        assert(!empty());
         return *begin();
     }
     const_reference front() const
     {
+        assert(!empty());
         return *begin();
     }
     // iterators
@@ -536,6 +539,7 @@ public:
     }
     void pop_front()
     {
+        assert(!empty());
         remove_elements(node, node->next->next);
     }
     void resize(size_type count) // 1
@@ -574,10 +578,12 @@ public:
     // *this and other should be sorted in ascending order, merge other to *this.
     void merge(forward_list& other) // 1
     {
+        assert(alloc == other.alloc);
         merge(std::move(other));
     }
     void merge(forward_list&& other) // 2
     {
+        assert(alloc == other.alloc);
         link_type this_prev = node;
         while (this_prev->next && other.node->next)
         {
@@ -603,11 +609,13 @@ public:
     template<typename Compare>
     void merge(forward_list& other, Compare cmp) // 3
     {
+        assert(alloc == other.alloc);
         merge(std::move(other), cmp);
     }
     template<typename Compare>
     void merge(forward_list&& other, Compare cmp) // 4
     {
+        assert(alloc == other.alloc);
         link_type this_prev = node;
         while (this_prev->next && other.node->next)
         {
@@ -633,10 +641,12 @@ public:
     // splice_after
     void splice_after(const_iterator pos, forward_list& other) // 1
     {
+        assert(alloc == other.alloc);
         splice_after(pos, std::move(other));
     }
     void splice_after(const_iterator pos, forward_list&& other) // 2
     {
+        assert(alloc == other.alloc);
         link_type tmp = pos.node->next;
         pos.node->next = other.node->next;
         other.node->next = nullptr;
@@ -649,10 +659,12 @@ public:
     }
     void splice_after(const_iterator pos, forward_list& other, const_iterator it) // 3
     {
+        assert(alloc == other.alloc);
         splice_after(pos, std::move(other), it);
     }
     void splice_after(const_iterator pos, [[maybe_unused]] forward_list&& other, const_iterator it) // 4
     {
+        assert(alloc == other.alloc);
         link_type tmp = pos.node->next;
         if (it.node->next)
         {
@@ -664,10 +676,12 @@ public:
     }
     void splice_after(const_iterator pos, forward_list& other, const_iterator _first, const_iterator _last) // 5
     {
+        assert(alloc == other.alloc);
         splice_after(pos, std::move(other), _first, _last);
     }
     void splice_after(const_iterator pos, forward_list&& other, const_iterator _first, const_iterator _last) // 6
     {
+        assert(alloc == other.alloc);
         link_type tmp = pos.node->next;
         pos.node->next = _first.node->next;
         _first.node->next = _last.node;

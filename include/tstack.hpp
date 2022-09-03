@@ -3,6 +3,7 @@
 
 #include <tdeque.hpp>
 #include <initializer_list>
+#include <cassert>
 
 namespace tstd
 {
@@ -122,10 +123,12 @@ public:
     // element access
     reference top()
     {
+        assert(!c.empty());
         return c.back();
     }
     const_reference top() const
     {
+        assert(!c.empty());
         return c.back();
     }
     // size and capacity
@@ -153,6 +156,7 @@ public:
     }
     void pop()
     {
+        assert(!c.empty());
         c.pop_back();
     }
     void swap(stack& other) noexcept(std::is_nothrow_swappable_v<Container>)

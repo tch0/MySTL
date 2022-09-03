@@ -445,18 +445,22 @@ public:
     // element access
     reference front()
     {
+        assert(!empty());
         return node->next->data;
     }
     const_reference front() const
     {
+        assert(!empty());
         return node->next->data;
     }
     reference back()
     {
+        assert(!empty());
         return node->prev->data;
     }
     const_reference back() const
     {
+        assert(!empty());
         return node->prev->data;
     }
     // iterators
@@ -588,6 +592,7 @@ public:
     }
     void pop_back()
     {
+        assert(!empty());
         remove_elements(node->prev, node->prev);
     }
     void push_front(const T& value) // 1
@@ -606,6 +611,7 @@ public:
     }
     void pop_front()
     {
+        assert(!empty());
         remove_elements(node->next, node->next);
     }
     void resize(size_type count) // 1
@@ -657,6 +663,7 @@ public:
     // merge, this and other should be sorted in ascending order
     void merge(list& other) // 1
     {
+        assert(alloc == other.alloc);
         iterator first1 = begin();
         iterator first2 = other.begin();
         while (first1 != end() && first2 != other.end())
@@ -679,11 +686,13 @@ public:
     }
     void merge(list&& other) // 2
     {
+        assert(alloc == other.alloc);
         merge(other); // call merge(list&)
     }
     template<typename Compare>
     void merge(list& other, Compare cmp) // 3
     {
+        assert(alloc == other.alloc);
         iterator first1 = begin();
         iterator first2 = other.begin();
         while (first1 != end() && first2 != other.end())
@@ -707,6 +716,7 @@ public:
     template<typename Compare>
     void merge(list&& other, Compare cmp) // 4
     {
+        assert(alloc == other.alloc);
         merge(other, cmp);
     }
     // splice

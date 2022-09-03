@@ -122,18 +122,22 @@ public:
     // element access
     reference front()
     {
+        assert(!c.empty());
         return c.front();
     }
     const_reference front() const
     {
+        assert(!c.empty());
         return c.front();
     }
     reference back()
     {
+        assert(!c.empty());
         return c.back();
     }
     const_reference back() const
     {
+        assert(!c.empty());
         return c.back();
     }
     // size and capacity
@@ -161,6 +165,7 @@ public:
     }
     void pop()
     {
+        assert(!c.empty());
         c.pop_front();
     }
     void swap(queue& other) noexcept(std::is_nothrow_swappable_v<Container>)
@@ -384,10 +389,12 @@ public:
     // element access
     reference top()
     {
+        assert(!c.empty());
         return c.front();
     }
     const_reference top() const
     {
+        assert(!c.empty());
         return c.front();
     }
     // size and capacity
@@ -418,6 +425,7 @@ public:
     }
     void pop()
     {
+        assert(!c.empty());
         tstd::pop_heap(c.begin(), c.end(), comp);
         c.pop_back();
     }

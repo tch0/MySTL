@@ -7,7 +7,8 @@
 #include <tutility.hpp>
 #include <initializer_list>
 #include <type_traits>
-#include <algorithm> // todo: replace with <talgorithm.hpp>, replace all algorithms with tstd::xxx
+#include <talgorithm.hpp>
+#include <cassert>
 
 namespace tstd
 {
@@ -203,7 +204,7 @@ private:
     void create_map_and_nodes(size_type num_elements)
     {
         size_type num_nodes = num_elements / ElemSize + 1;
-        map_size = std::max(initial_map_size, num_nodes + 2);
+        map_size = tstd::max(initial_map_size, num_nodes + 2);
         map = map_alloc.allocate(map_size);
         for (int i = 0; i < map_size; ++i)
         {
@@ -291,19 +292,19 @@ private:
             new_start = map + (map_size - new_num_nodes) / 2 + (add_at_front ? nodes_to_add : 0);
             if (new_start < start.node)
             {
-                std::copy(start.node, finish.node + 1, new_start);
+                tstd::copy(start.node, finish.node + 1, new_start);
             }
             else
             {
-                std::copy_backward(start.node, finish.node + 1, new_start + old_num_nodes);
+                tstd::copy_backward(start.node, finish.node + 1, new_start + old_num_nodes);
             }
         }
         else // allocate a new map
         {
-            size_type new_map_size = map_size + std::max(map_size, nodes_to_add) + 2;
+            size_type new_map_size = map_size + tstd::max(map_size, nodes_to_add) + 2;
             map_pointer new_map = map_alloc.allocate(new_map_size);
             new_start = new_map + (new_map_size - new_num_nodes) / 2 + (add_at_front ? nodes_to_add : 0);
-            std::copy(start.node, finish.node + 1, new_start);
+            tstd::copy(start.node, finish.node + 1, new_start);
             map_alloc.deallocate(map, map_size);
             map = new_map;
             map_size = new_map_size;
@@ -355,7 +356,7 @@ private:
             start -= elems_num;
             tstd::uninitialized_fill_n(start, elems_num, T());
             insert_pos = start + index;
-            std::move(start + elems_num, insert_pos + elems_num, start);
+            tstd::move(start + elems_num, insert_pos + elems_num, start);
         }
         else // insert to back
         {
@@ -368,7 +369,7 @@ private:
             tstd::uninitialized_fill_n(finish, elems_num, T());
             finish += elems_num;
             insert_pos = start + index;
-            std::move_backward(insert_pos, finish - elems_num, finish);
+            tstd::move_backward(insert_pos, finish - elems_num, finish);
         }
         return insert_pos;
     }
@@ -527,7 +528,8 @@ public:
     // element access
     reference at(size_type pos)
     {
-        if (pos > size())
+        assert(pos < size());
+        if (pos >= size())
         {
             throw std::out_of_range("deque::at : input index is out of bounds");
         }
@@ -535,7 +537,8 @@ public:
     }
     const_reference at(size_type pos) const
     {
-        if (pos > size)
+        assert(pos < size());
+        if (pos >= size)
         {
             throw std::out_of_range("deque::at : input index is out of bounds");
         }
@@ -543,26 +546,32 @@ public:
     }
     reference operator[](size_type pos)
     {
+        assert(pos < size());
         return *(start + pos);
     }
     const_reference operator[](size_type pos) const
     {
+        assert(pos < size());
         return *(start + pos);
     }
     reference front()
     {
+        assert(!empty());
         return *start;
     }
     const_reference front() const
     {
+        assert(!empty());
         return *start;
     }
     reference back()
     {
+        assert(!empty());
         return *(finish - 1);
     }
     const_reference back() const
     {
+        assert(!empty());
         return *(finish - 1);
     }
     // iterators
@@ -651,7 +660,7 @@ public:
     iterator insert(const_iterator pos, size_type count, const T& value) // 3
     {
         iterator insert_pos = get_ready_for_insert(count, pos);
-        std::fill_n(insert_pos, count, value);
+        tstd::fill_n(insert_pos, count, value);
         return insert_pos;
     }
     template<typename InputIterator, 
@@ -660,13 +669,13 @@ public:
     {
         difference_type count = tstd::distance(first, last);
         iterator insert_pos = get_ready_for_insert(count, pos);
-        std::copy_n(first, count, insert_pos);
+        tstd::copy_n(first, count, insert_pos);
         return insert_pos;
     }
     iterator insert(const_iterator pos, std::initializer_list<T> il) // 5
     {
         iterator insert_pos = get_ready_for_insert(il.size(), pos);
-        std::copy_n(il.begin(), il.size(), insert_pos);
+        tstd::copy_n(il.begin(), il.size(), insert_pos);
         return insert_pos;
     }
     template<typename... Args>
@@ -683,12 +692,12 @@ public:
         difference_type index = _pos - start;
         if (index < size() / 2) // move front elements
         {
-            std::move_backward(start, _pos, next);
+            tstd::move_backward(start, _pos, next);
             pop_front();
         }
         else // move back elements
         {
-            std::move(next, finish, _pos);
+            tstd::move(next, finish, _pos);
             pop_back();
         }
         return start + index;
@@ -708,7 +717,7 @@ public:
             difference_type elems_before = _first - start;
             if (elems_before < (size() - n) / 2) // more elements in back of range, move front elements
             {
-                std::move_backward(start, _first, _last);
+                tstd::move_backward(start, _first, _last);
                 iterator new_start = start + n;
                 for (auto iter = start; iter < new_start; ++iter)
                 {
@@ -722,7 +731,7 @@ public:
             }
             else // more elements in front of range, move back elements
             {
-                std::move(_last, finish, _first);
+                tstd::move(_last, finish, _first);
                 iterator new_finish = finish - n;
                 for (auto iter = finish - 1; iter >= new_finish; --iter)
                 {
@@ -789,6 +798,7 @@ public:
     }
     void pop_back()
     {
+        assert(!empty());
         if (finish.cur > finish.first) // two or more elements in last buffer
         {
             --finish.cur;
@@ -804,6 +814,7 @@ public:
     }
     void push_front(const T& value) // 1
     {
+        assert(!empty());
         if (start.cur > start.first) // first buffer is not full
         {
             alloc.construct(start.cur - 1, value);
@@ -854,6 +865,7 @@ public:
     }
     void pop_front()
     {
+        assert(!empty());
         if (start.cur < start.last - 1) // two or more elements in first buffer
         {
             alloc.destroy(start.cur);
@@ -873,7 +885,7 @@ public:
         {
             size_type elems_to_insert = count - size();
             iterator insert_pos = get_ready_for_insert(elems_to_insert, finish);
-            std::fill_n(insert_pos, elems_to_insert, T());
+            tstd::fill_n(insert_pos, elems_to_insert, T());
         }
         else if (count < size())
         {
@@ -886,7 +898,7 @@ public:
         {
             size_type elems_to_insert = count - size();
             iterator insert_pos = get_ready_for_insert(elems_to_insert, finish);
-            std::fill_n(insert_pos, elems_to_insert, value);
+            tstd::fill_n(insert_pos, elems_to_insert, value);
         }
         else if (count < size())
         {

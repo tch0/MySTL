@@ -920,7 +920,7 @@ constexpr ForwardIterator shift_right(ForwardIterator first, ForwardIterator las
         {
             if (dest_tail == last)
             {
-                std::move(first, dest_head, result);
+                tstd::move(first, dest_head, result);
                 return result;
             }
             ++dest_head;
@@ -933,8 +933,8 @@ constexpr ForwardIterator shift_right(ForwardIterator first, ForwardIterator las
             {
                 if (dest_tail == last)
                 {
-                    dest_head = std::move(cursor, result, dest_head);
-                    std::move(first, cursor, dest_head);
+                    dest_head = tstd::move(cursor, result, dest_head);
+                    tstd::move(first, cursor, dest_head);
                     return result;
                 }
                 tstd::iter_swap(cursor, dest_head);
@@ -996,6 +996,8 @@ void shuffle(RandomIterator first, RandomIterator last, URBG&& g)
 // sample: sample n elements from sequence [first, last) randomly, write to output iterator, using g generate random number
 // complexity: O(last-first)
 // copy from libstdc++, doesn't understand yet!
+template<typename T>
+constexpr const T& min(const T& a, const T& b);
 template<typename PopulationIterator, typename SampleIterator, typename Distance, typename URBG>
 SampleIterator sample(PopulationIterator first, PopulationIterator last, SampleIterator out, Distance n, URBG&& g)
 {
@@ -1013,7 +1015,7 @@ SampleIterator sample(PopulationIterator first, PopulationIterator last, SampleI
         }
         distrib_type d;
         Distance unsampled_size = tstd::distance(first, last);
-        n = std::min(n, unsampled_size); // todo: replace with tstd::min
+        n = tstd::min(n, unsampled_size);
         const UC_type range = g.max() - g.min();
         if (range / UC_type(unsampled_size) >= unsampled_size)
         {
@@ -1920,7 +1922,7 @@ constexpr OutputIterator set_difference(InputIterator1 first1, InputIterator1 la
     }
     if (first1 != last1)
     {
-        d_first = std::copy(first1, last1, d_first);
+        d_first = tstd::copy(first1, last1, d_first);
     }
     return d_first;
 }
@@ -1945,7 +1947,7 @@ constexpr OutputIterator set_difference(InputIterator1 first1, InputIterator1 la
     }
     if (first1 != last1)
     {
-        d_first = std::copy(first1, last1, d_first);
+        d_first = tstd::copy(first1, last1, d_first);
     }
     return d_first;
 }
@@ -2285,7 +2287,7 @@ constexpr std::pair<T, T> minmax(std::initializer_list<T> il, Compare comp) // 4
 template<typename ForwardIterator>
 constexpr std::pair<ForwardIterator, ForwardIterator> minmax_element(ForwardIterator first, ForwardIterator last) // 1
 {
-    return std::minmax_element(first, last, std::less<>());
+    return tstd::minmax_element(first, last, std::less<>());
 }
 template<typename ForwardIterator, typename Compare>
 constexpr std::pair<ForwardIterator, ForwardIterator> minmax_element(ForwardIterator first, ForwardIterator last, Compare comp) // 2
@@ -2494,7 +2496,7 @@ constexpr bool is_permutation(ForwardIterator1 first1, ForwardIterator1 last1, F
 template<typename ForwardIterator1, typename ForwardIterator2>
 constexpr bool is_permutation(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2)
 {
-    if (std::distance(first1, last1) != std::distance(first2, last2))
+    if (tstd::distance(first1, last1) != tstd::distance(first2, last2))
     {
         return false;
     }
@@ -2520,7 +2522,7 @@ constexpr bool is_permutation(ForwardIterator1 first1, ForwardIterator1 last1, F
 template<typename ForwardIterator1, typename ForwardIterator2, typename BinaryPredicate>
 constexpr bool is_permutation(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2, BinaryPredicate p)
 {
-    if (std::distance(first1, last1) != std::distance(first2, last2))
+    if (tstd::distance(first1, last1) != tstd::distance(first2, last2))
     {
         return false;
     }
