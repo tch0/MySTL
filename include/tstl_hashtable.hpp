@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <type_traits>
 #include <utility>
-#include <algorithm> // todo: replace with <talgorihtm.hpp>
+#include <talgorithm.hpp>
 #include <cmath>
 #include <tstl_allocator.hpp>
 #include <tvector.hpp>
@@ -832,8 +832,8 @@ public:
     // rehash
     void rehash(size_type count)
     {
-        size_type new_bucket_count = std::max(count, size_type(std::ceil(size() / max_load_factor_value)));
-        new_bucket_count = std::max(new_bucket_count, size_type(16));
+        size_type new_bucket_count = tstd::max(count, size_type(std::ceil(size() / max_load_factor_value)));
+        new_bucket_count = tstd::max(new_bucket_count, size_type(16));
         if (new_bucket_count != bucket_count())
         {
             elem_count = 0;
@@ -882,7 +882,7 @@ bool operator==(const tstd::impl::hash_table<Key, Value, KeyOfValue, Multi, Hash
         auto pl = lhs.equal_range(get_key(elem));
         auto pr = rhs.equal_range(get_key(elem));
         if (tstd::distance(pl.first, pl.second) != tstd::distance(pr.first, pr.second)
-            || !std::is_permutation(pl.first, pl.second, pr.first))
+            || !tstd::is_permutation(pl.first, pl.second, pr.first))
         {
             return false;
         }
