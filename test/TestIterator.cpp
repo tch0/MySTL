@@ -11,6 +11,7 @@
 
 void testReverseIterator(bool showDetails);
 void testMoveIterator(bool showDetails);
+void testInsertIterators(bool showDetails);
 void testIteratorOperations(bool showDetails);
 void testRangeAccess(bool showDetails);
 
@@ -19,6 +20,7 @@ int main(int argc, char const *argv[])
     bool showDetails = parseDetailFlag(argc, argv);
     testReverseIterator(showDetails);
     testMoveIterator(showDetails);
+    testInsertIterators(showDetails);
     testIteratorOperations(showDetails);
     testRangeAccess(showDetails);
     std::cout << std::endl;
@@ -248,6 +250,48 @@ void testMoveIterator(bool showDetails)
         util.assertEqual(*(50 + iter1), *(50 + iter2));
         util.assertEqual(iter1 - tmp1, iter2 - tmp2);
         util.assertEqual(tmp1 - iter1, tmp2 - iter2);
+    }
+    util.showFinalResult();
+}
+
+void testInsertIterators(bool showDetails)
+{
+    TestUtil util(showDetails, "insert iterators");
+    std::vector<int> vec(100);
+    std::iota(vec.begin(), vec.end(), 1);
+    std::shuffle(vec.begin(), vec.end(), std::mt19937());
+    // front insert iterator
+    {
+        std::list<int> l1;
+        std::list<int> l2;
+        std::copy(vec.begin(), vec.end(), std::front_inserter(l1));
+        std::copy(vec.begin(), vec.end(), tstd::front_inserter(l2));
+        util.assertSequenceEqual(l1, l2);
+    }
+    // back insert iterator
+    {
+        std::vector<int> vec1;
+        std::vector<int> vec2;
+        std::copy(vec.begin(), vec.end(), std::back_inserter(vec1));
+        std::copy(vec.begin(), vec.end(), tstd::back_inserter(vec2));
+        util.assertSequenceEqual(vec1, vec2);
+    }
+    // insert iterator
+    {
+        {
+            std::vector<int> vec1{10, 100, 1, 9};
+            std::vector<int> vec2{10, 100, 1, 9};
+            std::copy(vec.begin(), vec.end(), std::inserter(vec1, vec1.begin() + 2));
+            std::copy(vec.begin(), vec.end(), tstd::inserter(vec2, vec2.begin() + 2));
+            util.assertSequenceEqual(vec1, vec2);
+        }
+        {
+            std::vector<int> set1{10, 100, 1, 9};
+            std::vector<int> set2{10, 100, 1, 9};
+            std::copy(vec.begin(), vec.end(), std::inserter(set1, set1.begin() + 2));
+            std::copy(vec.begin(), vec.end(), tstd::inserter(set2, set2.begin() + 2));
+            util.assertSetEqual(set1, set2);
+        }
     }
     util.showFinalResult();
 }

@@ -301,10 +301,126 @@ constexpr auto operator-( const move_iterator<Iterator1>& lhs, const move_iterat
     return lhs.base() - rhs.base();
 }
 
-// todo: other iterator adpators and functions
-// back_insert_iterator
-// front_insert_iterator
-// insert_iterator
+// front insert iterator
+template<typename Container>
+class front_insert_iterator
+{
+public:
+    using iterator_category = std::output_iterator_tag;
+    using value_type = void;
+    using difference_tyep = std::ptrdiff_t;
+    using pointer = void;
+    using reference = void;
+    using container_type = Container;
+private:
+    Container* container;
+public:
+    explicit constexpr front_insert_iterator(Container& c)
+        : container(&c)
+    {
+    }
+    constexpr front_insert_iterator& operator=(typename Container::value_type& value)
+    {
+        container->push_front(value);
+        return *this;
+    }
+    constexpr front_insert_iterator& operator=(typename Container::value_type&& value)
+    {
+        container->push_front(std::move(value));
+        return *this;
+    }
+    constexpr front_insert_iterator& operator*() { return *this; }
+    constexpr front_insert_iterator& operator++() { return *this; }
+    constexpr front_insert_iterator& operator++(int) { return *this; }
+};
+
+template<typename Container>
+constexpr tstd::front_insert_iterator<Container> front_inserter(Container& c)
+{
+    return tstd::front_insert_iterator<Container>(c);
+}
+
+// back insert iterator
+template<typename Container>
+class back_insert_iterator
+{
+public:
+    using iterator_category = std::output_iterator_tag;
+    using value_type = void;
+    using difference_tyep = std::ptrdiff_t;
+    using pointer = void;
+    using reference = void;
+    using container_type = Container;
+private:
+    Container* container;
+public:
+    explicit constexpr back_insert_iterator(Container& c)
+        : container(&c)
+    {
+    }
+    constexpr back_insert_iterator& operator=(typename Container::value_type& value)
+    {
+        container->push_back(value);
+        return *this;
+    }
+    constexpr back_insert_iterator& operator=(typename Container::value_type&& value)
+    {
+        container->push_back(std::move(value));
+        return *this;
+    }
+    constexpr back_insert_iterator& operator*() { return *this; }
+    constexpr back_insert_iterator& operator++() { return *this; }
+    constexpr back_insert_iterator& operator++(int) { return *this; }
+};
+
+template<typename Container>
+constexpr tstd::back_insert_iterator<Container> back_inserter(Container& c)
+{
+    return tstd::back_insert_iterator<Container>(c);
+}
+
+// insert iterator
+template<typename Container>
+class insert_iterator
+{
+public:
+    using iterator_category = std::output_iterator_tag;
+    using value_type = void;
+    using difference_tyep = std::ptrdiff_t;
+    using pointer = void;
+    using reference = void;
+    using container_type = Container;
+private:
+    Container* container;
+    typename Container::iterator iter;
+public:
+    constexpr insert_iterator(Container& c, typename Container::iterator i)
+        : container(&c)
+        , iter(i)
+    {
+    }
+    constexpr insert_iterator& operator=(typename Container::value_type& value)
+    {
+        iter = container->insert(iter, value);
+        ++iter;
+        return *this;
+    }
+    constexpr insert_iterator& operator=(typename Container::value_type&& value)
+    {
+        iter = container->insert(iter, std::move(value));
+        ++iter;
+        return *this;
+    }
+    constexpr insert_iterator& operator*() { return *this; }
+    constexpr insert_iterator& operator++() { return *this; }
+    constexpr insert_iterator& operator++(int) { return *this; }
+};
+
+template<class Container>
+constexpr tstd::insert_iterator<Container> inserter(Container& c, typename Container::iterator i)
+{
+    return tstd::insert_iterator<Container>(c, i);
+}
 
 template<typename InputIterator, typename Distance>
 constexpr void advance(InputIterator& it, Distance n)
