@@ -149,7 +149,7 @@ struct __bst_iterator : public __bst_iterator_base
     using self = __bst_iterator<Value, Ref, Ptr>;
     using link_type = __bst_node<Value>*; // or __bst_node<Value>::link_type
 
-    __bst_iterator(link_type x, link_type header) : __bst_iterator_base(x, header) {}
+    __bst_iterator(link_type x = nullptr, link_type header = nullptr) : __bst_iterator_base(x, header) {}
     __bst_iterator(const iterator& it) : __bst_iterator_base(it) {}
     self& operator=(const self& other)
     {

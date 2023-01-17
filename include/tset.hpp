@@ -10,6 +10,7 @@
 #include <tstl_allocator.hpp>
 #include <titerator.hpp>
 #include <tstl_bst.hpp>
+#include <tstl_rbtree.hpp>
 #include <tutility.hpp>
 #include <tmultiset.hpp> // multiset is in <set>
 
@@ -17,7 +18,7 @@ namespace tstd
 {
 
 template<typename Key, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<Key>,
-    typename UnderlyingTree = tstd::impl::bst<Key, Key, tstd::impl::identity, false, Compare, Allocator>>
+    typename UnderlyingTree = tstd::impl::rb_tree<Key, Key, tstd::impl::identity, false, Compare, Allocator>>
 class set;
 
 template<typename Key, typename Compare, typename Allocator, typename UnderlyingTree>

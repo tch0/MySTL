@@ -58,7 +58,6 @@ C++ 标准模板库的完整内容见[Cpp_STL_ReferenceManual.pdf](https://www.c
 
 ### TODO
 
-- `set/map/multiset/multimap`目前是使用普通二叉搜索树实现的，实现红黑树以替代现有实现。
 - `<functional>`内容实现。
 - 智能指针实现。
 - 容器与常用算法的效率测试。

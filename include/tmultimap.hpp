@@ -10,13 +10,14 @@
 #include <tstl_allocator.hpp>
 #include <titerator.hpp>
 #include <tstl_bst.hpp>
+#include <tstl_rbtree.hpp>
 #include <tutility.hpp>
 
 namespace tstd
 {
 
 template<typename Key, typename T, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<std::pair<const Key, T>>,
-    typename UnderlyingTree = tstd::impl::bst<const Key, std::pair<const Key, T>, tstd::impl::first_of_pair<const Key, T>, true, Compare, Allocator>>
+    typename UnderlyingTree = tstd::impl::rb_tree<const Key, std::pair<const Key, T>, tstd::impl::first_of_pair<const Key, T>, true, Compare, Allocator>>
 class multimap;
 
 template<typename Key, typename T, typename Compare, typename Allocator, typename UnderlyingTree>

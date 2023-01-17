@@ -6,20 +6,22 @@
 #include <functional>
 #include <iterator>
 #include <tstl_bst.hpp>
+#include <tstl_rbtree.hpp>
 #include "TestUtil.hpp"
 
 // test of the binary search tree implementation
 // 1. bst
-// 2. rb-tree: todo yet!
+// 2. rb-tree
 // 3. avl-tree: todo yet!
 
-template<template<typename Key, typename Value, typename KeyOfValue, bool Multi = false, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<Value>> class bst>
+template<template<typename Key, typename Value, typename KeyOfValue, bool Multi = false, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<Value>> class treeimpl>
 void testTreeImpl(bool showDetails, const std::string& treeType);
 
 int main(int argc, char const *argv[])
 {
     bool showDetails = parseDetailFlag(argc, argv);
     testTreeImpl<tstd::impl::bst>(showDetails, "tstd::impl::bst");
+    testTreeImpl<tstd::impl::rb_tree>(showDetails, "tstd::impl::rb_tree");
     std::cout << std::endl;
     return 0;
 }
@@ -57,7 +59,7 @@ public:
 };
 
 
-template<template<typename Key, typename Value, typename KeyOfValue, bool Multi = false, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<Value>> class bst>
+template<template<typename Key, typename Value, typename KeyOfValue, bool Multi = false, typename Compare = std::less<Key>, typename Allocator = tstd::allocator<Value>> class treeimpl>
 void testTreeImpl(bool showDetails, const std::string& treeType)
 {
     TestUtil util(showDetails, treeType);
@@ -67,7 +69,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
     {
         // constructors
         // 1: default constructor
-        bst<int, int, identity<int>> t1;
+        treeimpl<int, int, identity<int>> t1;
         util.assertEqual(t1.size(), 0);
         util.assertEqual(std::distance(t1.begin(), t1.end()), t1.size());
         util.assertEqual(std::distance(t1.rbegin(), t1.rend()), t1.size());
@@ -81,14 +83,14 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
         util.assertEqual(std::distance(t1.begin(), t1.end()), t1.size());
         util.assertEqual(std::distance(t1.rbegin(), t1.rend()), t1.size());
         // 2: copy constructor
-        bst<int, int, identity<int>> t2(t1);
+        treeimpl<int, int, identity<int>> t2(t1);
         util.assertSequenceEqual(t1, t2);
         util.assertSorted(t2.begin(), t2.end());
         util.assertEqual(t2.size(), t1.size());
         util.assertEqual(std::distance(t2.begin(), t2.end()), t2.size());
         util.assertEqual(std::distance(t2.rbegin(), t2.rend()), t2.size());
         // 3: move constructor
-        bst<int, int, identity<int>> t3(std::move(t2));
+        treeimpl<int, int, identity<int>> t3(std::move(t2));
         util.assertSequenceEqual(t1, t3);
         util.assertSorted(t3.begin(), t3.end());
         util.assertEqual(t3.size(), t1.size());
@@ -101,16 +103,16 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
     {
         // assignment
         // copy assignment
-        bst<int, int, identity<int>> t1;
+        treeimpl<int, int, identity<int>> t1;
         for (auto elem : vec)
         {
             t1.insert(elem);
         }
-        bst<int, int, identity<int>> t2;
+        treeimpl<int, int, identity<int>> t2;
         t2 = t1;
         util.assertSequenceEqual(t1, t2);
         // move assignment
-        bst<int, int, identity<int>> t3;
+        treeimpl<int, int, identity<int>> t3;
         t3 = std::move(t2);
         util.assertSequenceEqual(t1, t3);
         util.assertEqual(t2.size(), 0);
@@ -119,12 +121,12 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
     }
     {
         // allocator
-        bst<int, int, identity<int>> t1;
+        treeimpl<int, int, identity<int>> t1;
         util.assertEqual(t1.get_allocator() == tstd::allocator<int>(), true);
     }
     {
         // iterators
-        bst<int, int, identity<int>> t1;
+        treeimpl<int, int, identity<int>> t1;
         for (auto elem : vec)
         {
             t1.insert(elem);
@@ -145,7 +147,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
         util.assertEqual(*iter--, 2);
         util.assertEqual(*iter, 1);
         // const version
-        const bst<int, int, identity<int>> t2(t1);
+        const treeimpl<int, int, identity<int>> t2(t1);
         util.assertRangeEqual(t2.begin(), t2.end(), t2.cbegin());
         util.assertRangeEqual(t2.cbegin(), t2.cend(), t2.begin());
         util.assertRangeEqual(t2.rbegin(), t2.rend(), t2.crbegin());
@@ -153,7 +155,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
     }
     {
         // size and capacity
-        bst<int, int, identity<int>> t1;
+        treeimpl<int, int, identity<int>> t1;
         util.assertEqual(t1.size(), 0);
         util.assertEqual(t1.empty(), true);
         for (auto elem : vec)
@@ -166,7 +168,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
     {
         // modifiers
         // clear
-        bst<int, int, identity<int>> t1;
+        treeimpl<int, int, identity<int>> t1;
         for (auto elem : vec)
         {
             t1.insert(elem);
@@ -207,7 +209,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
         // erase
         // 1
         {
-            bst<int, int, identity<int>> t1;
+            treeimpl<int, int, identity<int>> t1;
             for (auto elem : vec)
             {
                 t1.insert(elem);
@@ -228,7 +230,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
         }
         // 2
         {
-            bst<int, int, identity<int>> t1;
+            treeimpl<int, int, identity<int>> t1;
             for (auto elem : vec)
             {
                 t1.insert(elem);
@@ -240,7 +242,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
         }
         // 3
         {
-            bst<int, int, identity<int>> t1;
+            treeimpl<int, int, identity<int>> t1;
             for (auto elem : vec)
             {
                 t1.insert(elem);
@@ -255,16 +257,16 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
         }
         // swap
         {
-            bst<int, int, identity<int>> t1;
-            bst<int, int, identity<int>> t2;
+            treeimpl<int, int, identity<int>> t1;
+            treeimpl<int, int, identity<int>> t2;
             for (auto elem : vec)
             {
                 t1.insert(elem);
                 t2.insert(elem/2);
             }
             util.assertEqual(t2.size(), 51);
-            bst<int, int, identity<int>> t1c(t1);
-            bst<int, int, identity<int>> t2c(t2);
+            treeimpl<int, int, identity<int>> t1c(t1);
+            treeimpl<int, int, identity<int>> t2c(t2);
             t1.swap(t2);
             util.assertSequenceEqual(t1, t2c);
             util.assertSequenceEqual(t2, t1c);
@@ -275,7 +277,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
     }
     {
         // lookup
-        bst<int, int, identity<int>> t1;
+        treeimpl<int, int, identity<int>> t1;
         for (auto elem : vec)
         {
             t1.insert(elem);
@@ -296,7 +298,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
 
         // const version
         {
-            const bst<int, int, identity<int>> t2(t1);
+            const treeimpl<int, int, identity<int>> t2(t1);
             // find
             auto iter = t2.find(10);
             util.assertEqual(*iter, 10);
@@ -314,14 +316,14 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
     }
     {
         // observers
-        bst<int, int, identity<int>> t1;
+        treeimpl<int, int, identity<int>> t1;
         util.assertEqual(typeid(t1.key_comp()) == typeid(std::less<int>), true);
         util.assertEqual(typeid(t1.value_comp()) == typeid(std::less<int>), true);
     }
     {
         // comparisons
-        bst<int, int, identity<int>> t1;
-        bst<int, int, identity<int>> t2;
+        treeimpl<int, int, identity<int>> t1;
+        treeimpl<int, int, identity<int>> t2;
         for (auto elem : vec)
         {
             t1.insert(elem);
@@ -338,7 +340,7 @@ void testTreeImpl(bool showDetails, const std::string& treeType)
     }
     // other template arguments test
     // support multi, customized compare/key/value
-    using bst_map = bst<const int, std::pair<const int, std::string>, FirstOfPair<const int, std::string>, true, std::greater<int>>;
+    using bst_map = treeimpl<const int, std::pair<const int, std::string>, FirstOfPair<const int, std::string>, true, std::greater<int>>;
     CmpFirstOfPair<const int, std::string> cmp;
     {
         // constructors
